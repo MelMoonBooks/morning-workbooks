@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/clerk-react";
 
 const THEMES = {
   January:   { gradient: ["#f9fafb", "#f3f4f6"], color: "#374151" },
@@ -2485,6 +2486,17 @@ export default function ActivityPage() {
 
   return (
     <div style={{minHeight:"100vh",background:"#f0ece3",display:"flex",flexDirection:"column",alignItems:"center",padding:"24px 16px 48px",fontFamily:"Georgia, serif"}}>
+      <SignedOut>
+        <div style={{marginTop:80,textAlign:"center"}}>
+          <div style={{fontSize:32,marginBottom:12}}>📖</div>
+          <div style={{fontSize:24,fontWeight:"bold",color:"#1f2937",fontFamily:"Georgia,serif",marginBottom:8}}>Morning Workbooks</div>
+          <div style={{fontSize:14,color:"#6b7280",marginBottom:28}}>Personalized daily workbooks for your little ones</div>
+          <SignInButton mode="modal">
+            <button style={{padding:"12px 32px",fontSize:15,fontWeight:"bold",borderRadius:10,border:"none",background:"#1f2937",color:"white",cursor:"pointer"}}>Sign In to Get Started</button>
+          </SignInButton>
+        </div>
+      </SignedOut>
+      <SignedIn>
 
       {/* Profile Modal */}
       {showProfiles && (
@@ -2621,6 +2633,7 @@ export default function ActivityPage() {
           </div>
         </div>
       )}
+      </SignedIn>
     </div>
   );
 }
