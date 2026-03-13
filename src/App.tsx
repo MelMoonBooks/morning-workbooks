@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/clerk-react";
+import { UserButton } from "@clerk/clerk-react";
 
 const THEMES = {
   January:   { gradient: ["#f9fafb", "#f3f4f6"], color: "#374151" },
