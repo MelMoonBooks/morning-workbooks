@@ -2485,6 +2485,10 @@ export default function ActivityPage() {
   };
 
   return (
+    <div style={{minHeight:"100vh",background:"#f0ece3",display:"flex",flexDirection:"column",alignItems:"center",padding:"24px 16px 48px",fontFamily:"Georgia, serif"}}>
+      <div style={{width:"100%",display:"flex",justifyContent:"flex-end",maxWidth:640,marginBottom:8}}>
+        <UserButton afterSignOutUrl={window.location.href}/>
+      </div>
 
       {/* Profile Modal */}
       {showProfiles && (
