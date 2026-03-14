@@ -131,9 +131,14 @@ const SEASONAL_OBJS: Record<string,string[]> = {
 const GENERIC_AFFIRMATIONS: Record<string,{action:string,quote:string}> = {
   "3-13":{ action:"Try something you have never done before!", quote:"Adventure is worthwhile in itself. — Amelia Earhart" },
 };
-function getAffirmation(m: number, d: number): {action:string,quote:string} {
-  const key = `${m+1}-${d}`;
-  return GENERIC_AFFIRMATIONS[key] ?? { action:"Be kind and make today wonderful!", quote:"Every day is a new beginning." };
+function getAffirmation(m: number, d: number, religion: string = "Non-religious"): {quote:string} {
+  const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const month = monthNames[m];
+  const monthIdx: Record<string,number> = { January:1, February:2, March:3, April:4, May:5, June:6,
+    July:7, August:8, September:9, October:10, November:11, December:12 };
+  const key = `${monthIdx[month]}-${Number(d)}`;
+  const generic = GENERIC_AFFIRMATIONS[key] ?? { quote:"Every day is a new beginning.", ref:"" };
+  return { quote: generic.quote };
 }
 
 function seasonalObj(month: string, offset=0): string {
@@ -340,7 +345,7 @@ function PreviewWorkbookPage({ day, month, year, childName, age, religion }: {
 }) {
   const today = new Date(year, MONTH_NAMES.indexOf(month), day);
   const dayName = DAY_NAMES[today.getDay()];
-  const affirmation = getAffirmation(MONTH_NAMES.indexOf(month), day);
+  const affirmation = getAffirmation(MONTH_NAMES.indexOf(month), day, religion);
 
   return (
     <div style={{
