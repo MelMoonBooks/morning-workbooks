@@ -525,7 +525,7 @@ background:"#FFF8B5",border:`1.5px solid ${BORDER}`,borderRadius:12,
 
         {/* Tradition */}
         <div style={{flex:1,minWidth:80}}>
-          <div style={{fontSize:10,fontWeight:"bold",color:"#9b99c4",marginBottom:3}}>TRADITION</div>
+          <div style={{fontSize:10,fontWeight:"bold",color:"#9b99c4",marginBottom:3}}>FAITH TRADITION</div>
           <select value={religion} onChange={e=>setReligion(e.target.value)}
             style={{width:"100%",padding:"5px",borderRadius:6,
               border:`1.5px solid #d1d5db`,
