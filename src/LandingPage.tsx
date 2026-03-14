@@ -464,8 +464,8 @@ width:"100%",background:"#C9C9FF",borderBottom:`1px solid ${BORDER}`,
         <div style={{display:"flex",alignItems:"center",gap:10}}>
           <span style={{fontSize:22}}>📖</span>
           <div>
-            <div style={{fontSize:16,fontWeight:"bold",color:"#1f2937"}}>Morning Workbooks</div>
-            <div style={{fontSize:10,color:"#9b99c4",marginTop:-2}}>personalized pages for little ones · ages 3–6</div>
+            <div style={{fontSize:16,fontWeight:"bold",color:"#1f2937"}}>MelMoon Books</div>
+            <div style={{fontSize:10,color:"#9b99c4",marginTop:-2}}>morning workbooks for little ones · ages 3–6</div>
           </div>
         </div>
         <div style={{display:"flex",gap:10,alignItems:"center"}}>
@@ -530,7 +530,7 @@ background:"#FFF8B5",border:`1.5px solid ${BORDER}`,borderRadius:12,
             style={{width:"100%",padding:"5px",borderRadius:6,
               border:`1.5px solid #d1d5db`,
 fontSize:13,color:"#374151",fontWeight:"normal",background:"white"}}>
-            {["Generic","Christian","Hindu","Both"].map(r=><option key={r}>{r}</option>)}
+            {["Non-religious","Christian","Hindu","Both"].map(r=><option key={r}>{r}</option>)}
           </select>
         </div>
 
