@@ -515,8 +515,8 @@ background:"#FFF8B5",border:`1.5px solid ${BORDER}`,borderRadius:12,
         </div>
 
         {/* Month */}
-        <div style={{flex:1,minWidth:80}}>
-          <div style={{fontSize:10,fontWeight:"bold",color:"#9b99c4",marginBottom:3}}>MONTH</div>
+        <div style={{flex:1,minWidth:110}}>
+          <div style={{fontSize:10,fontWeight:"bold",color:"#9b99c4",marginBottom:3}}>FAITH TRADITION</div>
           <select value={month} onChange={e=>setMonth(e.target.value)}
             style={{width:"100%",padding:"5px",borderRadius:6,border:`1.5px solid ${BORDER}`,fontSize:13,background:"white"}}>
             {MONTH_NAMES.map(m=><option key={m}>{m}</option>)}
