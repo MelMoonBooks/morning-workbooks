@@ -507,8 +507,8 @@ background:"#FFF8B5",border:`1.5px solid ${BORDER}`,borderRadius:12,
       }}>
         {/* Child name */}
         <div style={{flex:1,minWidth:90}}>
-          <div style={{fontSize:10,fontWeight:"bold",color:"#9b99c4",marginBottom:3}}>CHILD'S NAME</div>
-          <input value={childName} onChange={e=>setChildName(e.target.value)}
+          <div style={{fontSize:10,fontWeight:"bold",color:"#9b99c4",marginBottom:3}}>MONTH</div>
+          <select value={month} onChange={e=>setMonth(e.target.value)}
             placeholder="Child's name"
             style={{width:"100%",padding:"5px 7px",borderRadius:6,border:`1.5px solid ${BORDER}`,
               fontSize:13,fontFamily:"Georgia",boxSizing:"border-box",background:"white"}}/>
@@ -516,7 +516,7 @@ background:"#FFF8B5",border:`1.5px solid ${BORDER}`,borderRadius:12,
 
         {/* Month */}
         <div style={{flex:1,minWidth:110}}>
-          <div style={{fontSize:10,fontWeight:"bold",color:"#9b99c4",marginBottom:3}}>FAITH TRADITION</div>
+          <div style={{fontSize:9,fontWeight:"bold",color:"#9b99c4",marginBottom:3}}>FAITH TRADITION</div>
           <select value={month} onChange={e=>setMonth(e.target.value)}
             style={{width:"100%",padding:"5px",borderRadius:6,border:`1.5px solid ${BORDER}`,fontSize:13,background:"white"}}>
             {MONTH_NAMES.map(m=><option key={m}>{m}</option>)}
