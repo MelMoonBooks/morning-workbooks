@@ -457,7 +457,7 @@ export default function LandingPage() {
 
       {/* ── Nav ── */}
       <nav style={{
-    width:"100%",background:"#dbeafe",borderBottom:`1px solid ${BORDER}`,
+width:"100%",background:"#FADADD",borderBottom:`1px solid ${BORDER}`,
         padding:"14px 24px",display:"flex",alignItems:"center",
         justifyContent:"space-between",boxSizing:"border-box",
       }}>
@@ -499,7 +499,7 @@ export default function LandingPage() {
 
       {/* ── Controls ── */}
       <div style={{
-        background:PEACH,border:`1.5px solid ${BORDER}`,borderRadius:12,
+background:"#FFDAB9",border:`1.5px solid ${BORDER}`,borderRadius:12,
         padding:"14px 16px",margin:"12px 16px",
         display:"flex",gap:12,flexWrap:"wrap",alignItems:"center",
         boxShadow:"0 2px 8px rgba(0,0,0,0.04)",
@@ -584,7 +584,7 @@ export default function LandingPage() {
       {showPricing && (
         <div style={{
           maxWidth:560,width:"calc(100% - 32px)",margin:"0 16px 20px",
-          background:MINT,border:`1.5px solid ${BORDER}`,borderRadius:12,
+background:"#C8E6C9",border:`1.5px solid ${BORDER}`,borderRadius:12,
           padding:"20px 24px",boxSizing:"border-box",
         }}>
           <div style={{fontSize:14,fontWeight:"bold",color:"#1f2937",marginBottom:16,textAlign:"center"}}>Pricing</div>
@@ -601,7 +601,7 @@ export default function LandingPage() {
                 display:"flex",alignItems:"center",justifyContent:"space-between",
                 padding:"10px 14px",borderRadius:8,
                 border:`1.5px solid ${tier.highlight?"#c4b5a0":BORDER}`,
-                background:tier.highlight?"#fff8f0":"white",
+                background:tier.highlight?"#C8E6C9":"white",
               }}>
                 <div>
                   <div style={{fontSize:13,fontWeight:"bold",color:"#1f2937"}}>{tier.label}</div>
@@ -639,7 +639,7 @@ export default function LandingPage() {
 
       {/* ── Bottom CTA ── */}
       <div style={{
-        margin:"8px 16px 48px",background:LILAC,
+margin:"8px 16px 48px",background:"#C9C9FF",
         border:"1.5px solid #D6E9FF",borderRadius:12,
         padding:"22px 28px",maxWidth:560,width:"calc(100% - 32px)",
         textAlign:"center",boxSizing:"border-box",
