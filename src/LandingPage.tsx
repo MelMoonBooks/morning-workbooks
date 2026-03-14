@@ -444,13 +444,13 @@ export default function LandingPage() {
     Generic:"#6366f1", Christian:"#0369a1", Hindu:"#b45309", Both:"#7c3aed"
   };
 
-  const BG      = "#fef9f0";   // warm soft cream
+    const BG      = "#FAF7F2";
   const CARD_BG = "#ffffff";
-  const BORDER  = "#e8ddd0";
-  const YELLOW  = "#fef3c7";   // soft yellow
-  const PEACH   = "#fde8d8";   // soft peach
-  const MINT    = "#d1f0e0";   // soft mint
-  const LILAC   = "#ede8f8";   // soft lilac
+  const BORDER  = "#ddd0c8";
+  const YELLOW  = "#FADADD";
+  const PEACH   = "#FFDAB9";
+  const MINT    = "#C8E6C9";
+  const LILAC   = "#C9C9FF";
 
   return (
     <div style={{minHeight:"100vh",background:BG,fontFamily:"Georgia, serif",display:"flex",flexDirection:"column",alignItems:"center"}}>
@@ -640,7 +640,7 @@ export default function LandingPage() {
       {/* ── Bottom CTA ── */}
       <div style={{
         margin:"8px 16px 48px",background:LILAC,
-        border:`1.5px solid ${BORDER}`,borderRadius:12,
+        border:"1.5px solid #D6E9FF",borderRadius:12,
         padding:"22px 28px",maxWidth:560,width:"calc(100% - 32px)",
         textAlign:"center",boxSizing:"border-box",
       }}>
