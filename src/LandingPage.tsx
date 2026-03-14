@@ -505,6 +505,7 @@ export default function LandingPage() {
         <div style={{flex:1,minWidth:90}}>
           <div style={{fontSize:10,fontWeight:"bold",color:"#a78a6a",marginBottom:3}}>CHILD'S NAME</div>
           <input value={childName} onChange={e=>setChildName(e.target.value)}
+            placeholder="Child's name"
             style={{width:"100%",padding:"5px 7px",borderRadius:6,border:`1.5px solid ${BORDER}`,
               fontSize:13,fontFamily:"Georgia",boxSizing:"border-box",background:"white"}}/>
         </div>
