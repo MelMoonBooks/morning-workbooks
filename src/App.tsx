@@ -2201,12 +2201,12 @@ function ProfileModal({
 }) {
   const [list, setList] = useState<ChildProfile[]>(profiles);
   const [editing, setEditing] = useState<ChildProfile | null>(null);
-  const [form, setForm] = useState({ name: "", age: 5, tradition: "Generic" });
+  const [form, setForm] = useState({ name: "", age: 5, tradition: "Non-religious" });
 
   const openNew = () => {
     const nextEmoji = CHILD_EMOJIS[list.length % CHILD_EMOJIS.length];
-    setEditing({ id: makeId(), name: "", age: 5, tradition: "Generic", emoji: nextEmoji });
-    setForm({ name: "", age: 5, tradition: "Generic" });
+    setEditing({ id: makeId(), name: "", age: 5, tradition: "Non-religious", emoji: nextEmoji });
+    setForm({ name: "", age: 5, tradition: "Non-religious" });
   };
 
   const openEdit = (p: ChildProfile) => {
@@ -2304,7 +2304,7 @@ function ProfileModal({
             <div style={{marginBottom:14}}>
               <div style={{fontSize:10,fontWeight:"bold",color:"#6b7280",marginBottom:4}}>TRADITION</div>
               <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
-                {["Generic","Christian","Hindu","Both"].map(t=>(
+                {["Non-religious","Christian","Hindu","Both"].map(t=>(
                   <button key={t} onClick={()=>setForm(f=>({...f,tradition:t}))}
                     style={{flex:1,minWidth:70,padding:"6px 4px",borderRadius:7,cursor:"pointer",fontSize:12,fontWeight:"bold",
                       border:`2px solid ${form.tradition===t?(tradColors[t]??"#1f2937"):"#e5e7eb"}`,
@@ -2548,7 +2548,7 @@ export default function ActivityPage() {
 
         {/* Tradition — shows active child's tradition, color-coded */}
         <div style={{flex:1,minWidth:80}}>
-          <div style={{fontSize:10,fontWeight:"bold",color:"#6b7280",marginBottom:3}}>TRADITION</div>
+        <div style={{fontSize:10,fontWeight:"bold",color:"#6b7280",marginBottom:3}}>FAITH TRADITION</div>
           <select value={religion} onChange={e=>setReligion(e.target.value)}
             style={{width:"100%",padding:"5px",borderRadius:6,
               border:`2px solid ${tradColors[religion]??"#e5e7eb"}`,
