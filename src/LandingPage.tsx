@@ -457,7 +457,7 @@ export default function LandingPage() {
 
       {/* ── Nav ── */}
       <nav style={{
-width:"100%",background:"#FADADD",borderBottom:`1px solid ${BORDER}`,
+width:"100%",background:"#C9C9FF",borderBottom:`1px solid ${BORDER}`,
         padding:"14px 24px",display:"flex",alignItems:"center",
         justifyContent:"space-between",boxSizing:"border-box",
       }}>
@@ -499,7 +499,7 @@ width:"100%",background:"#FADADD",borderBottom:`1px solid ${BORDER}`,
 
       {/* ── Controls ── */}
       <div style={{
-background:"#C8E6C9",border:`1.5px solid ${BORDER}`,borderRadius:12,
+background:"#FFF8B5",border:`1.5px solid ${BORDER}`,borderRadius:12,
         padding:"14px 16px",margin:"12px 16px",
         display:"flex",gap:12,flexWrap:"wrap",alignItems:"center",
         boxShadow:"0 2px 8px rgba(0,0,0,0.04)",
@@ -529,7 +529,7 @@ background:"#C8E6C9",border:`1.5px solid ${BORDER}`,borderRadius:12,
           <select value={religion} onChange={e=>setReligion(e.target.value)}
             style={{width:"100%",padding:"5px",borderRadius:6,
               border:`1.5px solid ${tradColors[religion]??"#e5e7eb"}`,
-              fontSize:13,color:tradColors[religion]??"#374151",fontWeight:"bold",background:"white"}}>
+              fontSize:13,color:"#374151",fontWeight:"bold",background:"white"}}>
             {["Generic","Christian","Hindu","Both"].map(r=><option key={r}>{r}</option>)}
           </select>
         </div>
@@ -584,7 +584,7 @@ background:"#C8E6C9",border:`1.5px solid ${BORDER}`,borderRadius:12,
       {showPricing && (
         <div style={{
           maxWidth:560,width:"calc(100% - 32px)",margin:"0 16px 20px",
-background:"#C8E6C9",border:`1.5px solid ${BORDER}`,borderRadius:12,
+background:"#D6E9FF",border:`1.5px solid ${BORDER}`,borderRadius:12,
           padding:"20px 24px",boxSizing:"border-box",
         }}>
           <div style={{fontSize:14,fontWeight:"bold",color:"#1f2937",marginBottom:16,textAlign:"center"}}>Pricing</div>
