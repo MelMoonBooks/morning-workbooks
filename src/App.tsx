@@ -2149,8 +2149,6 @@ function DayPage({ day, month, year, childName, religion, age, id }: {
           &ldquo;{affirmation.quote}&rdquo;{affirmation.ref&&<span style={{fontSize:11,color:"#6b7280",fontStyle:"normal"}}> — {affirmation.ref}</span>}
         </div>
       </div>
-        }
-      </div>
     </div>
   );
 }
