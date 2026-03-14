@@ -501,7 +501,7 @@ width:"100%",background:"#C9C9FF",borderBottom:`1px solid ${BORDER}`,
       <div style={{
         background:"#E8E8FF",border:`1.5px solid ${BORDER}`,borderRadius:12,
         padding:"14px 16px",margin:"12px 16px",
-        display:"flex",gap:12,flexWrap:"wrap",alignItems:"center",
+        display:"flex",gap:12,flexWrap:"wrap",alignItems:"flex-end",
         boxShadow:"0 2px 8px rgba(0,0,0,0.04)",
         maxWidth:560,width:"calc(100% - 32px)",boxSizing:"border-box",
       }}>
