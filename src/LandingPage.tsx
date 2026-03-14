@@ -522,8 +522,8 @@ width:"100%",background:"#C9C9FF",borderBottom:`1px solid ${BORDER}`,
           </select>
         </div>
         {/* Faith Tradition */}
-        <div style={{flex:1,minWidth:90}}>
-          <div style={{fontSize:9,fontWeight:"bold",color:"#9b99c4",marginBottom:3,lineHeight:1.3,minHeight:24,paddingTop:12}}>FAITH TRADITION</div>
+        <div style={{flex:1,minWidth:90,display:"flex",flexDirection:"column",justifyContent:"flex-end"}}>
+          <div style={{fontSize:9,fontWeight:"bold",color:"#9b99c4",marginBottom:3}}>FAITH<br/>TRADITION</div>
           <select value={religion} onChange={e=>setReligion(e.target.value)}
             style={{width:"100%",padding:"5px",borderRadius:6,border:`1.5px solid #d1d5db`,
               fontSize:13,color:"#374151",fontWeight:"normal",background:"white"}}>
