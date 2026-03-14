@@ -713,14 +713,17 @@ function getAffirmation(m: number, d: number, religion: string = "Non-religious"
 
   const fallback = nonReligious[(m * 31 + d - 1) % nonReligious.length];
 
-  if (religion === "Hindu") {
-    return LANDING_HINDU[key] || fallback;
+ if (religion === "Hindu") {
+    return HINDU_AFFIRMATIONS[key] || fallback;
   }
   if (religion === "Christian" || religion === "Christian-Catholic" || religion === "Christian-Protestant") {
     return CHRISTIAN_AFFIRMATIONS[key] || fallback;
   }
   if (religion === "Both") {
-    if (d % 2 === 0) return LANDING_HINDU[key] || fallback;
+    if (d % 2 === 0) if (religion === "Both") {
+    if (d % 2 === 0) return HINDU_AFFIRMATIONS[key] || fallback;
+    return CHRISTIAN_AFFIRMATIONS[key] || fallback;
+  }
     return CHRISTIAN_AFFIRMATIONS[key] || fallback;
   }
   return fallback;
