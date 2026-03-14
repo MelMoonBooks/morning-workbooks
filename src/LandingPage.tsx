@@ -131,8 +131,68 @@ const SEASONAL_OBJS: Record<string,string[]> = {
 const GENERIC_AFFIRMATIONS: Record<string,{action:string,quote:string}> = {
   "3-13":{ action:"Try something you have never done before!", quote:"Adventure is worthwhile in itself. — Amelia Earhart" },
 };
+const LANDING_CHRISTIAN: Record<string,{quote:string,ref:string}> = {
+  "1-1":{quote:"I am making everything new!",ref:"Rev 21:5"},
+  "1-2":{quote:"Give thanks no matter what happens.",ref:"1 Thess 5:18"},
+  "1-3":{quote:"A cheerful heart makes you feel good.",ref:"Prov 17:22"},
+  "1-4":{quote:"Do everything in love.",ref:"1 Cor 16:14"},
+  "1-5":{quote:"The earth is full of God's love.",ref:"Ps 33:5"},
+  "2-1":{quote:"Love is patient. Love is kind.",ref:"1 Cor 13:4"},
+  "2-2":{quote:"Help carry each other's heavy loads.",ref:"Gal 6:2"},
+  "2-14":{quote:"Dear friends, let us love one another, because love comes from God.",ref:"1 John 4:7"},
+  "3-1":{quote:"Winter is past. The rains are over and gone.",ref:"Song 2:11"},
+  "3-13":{quote:"Be strong and brave.",ref:"Josh 1:9"},
+  "3-14":{quote:"Flowers are appearing on the earth.",ref:"Song 2:12"},
+  "3-17":{quote:"The Lord is my shepherd. He gives me everything I need.",ref:"Ps 23:1"},
+  "3-20":{quote:"Anyone who believes in Christ is a new creation.",ref:"2 Cor 5:17"},
+  "4-5":{quote:"I am the resurrection and the life.",ref:"John 11:25"},
+  "4-22":{quote:"The Lord God put the man in the Garden of Eden to take care of it.",ref:"Gen 2:15"},
+  "5-11":{quote:"Honor your father and mother.",ref:"Exod 20:12"},
+  "6-15":{quote:"Honor your father and mother.",ref:"Exod 20:12"},
+  "6-19":{quote:"Announce freedom for everyone in the land.",ref:"Lev 25:10"},
+  "7-4":{quote:"Announce freedom for everyone in the land.",ref:"Lev 25:10"},
+  "8-1":{quote:"I know the plans I have for you. I will give you hope and a good future.",ref:"Jer 29:11"},
+  "9-1":{quote:"There is a time for everything.",ref:"Eccl 3:1"},
+  "10-1":{quote:"God crowns the year with his good gifts.",ref:"Ps 65:11"},
+  "11-1":{quote:"We are surrounded by a huge number of witnesses to the life of faith.",ref:"Heb 12:1"},
+  "11-26":{quote:"Every good and perfect gift comes down from God.",ref:"James 1:17"},
+  "12-1":{quote:"The people who walked in darkness have seen a great light.",ref:"Isa 9:2"},
+  "12-25":{quote:"God loved the world so much that he gave his one and only Son.",ref:"John 3:16"},
+};
+
+const LANDING_HINDU: Record<string,{quote:string,ref:string}> = {
+  "1-1":{quote:"Every day is a gift from the Divine. Receive it with gratitude.",ref:"Upanishads"},
+  "1-4":{quote:"Do good without wanting a reward. That is the highest path.",ref:"Gita 3:19"},
+  "1-8":{quote:"Love all beings — God lives inside every heart.",ref:"Gita 13:28"},
+  "1-12":{quote:"Patience is the greatest virtue. Wait, and good will come.",ref:"Mahabharata"},
+  "2-1":{quote:"Love is the bridge between you and all of creation.",ref:"Gita 12:13"},
+  "2-14":{quote:"Pure love is the most powerful force in the universe.",ref:"Gita 12:20"},
+  "3-3":{quote:"Krishna danced and filled the world with joy.",ref:"Bhagavatam"},
+  "3-13":{quote:"Stand up for what is right, just as Rama always did.",ref:"Ramayana"},
+  "3-20":{quote:"Everything is born, grows, and is born again — like spring.",ref:"Gita 2:22"},
+  "4-1":{quote:"God is always creating new beauty. Open your eyes to see it.",ref:"Gita 10:41"},
+  "4-22":{quote:"The earth is our mother. Take care of her with love.",ref:"Atharva Veda"},
+  "5-11":{quote:"A mother's love is the closest thing to God's love on earth.",ref:"Mahabharata"},
+  "5-16":{quote:"Be brave like Hanuman — love gives you great strength.",ref:"Ramayana"},
+  "6-15":{quote:"Serve your family lovingly. That is the highest worship.",ref:"Gita 3:19"},
+  "6-19":{quote:"True freedom comes from knowing God lives inside you.",ref:"Gita 18:66"},
+  "7-4":{quote:"True freedom comes from knowing God lives inside you.",ref:"Gita 18:66"},
+  "8-1":{quote:"Learning is a sacred duty. Honor your teachers.",ref:"Taittiriya Upanishad"},
+  "9-1":{quote:"Nature's beauty is God's art — admire it with gratitude.",ref:"Upanishads"},
+  "9-14":{quote:"Remove obstacles with wisdom and love — like Ganesha.",ref:"Bhagavatam"},
+  "10-1":{quote:"God fills the world with every color. Look and be amazed.",ref:"Rigveda"},
+  "10-21":{quote:"Rama's righteousness shone like the sun and nothing could defeat it.",ref:"Ramayana"},
+  "11-1":{quote:"Give thanks for all you have. Gratitude is the highest prayer.",ref:"Gita 16:1"},
+  "11-8":{quote:"Your light is like a diya — it can light up the whole world.",ref:"Diwali"},
+  "11-26":{quote:"Give freely and the universe will give back to you.",ref:"Gita 3:10"},
+  "12-1":{quote:"A lamp chases away darkness — just as love chases away fear.",ref:"Gita 10:11"},
+  "12-25":{quote:"Share your joy freely. Joy multiplies when it is given away.",ref:"Gita 5:21"},
+};
+
 function getAffirmation(m: number, d: number, religion: string = "Non-religious"): {quote:string, ref:string} {
-  const quotes = [
+  const key = `${m+1}-${d}`;
+  
+  const nonReligious = [
     { quote:"Every day is a new beginning. Take a deep breath and start again.", ref:"" },
     { quote:"You are braver than you believe, stronger than you seem, and smarter than you think.", ref:"A.A. Milne" },
     { quote:"No act of kindness, no matter how small, is ever wasted.", ref:"Aesop" },
@@ -165,14 +225,21 @@ function getAffirmation(m: number, d: number, religion: string = "Non-religious"
     { quote:"Where flowers bloom, so does hope.", ref:"Lady Bird Johnson" },
     { quote:"Every moment is a fresh beginning.", ref:"T.S. Eliot" },
   ];
-  return quotes[(m * 31 + d - 1) % quotes.length];
-}
 
-function seasonalObj(month: string, offset=0): string {
-  const pool = SEASONAL_OBJS[month] || ["star"];
-  return pool[offset % pool.length];
-}
+  const fallback = nonReligious[(m * 31 + d - 1) % nonReligious.length];
 
+  if (religion === "Hindu") {
+    return LANDING_HINDU[key] || fallback;
+  }
+  if (religion === "Christian" || religion === "Christian-Catholic" || religion === "Christian-Protestant") {
+    return LANDING_CHRISTIAN[key] || fallback;
+  }
+  if (religion === "Both") {
+    if (d % 2 === 0) return LANDING_HINDU[key] || fallback;
+    return LANDING_CHRISTIAN[key] || fallback;
+  }
+  return fallback;
+}
 function getDayActivity(month: string, day: number) {
   const list = DAILY_ACTIVITIES[month] || DAILY_ACTIVITIES.December;
   return list[Math.min(day-1, list.length-1)];
