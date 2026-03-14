@@ -484,7 +484,10 @@ function PreviewWorkbookPage({ day, month, year, childName, age, religion }: {
 
       {/* Footer */}
       <div style={{borderTop:"1.5px solid #e5e7eb",paddingTop:10,textAlign:"center"}}>
-       <div style={{fontSize:11,fontStyle:"italic",color:"#6b7280"}}>"{affirmation.quote}"</div>
+       <div style={{fontSize:11,fontStyle:"italic",color:"#6b7280"}}>
+  "{affirmation.quote}"
+  {affirmation.ref && <span style={{fontSize:10,fontStyle:"normal",color:"#9ca3af"}}> — {affirmation.ref}</span>}
+</div>
       </div>
     </div>
   );
