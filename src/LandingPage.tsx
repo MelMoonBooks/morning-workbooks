@@ -433,7 +433,7 @@ export default function LandingPage() {
 
   const daysInMonth = new Date(currentYear, monthIdx + 1, 0).getDate();
 
-  const [childName, setChildName] = useState("Your Child");
+  const [childName, setChildName] = useState("");
   const [age,       setAge]       = useState(4);
   const [religion,  setReligion]  = useState("Generic");
   const [month,     setMonth]     = useState(currentMonth);
