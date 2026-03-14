@@ -2143,15 +2143,12 @@ function DayPage({ day, month, year, childName, religion, age, id }: {
         </div>
         <MathActivity day={day} month={month} age={age}/>
       </div>
-      {/* Footer */}
+     {/* Footer */}
       <div style={{borderTop:"2px solid #1f2937",padding:"10px 20px",textAlign:"center",minHeight:58,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:3}}>
-        {day % 2 === 0
-          ? <div style={{fontSize:12,color:"#4b5563",fontStyle:"italic",maxWidth:400}}>
-              &ldquo;{affirmation.quote}&rdquo;{affirmation.ref&&<span style={{fontSize:11,color:"#6b7280",fontStyle:"normal"}}> — {affirmation.ref}</span>}
-            </div>
-          : <div style={{fontSize:13,color:"#1f2937",fontWeight:"bold",maxWidth:400}}>
-              {affirmation.action}
-            </div>
+        <div style={{fontSize:12,color:"#4b5563",fontStyle:"italic",maxWidth:400}}>
+          &ldquo;{affirmation.quote}&rdquo;{affirmation.ref&&<span style={{fontSize:11,color:"#6b7280",fontStyle:"normal"}}> — {affirmation.ref}</span>}
+        </div>
+      </div>
         }
       </div>
     </div>
