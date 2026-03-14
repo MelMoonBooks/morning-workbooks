@@ -131,14 +131,41 @@ const SEASONAL_OBJS: Record<string,string[]> = {
 const GENERIC_AFFIRMATIONS: Record<string,{action:string,quote:string}> = {
   "3-13":{ action:"Try something you have never done before!", quote:"Adventure is worthwhile in itself. — Amelia Earhart" },
 };
-function getAffirmation(m: number, d: number, religion: string = "Non-religious"): {quote:string} {
-  const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-  const month = monthNames[m];
-  const monthIdx: Record<string,number> = { January:1, February:2, March:3, April:4, May:5, June:6,
-    July:7, August:8, September:9, October:10, November:11, December:12 };
-  const key = `${monthIdx[month]}-${Number(d)}`;
-  const generic = GENERIC_AFFIRMATIONS[key] ?? { quote:"Every day is a new beginning.", ref:"" };
-  return { quote: generic.quote };
+function getAffirmation(m: number, d: number, religion: string = "Non-religious"): {quote:string, ref:string} {
+  const quotes = [
+    { quote:"Every day is a new beginning. Take a deep breath and start again.", ref:"" },
+    { quote:"You are braver than you believe, stronger than you seem, and smarter than you think.", ref:"A.A. Milne" },
+    { quote:"No act of kindness, no matter how small, is ever wasted.", ref:"Aesop" },
+    { quote:"Look deep into nature, and then you will understand everything better.", ref:"Einstein" },
+    { quote:"We rise by lifting others.", ref:"R.G. Ingersoll" },
+    { quote:"The best thing to hold onto in life is each other.", ref:"Audrey Hepburn" },
+    { quote:"The world is full of magical things, patiently waiting for our senses to grow sharper.", ref:"W.B. Yeats" },
+    { quote:"Happiness is only real when shared.", ref:"Jon Krakauer" },
+    { quote:"Kind words can be short and easy to speak, but their echoes are truly endless.", ref:"Mother Teresa" },
+    { quote:"Be the change you wish to see in the world.", ref:"Gandhi" },
+    { quote:"In every walk with nature, one receives far more than they seek.", ref:"John Muir" },
+    { quote:"It always seems impossible until it is done.", ref:"Nelson Mandela" },
+    { quote:"You yourself, as much as anybody in the universe, deserve your love.", ref:"Buddha" },
+    { quote:"The sky is everywhere. It begins at your feet.", ref:"Jandy Nelson" },
+    { quote:"Adventure is worthwhile in itself.", ref:"Amelia Earhart" },
+    { quote:"No matter how long the winter, spring is sure to follow.", ref:"African Proverb" },
+    { quote:"Creativity is intelligence having fun.", ref:"Einstein" },
+    { quote:"To plant a garden is to believe in tomorrow.", ref:"Audrey Hepburn" },
+    { quote:"A bird does not sing because it has an answer. It sings because it has a song.", ref:"Chinese Proverb" },
+    { quote:"The earth does not belong to us. We belong to the earth.", ref:"Chief Seattle" },
+    { quote:"Life is either a daring adventure or nothing at all.", ref:"Helen Keller" },
+    { quote:"We don't remember days; we remember moments.", ref:"Cesare Pavese" },
+    { quote:"Nature does not hurry, yet everything is accomplished.", ref:"Lao Tzu" },
+    { quote:"Joy is the simplest form of gratitude.", ref:"Karl Barth" },
+    { quote:"Every new beginning comes from some other beginning's end.", ref:"Seneca" },
+    { quote:"The more you praise and celebrate your life, the more there is to celebrate.", ref:"Oprah Winfrey" },
+    { quote:"Enough is a feast.", ref:"Buddhist Proverb" },
+    { quote:"Write it on your heart that every day is the best day in the year.", ref:"Ralph Waldo Emerson" },
+    { quote:"Turn your face to the sun and the shadows fall behind you.", ref:"Maori Proverb" },
+    { quote:"Where flowers bloom, so does hope.", ref:"Lady Bird Johnson" },
+    { quote:"Every moment is a fresh beginning.", ref:"T.S. Eliot" },
+  ];
+  return quotes[(m * 31 + d - 1) % quotes.length];
 }
 
 function seasonalObj(month: string, offset=0): string {
