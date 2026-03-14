@@ -457,7 +457,7 @@ export default function LandingPage() {
 
       {/* ── Nav ── */}
       <nav style={{
-        width:"100%",background:YELLOW,borderBottom:`1px solid ${BORDER}`,
+        width:"100%",background:#dbeafe,borderBottom:`1px solid ${BORDER}`,
         padding:"14px 24px",display:"flex",alignItems:"center",
         justifyContent:"space-between",boxSizing:"border-box",
       }}>
