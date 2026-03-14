@@ -444,16 +444,20 @@ export default function LandingPage() {
     Generic:"#6366f1", Christian:"#0369a1", Hindu:"#b45309", Both:"#7c3aed"
   };
 
-  const BG      = "#f5f0e8";
-  const CARD_BG = "#faf6ef";
-  const BORDER  = "#e8e0d0";
+  const BG      = "#fef9f0";   // warm soft cream
+  const CARD_BG = "#ffffff";
+  const BORDER  = "#e8ddd0";
+  const YELLOW  = "#fef3c7";   // soft yellow
+  const PEACH   = "#fde8d8";   // soft peach
+  const MINT    = "#d1f0e0";   // soft mint
+  const LILAC   = "#ede8f8";   // soft lilac
 
   return (
     <div style={{minHeight:"100vh",background:BG,fontFamily:"Georgia, serif",display:"flex",flexDirection:"column",alignItems:"center"}}>
 
       {/* ── Nav ── */}
       <nav style={{
-        width:"100%",background:CARD_BG,borderBottom:`1px solid ${BORDER}`,
+        width:"100%",background:YELLOW,borderBottom:`1px solid ${BORDER}`,
         padding:"14px 24px",display:"flex",alignItems:"center",
         justifyContent:"space-between",boxSizing:"border-box",
       }}>
@@ -495,7 +499,7 @@ export default function LandingPage() {
 
       {/* ── Controls ── */}
       <div style={{
-        background:CARD_BG,border:`1.5px solid ${BORDER}`,borderRadius:12,
+        background:PEACH,border:`1.5px solid ${BORDER}`,borderRadius:12,
         padding:"14px 16px",margin:"12px 16px",
         display:"flex",gap:12,flexWrap:"wrap",alignItems:"center",
         boxShadow:"0 2px 8px rgba(0,0,0,0.04)",
@@ -580,7 +584,7 @@ export default function LandingPage() {
       {showPricing && (
         <div style={{
           maxWidth:560,width:"calc(100% - 32px)",margin:"0 16px 20px",
-          background:CARD_BG,border:`1.5px solid ${BORDER}`,borderRadius:12,
+          background:MINT,border:`1.5px solid ${BORDER}`,borderRadius:12,
           padding:"20px 24px",boxSizing:"border-box",
         }}>
           <div style={{fontSize:14,fontWeight:"bold",color:"#1f2937",marginBottom:16,textAlign:"center"}}>Pricing</div>
@@ -635,7 +639,7 @@ export default function LandingPage() {
 
       {/* ── Bottom CTA ── */}
       <div style={{
-        margin:"8px 16px 48px",background:CARD_BG,
+        margin:"8px 16px 48px",background:LILAC,
         border:`1.5px solid ${BORDER}`,borderRadius:12,
         padding:"22px 28px",maxWidth:560,width:"calc(100% - 32px)",
         textAlign:"center",boxSizing:"border-box",
