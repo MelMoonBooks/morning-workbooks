@@ -465,7 +465,7 @@ width:"100%",background:"#C9C9FF",borderBottom:`1px solid ${BORDER}`,
           <span style={{fontSize:22}}>📖</span>
           <div>
             <div style={{fontSize:16,fontWeight:"bold",color:"#1f2937"}}>Morning Workbooks</div>
-            <div style={{fontSize:10,color:"#a78a6a",marginTop:-2}}>personalized pages for little ones · ages 3–6</div>
+            <div style={{fontSize:10,color:"#9b99c4",marginTop:-2}}>personalized pages for little ones · ages 3–6</div>
           </div>
         </div>
         <div style={{display:"flex",gap:10,alignItems:"center"}}>
@@ -507,7 +507,7 @@ background:"#FFF8B5",border:`1.5px solid ${BORDER}`,borderRadius:12,
       }}>
         {/* Child name */}
         <div style={{flex:1,minWidth:90}}>
-          <div style={{fontSize:10,fontWeight:"bold",color:"#a78a6a",marginBottom:3}}>CHILD'S NAME</div>
+          <div style={{fontSize:10,fontWeight:"bold",color:"#9b99c4",marginBottom:3}}>CHILD'S NAME</div>
           <input value={childName} onChange={e=>setChildName(e.target.value)}
             placeholder="Child's name"
             style={{width:"100%",padding:"5px 7px",borderRadius:6,border:`1.5px solid ${BORDER}`,
@@ -516,7 +516,7 @@ background:"#FFF8B5",border:`1.5px solid ${BORDER}`,borderRadius:12,
 
         {/* Month */}
         <div style={{flex:1,minWidth:80}}>
-          <div style={{fontSize:10,fontWeight:"bold",color:"#a78a6a",marginBottom:3}}>MONTH</div>
+          <div style={{fontSize:10,fontWeight:"bold",color:"#9b99c4",marginBottom:3}}>MONTH</div>
           <select value={month} onChange={e=>setMonth(e.target.value)}
             style={{width:"100%",padding:"5px",borderRadius:6,border:`1.5px solid ${BORDER}`,fontSize:13,background:"white"}}>
             {MONTH_NAMES.map(m=><option key={m}>{m}</option>)}
@@ -525,7 +525,7 @@ background:"#FFF8B5",border:`1.5px solid ${BORDER}`,borderRadius:12,
 
         {/* Tradition */}
         <div style={{flex:1,minWidth:80}}>
-          <div style={{fontSize:10,fontWeight:"bold",color:"#a78a6a",marginBottom:3}}>TRADITION</div>
+          <div style={{fontSize:10,fontWeight:"bold",color:"#9b99c4",marginBottom:3}}>TRADITION</div>
           <select value={religion} onChange={e=>setReligion(e.target.value)}
             style={{width:"100%",padding:"5px",borderRadius:6,
               border:`1.5px solid #d1d5db`,
@@ -536,7 +536,7 @@ fontSize:13,color:"#374151",fontWeight:"normal",background:"white"}}>
 
         {/* Age */}
         <div>
-          <div style={{fontSize:10,fontWeight:"bold",color:"#a78a6a",marginBottom:3}}>AGE</div>
+          <div style={{fontSize:10,fontWeight:"bold",color:"#9b99c4",marginBottom:3}}>AGE</div>
           <div style={{display:"flex",gap:3}}>
             {[3,4,5,6].map(a=>(
               <button key={a} onClick={()=>setAge(a)}
@@ -552,7 +552,7 @@ fontSize:13,color:"#374151",fontWeight:"normal",background:"white"}}>
 
         {/* Preview day */}
         <div>
-          <div style={{fontSize:10,fontWeight:"bold",color:"#a78a6a",marginBottom:3}}>DAY</div>
+          <div style={{fontSize:10,fontWeight:"bold",color:"#9b99c4",marginBottom:3}}>DAY</div>
           <input type="number" min={1} max={daysInMonth} value={previewDay}
             onChange={e=>setPreviewDay(Math.min(daysInMonth,Math.max(1,Number(e.target.value))))}
             style={{width:52,padding:"5px 6px",borderRadius:6,border:`1.5px solid ${BORDER}`,
@@ -575,7 +575,7 @@ fontSize:13,color:"#374151",fontWeight:"normal",background:"white"}}>
         <button onClick={()=>setShowPricing(v=>!v)}
           style={{padding:"8px 16px",fontSize:12,cursor:"pointer",
             border:`1.5px solid ${BORDER}`,borderRadius:8,
-            background:"white",color:"#a78a6a",fontFamily:"Georgia, serif"}}>
+            background:"white",color:"#9b99c4",fontFamily:"Georgia, serif"}}>
           {showPricing ? "▲ Hide Pricing" : "▼ See Pricing"}
         </button>
       </div>
@@ -666,7 +666,7 @@ margin:"8px 16px 48px",background:"#D6E9FF",
             }}>Sign In</button>
           </SignInButton>
         </div>
-        <div style={{fontSize:11,color:"#c4b5a0",marginTop:12}}>No credit card required</div>
+        <div style={{fontSize:11,color:"#9b99c4",marginTop:12}}>No credit card required</div>
       </div>
 
     </div>
