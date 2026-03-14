@@ -497,9 +497,9 @@ width:"100%",background:"#C9C9FF",borderBottom:`1px solid ${BORDER}`,
         </p>
       </div>
 
-      {/* ── Controls ── */}
+   {/* ── Controls ── */}
       <div style={{
-background:"#FFF8B5",border:`1.5px solid ${BORDER}`,borderRadius:12,
+        background:"#E8E8FF",border:`1.5px solid ${BORDER}`,borderRadius:12,
         padding:"14px 16px",margin:"12px 16px",
         display:"flex",gap:12,flexWrap:"wrap",alignItems:"center",
         boxShadow:"0 2px 8px rgba(0,0,0,0.04)",
@@ -507,32 +507,29 @@ background:"#FFF8B5",border:`1.5px solid ${BORDER}`,borderRadius:12,
       }}>
         {/* Child name */}
         <div style={{flex:1,minWidth:90}}>
-          <div style={{fontSize:10,fontWeight:"bold",color:"#9b99c4",marginBottom:3}}>MONTH</div>
-          <select value={month} onChange={e=>setMonth(e.target.value)}
+          <div style={{fontSize:10,fontWeight:"bold",color:"#9b99c4",marginBottom:3}}>CHILD'S NAME</div>
+          <input value={childName} onChange={e=>setChildName(e.target.value)}
+            placeholder="Child's name"
             style={{width:"100%",padding:"5px 7px",borderRadius:6,border:`1.5px solid ${BORDER}`,
               fontSize:13,fontFamily:"Georgia",boxSizing:"border-box",background:"white"}}/>
         </div>
-
-       {/* Month */}
+        {/* Month */}
         <div style={{flex:1,minWidth:80}}>
-          <div style={{fontSize:9,fontWeight:"bold",color:"#9b99c4",marginBottom:3,lineHeight:1.3,minHeight:24}}>FAITH TRADITION</div>
+          <div style={{fontSize:10,fontWeight:"bold",color:"#9b99c4",marginBottom:3}}>MONTH</div>
           <select value={month} onChange={e=>setMonth(e.target.value)}
             style={{width:"100%",padding:"5px",borderRadius:6,border:`1.5px solid ${BORDER}`,fontSize:13,background:"white"}}>
             {MONTH_NAMES.map(m=><option key={m}>{m}</option>)}
           </select>
         </div>
-
-        {/* Tradition */}
+        {/* Faith Tradition */}
         <div style={{flex:1,minWidth:90}}>
-          <div style={{fontSize:10,fontWeight:"bold",color:"#9b99c4",marginBottom:3}}>FAITH TRADITION</div>
+          <div style={{fontSize:9,fontWeight:"bold",color:"#9b99c4",marginBottom:3,lineHeight:1.3,minHeight:24}}>FAITH TRADITION</div>
           <select value={religion} onChange={e=>setReligion(e.target.value)}
-            style={{width:"100%",padding:"5px",borderRadius:6,
-              border:`1.5px solid #d1d5db`,
-fontSize:13,color:"#374151",fontWeight:"normal",background:"white"}}>
+            style={{width:"100%",padding:"5px",borderRadius:6,border:`1.5px solid #d1d5db`,
+              fontSize:13,color:"#374151",fontWeight:"normal",background:"white"}}>
             {["Non-religious","Christian","Hindu","Both"].map(r=><option key={r}>{r}</option>)}
           </select>
         </div>
-
         {/* Age */}
         <div>
           <div style={{fontSize:10,fontWeight:"bold",color:"#9b99c4",marginBottom:3}}>AGE</div>
@@ -548,7 +545,6 @@ fontSize:13,color:"#374151",fontWeight:"normal",background:"white"}}>
             ))}
           </div>
         </div>
-
         {/* Preview day */}
         <div>
           <div style={{fontSize:10,fontWeight:"bold",color:"#9b99c4",marginBottom:3}}>DAY</div>
