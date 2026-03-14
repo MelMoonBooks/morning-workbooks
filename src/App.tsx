@@ -2046,31 +2046,30 @@ const HINDU_AFFIRMATIONS: Record<string,{quote:string,ref:string}> = {
   "12-30": { quote: "Give thanks for every single day. Each one was a gift.", ref: "Upanishads" },
 };
 
-function getDailyAffirmation(month: string, day: number, religion: string = "Generic") {
+function getDailyAffirmation(month: string, day: number, religion: string = "Non-religious") {
   const monthIdx: Record<string,number> = { January:1, February:2, March:3, April:4, May:5, June:6,
     July:7, August:8, September:9, October:10, November:11, December:12 };
   const key = `${monthIdx[month]}-${Number(day)}`;
 
-  const generic   = GENERIC_AFFIRMATIONS[key]   || { action: "Be kind and brave today!", quote: "In the middle of every difficulty lies opportunity.", ref: "Einstein" };
-  const christian = CHRISTIAN_AFFIRMATIONS[key] || generic;
-  const hinduQ    = HINDU_AFFIRMATIONS[key];
+  const generic    = GENERIC_AFFIRMATIONS[key]    || { action: "Be kind and brave today!", quote: "In the middle of every difficulty lies opportunity.", ref: "Einstein" };
+  const christian  = CHRISTIAN_AFFIRMATIONS[key]  || generic;
+  const hinduQ     = HINDU_AFFIRMATIONS[key];
+  const hinduEntry = hinduQ ? { action: generic.action, quote: hinduQ.quote, ref: hinduQ.ref } : generic;
 
-  if (religion === "Christian") return christian;
+  // Return quote only — no action prompts
+  const stripAction = (entry: {action:string, quote:string, ref:string}) => ({ quote: entry.quote, ref: entry.ref });
 
-  if (religion === "Hindu") {
-    return hinduQ
-      ? { action: generic.action, quote: hinduQ.quote, ref: hinduQ.ref }
-      : generic;
-  }
-
+  if (religion === "Non-religious") return stripAction(generic);
+  if (religion === "Christian" || religion === "Christian-Protestant") return stripAction(christian);
+  if (religion === "Christian-Catholic") return stripAction(christian);
+  if (religion === "Hindu") return stripAction(hinduEntry);
+  if (religion === "Jewish") return stripAction(generic);
+  if (religion === "Muslim") return stripAction(generic);
   if (religion === "Both") {
-    // Even days → Hindu (if available), odd days → Christian
-    if (hinduQ && Number(day) % 2 === 0) return { action: generic.action, quote: hinduQ.quote, ref: hinduQ.ref };
-    return christian;
+    if (hinduQ && Number(day) % 2 === 0) return stripAction(hinduEntry);
+    return stripAction(christian);
   }
-
-  // Default / Generic — public-school safe, no religious content
-  return generic;
+  return stripAction(generic);
 }
 
 
