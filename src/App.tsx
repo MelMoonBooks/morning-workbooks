@@ -240,7 +240,7 @@ const DAILY_ACTIVITIES = {
     { word:"chick",     subject:"baby chicks",               instruction:"Color the baby chicks yellow!",                    colorWord:"yellow" }, // 11
     { word:"kite",      subject:"a kite",                    instruction:"Color the kite any colors you like!",              colorWord:"red"    }, // 12
     { word:"Holi",      subject:"Holi colors",               instruction:"Color the Holi colors!",                           colorWord:"purple" }, // 13
-    { word:"shamrock",  subject:"a shamrock",                instruction:"Color the shamrock green!",                        colorWord:"green"  }, // 14
+    { word:"nest",      subject:"a bird nest with eggs",     instruction:"Color the nest brown and the eggs blue!",         colorWord:"brown"  }, // 14
     { word:"blossom",   subject:"a spring tree",             instruction:"Color the spring tree with pink blossoms!",        colorWord:"pink"   }, // 15
     { word:"fish",      subject:"fish in the sea",           instruction:"Color the fish in the sea!",                       colorWord:"orange" }, // 16
     { word:"shamrock",  subject:"a shamrock",                instruction:"Color the shamrock green!",                        colorWord:"green"  }, // 17
