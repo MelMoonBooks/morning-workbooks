@@ -444,7 +444,7 @@ export default function LandingPage() {
     Generic:"#6366f1", Christian:"#0369a1", Hindu:"#b45309", Both:"#7c3aed"
   };
 
-    const BG      = "#FAF7F2";
+    const BG      = "#F5F5F5";
   const CARD_BG = "#ffffff";
   const BORDER  = "#ddd0c8";
   const YELLOW  = "#FADADD";
@@ -499,7 +499,7 @@ width:"100%",background:"#FADADD",borderBottom:`1px solid ${BORDER}`,
 
       {/* ── Controls ── */}
       <div style={{
-background:"#FFDAB9",border:`1.5px solid ${BORDER}`,borderRadius:12,
+background:"#C8E6C9",border:`1.5px solid ${BORDER}`,borderRadius:12,
         padding:"14px 16px",margin:"12px 16px",
         display:"flex",gap:12,flexWrap:"wrap",alignItems:"center",
         boxShadow:"0 2px 8px rgba(0,0,0,0.04)",
@@ -639,7 +639,7 @@ background:"#C8E6C9",border:`1.5px solid ${BORDER}`,borderRadius:12,
 
       {/* ── Bottom CTA ── */}
       <div style={{
-margin:"8px 16px 48px",background:"#C9C9FF",
+margin:"8px 16px 48px",background:"#D6E9FF",
         border:"1.5px solid #D6E9FF",borderRadius:12,
         padding:"22px 28px",maxWidth:560,width:"calc(100% - 32px)",
         textAlign:"center",boxSizing:"border-box",
