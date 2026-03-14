@@ -446,7 +446,7 @@ export default function LandingPage() {
 
     const BG      = "#FFF0F5";
   const CARD_BG = "#ffffff";
-  const BORDER  = "#ddd0c8";
+  const BORDER  = "#d0d0d8";
   const YELLOW  = "#FADADD";
   const PEACH   = "#FFDAB9";
   const MINT    = "#C8E6C9";
