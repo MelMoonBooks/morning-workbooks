@@ -127,7 +127,10 @@ const SEASONAL_OBJS: Record<string,string[]> = {
   September:["apple","star","flower","sun","star"], October:["pumpkin","star","apple","star","star"],
   November:["apple","star","star","sun","heart"], December:["star","star","heart","star","flower"],
 };
-
+function seasonalObj(month: string, offset=0): string {
+  const pool = SEASONAL_OBJS[month] || ["star"];
+  return pool[offset % pool.length];
+}
 const GENERIC_AFFIRMATIONS: Record<string,{action:string,quote:string}> = {
   "3-13":{ action:"Try something you have never done before!", quote:"Adventure is worthwhile in itself. — Amelia Earhart" },
 };
