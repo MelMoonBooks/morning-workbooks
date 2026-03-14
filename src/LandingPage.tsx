@@ -509,7 +509,6 @@ background:"#FFF8B5",border:`1.5px solid ${BORDER}`,borderRadius:12,
         <div style={{flex:1,minWidth:90}}>
           <div style={{fontSize:10,fontWeight:"bold",color:"#9b99c4",marginBottom:3}}>MONTH</div>
           <select value={month} onChange={e=>setMonth(e.target.value)}
-            placeholder="Child's name"
             style={{width:"100%",padding:"5px 7px",borderRadius:6,border:`1.5px solid ${BORDER}`,
               fontSize:13,fontFamily:"Georgia",boxSizing:"border-box",background:"white"}}/>
         </div>
