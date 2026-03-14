@@ -444,7 +444,7 @@ export default function LandingPage() {
     Generic:"#6366f1", Christian:"#0369a1", Hindu:"#b45309", Both:"#7c3aed"
   };
 
-    const BG      = "#F5F5F5";
+    const BG      = "#FFF0F5";
   const CARD_BG = "#ffffff";
   const BORDER  = "#ddd0c8";
   const YELLOW  = "#FADADD";
@@ -528,8 +528,8 @@ background:"#FFF8B5",border:`1.5px solid ${BORDER}`,borderRadius:12,
           <div style={{fontSize:10,fontWeight:"bold",color:"#a78a6a",marginBottom:3}}>TRADITION</div>
           <select value={religion} onChange={e=>setReligion(e.target.value)}
             style={{width:"100%",padding:"5px",borderRadius:6,
-              border:`1.5px solid ${tradColors[religion]??"#e5e7eb"}`,
-              fontSize:13,color:"#374151",fontWeight:"bold",background:"white"}}>
+              border:`1.5px solid #d1d5db`,
+fontSize:13,color:"#374151",fontWeight:"normal",background:"white"}}>
             {["Generic","Christian","Hindu","Both"].map(r=><option key={r}>{r}</option>)}
           </select>
         </div>
@@ -600,8 +600,8 @@ background:"#D6E9FF",border:`1.5px solid ${BORDER}`,borderRadius:12,
               <div key={i} style={{
                 display:"flex",alignItems:"center",justifyContent:"space-between",
                 padding:"10px 14px",borderRadius:8,
-                border:`1.5px solid ${tier.highlight?"#c4b5a0":BORDER}`,
-                background:tier.highlight?"#C8E6C9":"white",
+border:`1.5px solid ${BORDER}`,
+background:"white",
               }}>
                 <div>
                   <div style={{fontSize:13,fontWeight:"bold",color:"#1f2937"}}>{tier.label}</div>
