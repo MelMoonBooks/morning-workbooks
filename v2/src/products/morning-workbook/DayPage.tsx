@@ -116,6 +116,9 @@ export default function DayPage({ day, month, year, childName, traditions, regio
             instruction={theme.instruction}
             subject={theme.subject}
             colorWord={theme.colorWord}
+            tradition={dominantTradition}
+            region={region}
+            imageFile={theme.imageFile}
           />
         </div>
         {/* Bottom: math activity */}

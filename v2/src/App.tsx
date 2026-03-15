@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { UserButton } from '@clerk/clerk-react';
 import { ChildProfile } from './content/types';
+import { getDayContent } from './content';
 import DayPage from './products/morning-workbook/DayPage';
 import ProfileModal, { loadProfiles, saveProfiles } from './shared/ProfileModal';
 import { ImageCacheContext } from './shared/ImageCache';
@@ -79,13 +80,23 @@ export default function App() {
       const ReactDOM = await import("react-dom/client");
       const React2 = await import("react");
 
-      // Pre-fetch images as base64
+      // Pre-fetch images as base64 (tiered: tradition, region, universal)
       const imageCache: Record<string, string> = {};
       for (let d = 1; d <= daysInMonth; d++) {
         const paddedDay = String(d).padStart(2, "0");
-        const key = `${monthName.toLowerCase()}_${paddedDay}`;
-        const b64 = await fetchBase64(`/images/${key}.png`);
-        if (b64) imageCache[key] = b64;
+        const baseKey = `${monthName.toLowerCase()}_${paddedDay}`;
+        // Try tradition-specific, region-specific, then universal
+        const dayContent = getDayContent(traditions, region, month, d, year);
+        const candidates = [
+          ...(dayContent.theme.imageFile ? [dayContent.theme.imageFile.replace(/\.png$/, "")] : []),
+          ...(dayContent.dominantTradition !== "universal" ? [`${dayContent.dominantTradition}/${baseKey}`] : []),
+          `${region}/${baseKey}`,
+          baseKey,
+        ];
+        for (const key of candidates) {
+          const b64 = await fetchBase64(`/images/${key}.png`);
+          if (b64) { imageCache[key] = b64; break; }
+        }
       }
 
       const pdf = new jsPDF({ orientation: "portrait", unit: "pt", format: [612, 792] });
