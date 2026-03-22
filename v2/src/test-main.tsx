@@ -9,6 +9,7 @@ import { getDayContent, REGIONS } from './content';
 import { Birthday, ChildProfile } from './content/types';
 import { coloringBooks } from './content/coloring-books';
 import ProfileModal from './shared/ProfileModal';
+import ContentDashboard from './ContentDashboard';
 import { colors, theme } from './shared/theme';
 
 const MONTH_NAMES = ["January","February","March","April","May","June",
@@ -241,7 +242,7 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
 // ── Workbook Test (with birthdays) ──
 const CHILD_EMOJIS = ["🌟","🌈","🦋","🐣","🌻","🦄","🐬","🍎","🎨","🎵"];
 
-function TestWorkbook({ onSwitch }: { onSwitch: () => void }) {
+function TestWorkbook({ onSwitch, onDashboard }: { onSwitch: () => void; onDashboard: () => void }) {
   const now = new Date();
   const [profiles, setProfiles] = useState<ChildProfile[]>([
     { id: "demo-asha", name: "Asha", age: 5, traditions: ["hindu", "christian-catholic"], region: "us", emoji: "🌟",
@@ -319,9 +320,14 @@ function TestWorkbook({ onSwitch }: { onSwitch: () => void }) {
         {/* Header */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
           <h1 style={{ fontSize: 24, color: theme.textPrimary, margin: 0 }}>MelMoon Books</h1>
-          <button onClick={onSwitch} style={{ padding: "6px 14px", borderRadius: 8, border: `1.5px solid ${theme.buttonOutline}`, background: theme.cardBg, color: theme.textPrimary, fontSize: 12, fontWeight: "bold", cursor: "pointer" }}>
-            View Landing Page
-          </button>
+          <div style={{ display: "flex", gap: 8 }}>
+            <button onClick={onDashboard} style={{ padding: "6px 14px", borderRadius: 8, border: `1.5px solid ${colors.deepTeal}`, background: colors.deepTeal, color: "white", fontSize: 12, fontWeight: "bold", cursor: "pointer" }}>
+              Content Dashboard
+            </button>
+            <button onClick={onSwitch} style={{ padding: "6px 14px", borderRadius: 8, border: `1.5px solid ${theme.buttonOutline}`, background: theme.cardBg, color: theme.textPrimary, fontSize: 12, fontWeight: "bold", cursor: "pointer" }}>
+              Landing Page
+            </button>
+          </div>
         </div>
 
         {/* Child selector pills + add button */}
@@ -493,10 +499,10 @@ function TestWorkbook({ onSwitch }: { onSwitch: () => void }) {
 
 // ── Root: toggle between landing page and workbook ──
 function TestApp() {
-  const [view, setView] = useState<"landing" | "workbook">("landing");
-  return view === "landing"
-    ? <TestLandingPage onSwitch={() => setView("workbook")} />
-    : <TestWorkbook onSwitch={() => setView("landing")} />;
+  const [view, setView] = useState<"landing" | "workbook" | "dashboard">("landing");
+  if (view === "dashboard") return <ContentDashboard onBack={() => setView("workbook")} />;
+  if (view === "workbook") return <TestWorkbook onSwitch={() => setView("landing")} onDashboard={() => setView("dashboard")} />;
+  return <TestLandingPage onSwitch={() => setView("workbook")} />;
 }
 
 createRoot(document.getElementById('root')!).render(
