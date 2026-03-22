@@ -20,11 +20,13 @@ function ColorSceneActivity({ month, day, instruction, subject, tradition, regio
   tradition?: string; region?: string; imageFile?: string;
 }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
-      <div style={{ fontSize: 13, fontWeight: "bold", color: "#374151", marginBottom: 6 }}>
+    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+      <div style={{ fontSize: 12, fontWeight: "bold", color: "#1f2937", marginBottom: 6, lineHeight: 1.4 }}>
         {instruction}
       </div>
-      <DayImage month={month} day={day} label={subject} tradition={tradition} region={region} imageFile={imageFile} />
+      <div style={{ flex: 1, display: "flex" }}>
+        <DayImage month={month} day={day} label={subject} tradition={tradition} region={region} imageFile={imageFile} />
+      </div>
     </div>
   );
 }
@@ -36,7 +38,7 @@ function TraceColorActivity({ month, day, subject, colorWord, tradition, region,
   tradition?: string; region?: string; imageFile?: string;
 }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
+    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <div style={{
         fontSize: 10, fontWeight: "bold", color: "#374151",
         textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 6,
@@ -44,7 +46,7 @@ function TraceColorActivity({ month, day, subject, colorWord, tradition, region,
         Trace &amp; Color
       </div>
       <TraceRow text={colorWord} size={28} gap={2} />
-      <div style={{ marginTop: 8 }}>
+      <div style={{ flex: 1, display: "flex", marginTop: 6 }}>
         <DayImage month={month} day={day} label={subject} tradition={tradition} region={region} imageFile={imageFile} />
       </div>
     </div>
@@ -59,7 +61,8 @@ function ColorActivity({ day, month, instruction, subject, colorWord, tradition,
   return (
     <div style={{
       flex: 1, border: "1.5px solid #d1d5db", borderRadius: 6,
-      padding: "8px 10px", background: "white", minHeight: 180,
+      padding: "8px 10px", background: "white", display: "flex",
+      flexDirection: "column", minHeight: 180,
     }}>
       {type === "scene" ? (
         <ColorSceneActivity month={month} day={day} instruction={instruction} subject={subject}

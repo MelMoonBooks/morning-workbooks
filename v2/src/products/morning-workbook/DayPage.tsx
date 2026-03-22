@@ -44,11 +44,9 @@ export default function DayPage({ day, month, year, childName, traditions, regio
   for (let i = 0; i < firstDay; i++) calendarCells.push(null);
   for (let d = 1; d <= daysInMonth; d++) calendarCells.push(d);
 
-  // Pick the first holiday sentence to show (if any)
-  const holiday = holidays.length > 0 ? holidays[0] : null;
-
   // Check for birthdays on this day
   const todaysBirthdays = birthdays.filter(b => b.month === month && b.day === day);
+  const hasMessages = holidays.length > 0 || todaysBirthdays.length > 0;
 
   return (
     <div id={id} style={{ width: "100%", background: "white", borderRadius: 4, overflow: "hidden", fontFamily: "Georgia,serif" }}>
@@ -69,14 +67,14 @@ export default function DayPage({ day, month, year, childName, traditions, regio
             <RuledLine h={lineH} />
           </div>
           <div style={{ border: "1.5px solid #d1d5db", borderRadius: 6, padding: "6px 10px" }}>
-            <div style={{ fontSize: 14, fontWeight: "bold", color: "#1f2937", marginBottom: holiday ? 4 : 0 }}>
+            <div style={{ fontSize: 14, fontWeight: "bold", color: "#1f2937", marginBottom: hasMessages ? 4 : 0 }}>
               {dateDisplay}
             </div>
-            {holiday && (
-              <div style={{ fontSize: 11, color: "#374151", fontStyle: "italic", lineHeight: 1.5 }}>
-                {holiday.sentence}
+            {holidays.map((h, i) => (
+              <div key={i} style={{ fontSize: 11, color: "#374151", fontStyle: "italic", lineHeight: 1.5, marginTop: i > 0 ? 2 : 0 }}>
+                {h.sentence}
               </div>
-            )}
+            ))}
             {todaysBirthdays.map(b => (
               <div key={b.id} style={{ fontSize: 11, color: "#1f2937", fontWeight: "bold", lineHeight: 1.5, marginTop: 2, display: "flex", alignItems: "center", gap: 4 }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" style={{ display: "inline-block", flexShrink: 0 }}>

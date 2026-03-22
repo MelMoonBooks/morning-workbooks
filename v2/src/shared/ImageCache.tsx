@@ -18,10 +18,6 @@ interface DayImageProps {
 // 2. images/{tradition}/{month}_{day}.png
 // 3. images/{region}/{month}_{day}.png
 // 4. images/{month}_{day}.png (universal fallback)
-//
-// To add images for a tradition/region, create a subfolder:
-//   public/images/hindu/october_14.png
-//   public/images/india/january_26.png
 
 export function DayImage({ month, day, label, tradition, region, imageFile }: DayImageProps) {
   const cache = React.useContext(ImageCacheContext);
@@ -45,12 +41,12 @@ export function DayImage({ month, day, label, tradition, region, imageFile }: Da
   const cachedKey = candidates.find(k => cache[k]);
   if (cachedKey) {
     return (
-      <div style={{ flex: 1, width: "100%", minHeight: 110,
+      <div style={{ flex: 1, width: "100%",
         display: "flex", alignItems: "center", justifyContent: "center" }}>
         <img
           src={cache[cachedKey]}
           alt={label}
-          style={{ maxWidth: "100%", maxHeight: 160, width: "auto", height: "auto",
+          style={{ maxWidth: "100%", maxHeight: "100%", width: "auto", height: "auto",
             objectFit: "contain", borderRadius: 4, display: "block" }}
         />
       </div>
@@ -74,8 +70,8 @@ function TieredImage({ candidates, label }: { candidates: string[]; label: strin
   const src = exhausted ? "" : `/images/${candidates[index]}.png`;
 
   return (
-    <div style={{ flex: 1, width: "100%", minHeight: 110, position: "relative",
-      display: "flex", alignItems: "center", justifyContent: "center" }}>
+    <div style={{ flex: 1, width: "100%",
+      display: "flex", alignItems: "stretch", justifyContent: "center" }}>
       {!exhausted && (
         <img
           src={src}
@@ -86,12 +82,12 @@ function TieredImage({ candidates, label }: { candidates: string[]; label: strin
             setIndex(i => i + 1);
           }}
           style={{ display: loaded ? "block" : "none",
-            maxWidth: "100%", maxHeight: 160, width: "auto", height: "auto",
+            maxWidth: "100%", maxHeight: "100%", width: "auto", height: "auto",
             objectFit: "contain", borderRadius: 4 }}
         />
       )}
       {(!loaded || exhausted) && (
-        <div style={{ flex: 1, width: "100%", minHeight: 110,
+        <div style={{ flex: 1, width: "100%",
           border: "1.5px dashed #9ca3af", borderRadius: 6,
           display: "flex", alignItems: "center", justifyContent: "center",
           background: "white" }}>

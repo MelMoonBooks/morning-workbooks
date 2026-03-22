@@ -19,50 +19,52 @@ interface DayProps {
 }
 
 // ── CountActivity (ages 3-4) ──
-// Count objects and write the number
 
 function CountActivity({ day, month }: DayMonthProps) {
   const obj = seasonalObject(month, day) as SvgObjectType;
   const count = (day % 5) + 1;
 
   return (
-    <div>
-      <div style={LABEL_STYLE}>Count the {obj}s and write the number</div>
-      <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-        {Array.from({ length: count }, (_, i) => (
-          <SvgObject key={i} type={obj} />
-        ))}
-        <span style={{ fontSize: 22, fontWeight: "bold", margin: "0 4px" }}>=</span>
-        <WriteBox />
+    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+      <div style={LABEL_STYLE}>Count and write the number</div>
+      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 16 }}>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center", alignItems: "center" }}>
+          {Array.from({ length: count }, (_, i) => (
+            <SvgObject key={i} type={obj} size={58} />
+          ))}
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+          <div style={{ fontSize: 22, color: "#9ca3af" }}>=</div>
+          <WriteBox size={52} />
+        </div>
       </div>
     </div>
   );
 }
 
 // ── CircleActivity (ages 3-4) ──
-// Circle the smallest or biggest
 
 function CircleActivity({ day, month }: DayMonthProps) {
   const obj = seasonalObject(month, day) as SvgObjectType;
   const task = day % 2 === 0 ? "smallest" : "biggest";
-  const sizes: number[][] = [[36, 58, 46], [52, 36, 60], [60, 44, 38]];
+  const rowSizes = [[36, 58, 46], [52, 36, 60], [60, 44, 38]];
 
   return (
-    <div>
-      <div style={LABEL_STYLE}>Circle the {task} {obj}</div>
-      {sizes.map((row, r) => (
-        <div key={r} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
-          {row.map((s, c) => (
-            <SvgObject key={c} type={obj} size={s} />
-          ))}
-        </div>
-      ))}
+    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+      <div style={LABEL_STYLE}>Circle the {task} in each row</div>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-evenly" }}>
+        {rowSizes.map((sizes, ri) => (
+          <div key={ri} style={{ display: "flex", alignItems: "center", justifyContent: "space-evenly",
+            borderBottom: ri < 2 ? "1px dashed #e5e7eb" : "none", paddingBottom: ri < 2 ? 4 : 0 }}>
+            {sizes.map((sz, ci) => <SvgObject key={ci} type={obj} size={sz} />)}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
 
 // ── ColorNActivity (ages 3-4) ──
-// Color N objects
 
 function ColorNActivity({ day, month }: DayMonthProps) {
   const obj = seasonalObject(month, day) as SvgObjectType;
@@ -70,11 +72,11 @@ function ColorNActivity({ day, month }: DayMonthProps) {
   const plural = obj === "fish" ? "fish" : obj + "s";
 
   return (
-    <div>
+    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <div style={LABEL_STYLE}>Color {target} {plural}</div>
-      <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "space-evenly", flexWrap: "wrap", gap: 4 }}>
         {Array.from({ length: 5 }, (_, i) => (
-          <SvgObject key={i} type={obj} />
+          <SvgObject key={i} type={obj} size={54} />
         ))}
       </div>
     </div>
@@ -82,7 +84,6 @@ function ColorNActivity({ day, month }: DayMonthProps) {
 }
 
 // ── AdditionActivity (ages 5-6) ──
-// Addition with pictures
 
 function AdditionActivity({ day, month }: DayMonthProps) {
   const addPairs: [number, number][] = [
@@ -93,25 +94,24 @@ function AdditionActivity({ day, month }: DayMonthProps) {
   const objB = seasonalObject(month, day + 2) as SvgObjectType;
 
   return (
-    <div>
-      <div style={LABEL_STYLE}>Addition</div>
-      <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-        {Array.from({ length: a }, (_, i) => (
-          <SvgObject key={`a${i}`} type={objA} />
-        ))}
-        <span style={{ fontSize: 22, fontWeight: "bold", margin: "0 4px" }}>+</span>
-        {Array.from({ length: b }, (_, i) => (
-          <SvgObject key={`b${i}`} type={objB} />
-        ))}
-        <span style={{ fontSize: 22, fontWeight: "bold", margin: "0 4px" }}>=</span>
-        <WriteBox />
+    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+      <div style={LABEL_STYLE}>How many altogether?</div>
+      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
+        <div style={{ display: "flex", gap: 6, padding: "6px 10px", border: "1.5px solid #d1d5db", borderRadius: 6, alignItems: "center", flexWrap: "wrap", justifyContent: "center", maxWidth: 160 }}>
+          {Array.from({ length: a }, (_, i) => <SvgObject key={i} type={objA} size={48} />)}
+        </div>
+        <div style={{ fontSize: 26, color: "#374151", fontWeight: "bold" }}>+</div>
+        <div style={{ display: "flex", gap: 6, padding: "6px 10px", border: "1.5px solid #d1d5db", borderRadius: 6, alignItems: "center", flexWrap: "wrap", justifyContent: "center", maxWidth: 160 }}>
+          {Array.from({ length: b }, (_, i) => <SvgObject key={i} type={objB} size={48} />)}
+        </div>
+        <div style={{ fontSize: 26, color: "#374151", fontWeight: "bold" }}>=</div>
+        <WriteBox size={50} />
       </div>
     </div>
   );
 }
 
 // ── SubtractionActivity (ages 5-6) ──
-// Subtraction with crossed out objects
 
 function SubtractionActivity({ day, month }: DayMonthProps) {
   const subPairs: [number, number][] = [
@@ -119,52 +119,62 @@ function SubtractionActivity({ day, month }: DayMonthProps) {
   ];
   const [total, remove] = subPairs[day % subPairs.length];
   const obj = seasonalObject(month, day) as SvgObjectType;
+  const sz = 50;
+  const xSz = sz + 8;
 
   return (
-    <div>
-      <div style={LABEL_STYLE}>Subtraction</div>
-      <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+      <div style={LABEL_STYLE}>Cross out {remove} — how many are left?</div>
+      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, flexWrap: "wrap" }}>
         {Array.from({ length: total }, (_, i) => (
           <div key={i} style={{ position: "relative", display: "inline-flex" }}>
-            <SvgObject type={obj} />
+            <SvgObject type={obj} size={sz} />
             {i < remove && (
-              <svg
-                style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}
-                viewBox="0 0 44 44"
-              >
-                <line x1="8" y1="8" x2="36" y2="36" stroke="#ef4444" strokeWidth="3" strokeLinecap="round" />
-                <line x1="36" y1="8" x2="8" y2="36" stroke="#ef4444" strokeWidth="3" strokeLinecap="round" />
+              <svg style={{ position: "absolute", top: 0, left: 0, pointerEvents: "none" }}
+                width={xSz} height={xSz} viewBox={`0 0 ${xSz} ${xSz}`}>
+                <line x1="8" y1="8" x2={xSz - 8} y2={xSz - 8} stroke="#1f2937" strokeWidth="3" strokeLinecap="round" />
+                <line x1={xSz - 8} y1="8" x2="8" y2={xSz - 8} stroke="#1f2937" strokeWidth="3" strokeLinecap="round" />
               </svg>
             )}
           </div>
         ))}
-        <span style={{ fontSize: 22, fontWeight: "bold", margin: "0 4px" }}>=</span>
-        <WriteBox />
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginLeft: 8 }}>
+          <div style={{ fontSize: 26, color: "#374151", fontWeight: "bold" }}>=</div>
+          <WriteBox size={50} />
+        </div>
       </div>
     </div>
   );
 }
 
 // ── BeforeAfterActivity (ages 5-6) ──
-// What comes before and after
 
 function BeforeAfterActivity({ day }: DayProps) {
   const n = (day % 8) + 2;
 
   return (
-    <div>
+    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <div style={LABEL_STYLE}>What comes before and after?</div>
-      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-        <WriteBox />
-        <span style={{ fontSize: 28, fontWeight: "bold" }}>{n}</span>
-        <WriteBox />
+      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 14 }}>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+          <div style={{ fontSize: 9, color: "#9ca3af" }}>before</div>
+          <WriteBox size={46} />
+        </div>
+        <div style={{ fontSize: 30, fontWeight: "bold", color: "#1f2937",
+          border: "2px solid #1f2937", borderRadius: 8, width: 52, height: 60,
+          display: "flex", alignItems: "center", justifyContent: "center" }}>
+          {n}
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+          <div style={{ fontSize: 9, color: "#9ca3af" }}>after</div>
+          <WriteBox size={46} />
+        </div>
       </div>
     </div>
   );
 }
 
 // ── TallerShorterActivity (ages 5-6) ──
-// Circle taller or shorter
 
 function TallerShorterActivity({ day, month }: DayMonthProps) {
   const task = day % 2 === 0 ? "taller" : "shorter";
@@ -173,9 +183,9 @@ function TallerShorterActivity({ day, month }: DayMonthProps) {
   const sizeB = day % 2 === 0 ? 40 : 68;
 
   return (
-    <div>
-      <div style={LABEL_STYLE}>Circle the {task} {obj}</div>
-      <div style={{ display: "flex", alignItems: "flex-end", gap: 24 }}>
+    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+      <div style={LABEL_STYLE}>Circle the {task} one</div>
+      <div style={{ flex: 1, display: "flex", alignItems: "flex-end", justifyContent: "center", gap: 60, paddingBottom: 8 }}>
         <SvgObject type={obj} size={sizeA} />
         <SvgObject type={obj} size={sizeB} />
       </div>
@@ -184,62 +194,69 @@ function TallerShorterActivity({ day, month }: DayMonthProps) {
 }
 
 // ── PenniesActivity (ages 5-6) ──
-// Count pennies
 
 function PenniesActivity({ day }: DayProps) {
   const counts = [3,5,4,7,6,8,3,10,5,9,4,6,8,3,7,5,10,4,6,9,3,8,5,7,4,10,6,3,9,5,8];
   const count = counts[(day - 1) % counts.length];
 
   return (
-    <div>
+    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <div style={LABEL_STYLE}>Count the pennies</div>
-      <div style={{ display: "flex", alignItems: "center", gap: 4, flexWrap: "wrap" }}>
+      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, flexWrap: "wrap" }}>
         {Array.from({ length: count }, (_, i) => (
-          <Penny key={i} />
+          <Penny key={i} size={44} />
         ))}
-        <span style={{ fontSize: 22, fontWeight: "bold", margin: "0 4px" }}>=</span>
-        <WriteBox />
-        <span style={{ fontSize: 22, fontWeight: "bold" }}>&cent;</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, marginLeft: 8 }}>
+          <div style={{ fontSize: 22, color: "#9ca3af" }}>=</div>
+          <WriteBox size={50} />
+          <div style={{ fontSize: 13, color: "#374151" }}>&cent;</div>
+        </div>
       </div>
     </div>
   );
 }
 
 // ── WriteNumberActivity (ages 5-6) ──
-// Trace and write numbers
 
 function WriteNumberActivity({ day }: DayProps) {
   const n = (day % 10) + 1;
   const path = NUMBER_PATHS[n];
   const size = 64;
-  const h = Math.round(size * 1.4);
 
   return (
-    <div>
-      <div style={LABEL_STYLE}>Trace and write the number {n}</div>
-      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-        {/* Trace box with number path */}
-        <svg width={size} height={h} viewBox="0 0 40 56" style={{ display: "block" }}>
-          <rect x="1" y="1" width="38" height="54" rx="3"
-            fill="none" stroke="#d1d5db" strokeWidth="1.2" strokeDasharray="4 3" />
-          <line x1="4" y1="2" x2="36" y2="2" stroke="#d1d5db" strokeWidth="0.8" />
-          <line x1="4" y1="28" x2="36" y2="28" stroke="#d1d5db" strokeWidth="0.6" strokeDasharray="3 3" />
-          <line x1="4" y1="54" x2="36" y2="54" stroke="#d1d5db" strokeWidth="0.8" />
-          {path && (
-            <path d={path} fill="none" stroke="#b0b0b0" strokeWidth="2.8"
-              strokeLinecap="round" strokeLinejoin="round" strokeDasharray="3.5 3.5" />
-          )}
-        </svg>
-        {/* Two empty write boxes */}
-        <WriteBox size={size} />
-        <WriteBox size={size} />
+    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+      <div style={LABEL_STYLE}>Write the number {n}</div>
+      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 16 }}>
+        {/* Trace it */}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+          <div style={{ fontSize: 9, color: "#9ca3af" }}>trace</div>
+          <svg width={size} height={size} viewBox="0 0 32 44"
+            style={{ border: "1px dashed #e5e7eb", borderRadius: 4 }}>
+            <line x1="0" y1="2" x2="32" y2="2" stroke="#e5e7eb" strokeWidth="0.8" />
+            <line x1="0" y1="22" x2="32" y2="22" stroke="#e5e7eb" strokeWidth="0.6" strokeDasharray="3 3" />
+            <line x1="0" y1="42" x2="32" y2="42" stroke="#e5e7eb" strokeWidth="0.8" />
+            {path && <path d={path} fill="none" stroke="#b0b0b0" strokeWidth="3"
+              strokeLinecap="round" strokeLinejoin="round" strokeDasharray="4 4" />}
+          </svg>
+        </div>
+        {/* Write it twice */}
+        {[1, 2].map(i => (
+          <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+            <div style={{ fontSize: 9, color: "#9ca3af" }}>write</div>
+            <svg width={size} height={size} viewBox="0 0 32 44"
+              style={{ border: "1px dashed #e5e7eb", borderRadius: 4 }}>
+              <line x1="0" y1="2" x2="32" y2="2" stroke="#e5e7eb" strokeWidth="0.8" />
+              <line x1="0" y1="22" x2="32" y2="22" stroke="#e5e7eb" strokeWidth="0.6" strokeDasharray="3 3" />
+              <line x1="0" y1="42" x2="32" y2="42" stroke="#e5e7eb" strokeWidth="0.8" />
+            </svg>
+          </div>
+        ))}
       </div>
     </div>
   );
 }
 
 // ── MathActivity (router) ──
-// Picks the right activity based on age and day
 
 function MathActivity({ day, month, age }: MathActivityProps) {
   const maxTypes = age <= 4 ? 3 : 6;
@@ -271,6 +288,7 @@ function MathActivity({ day, month, age }: MathActivityProps) {
       border: "1.5px solid #d1d5db",
       borderRadius: 6,
       padding: "10px 14px",
+      background: "white",
       minHeight: 140,
     }}>
       {activity}

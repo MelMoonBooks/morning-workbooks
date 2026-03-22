@@ -175,9 +175,11 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
           </div>
         </div>
 
-        {/* DayPage */}
-        <div style={{ boxShadow: "0 4px 20px rgba(0,0,0,0.08)", borderRadius: 8, overflow: "hidden" }}>
-          <DayPage day={day} month={month} year={year} childName={childName} traditions={traditions} region={region} age={age} />
+        {/* DayPage — fixed width to match real printed page proportions */}
+        <div style={{ display: "flex", justifyContent: "center" }}>
+          <div style={{ width: 540, maxWidth: "100%", boxShadow: "0 4px 20px rgba(0,0,0,0.08)", borderRadius: 8, overflow: "hidden" }}>
+            <DayPage day={day} month={month} year={year} childName={childName} traditions={traditions} region={region} age={age} />
+          </div>
         </div>
         <div style={{ textAlign: "center", padding: "16px 0", fontSize: 12, color: theme.textMuted }}>
           PDF download and printed book ordering require a free account.
