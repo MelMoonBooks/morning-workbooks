@@ -33,6 +33,7 @@ export default function App() {
   const age        = activeChild?.age ?? 5;
   const traditions = activeChild?.traditions ?? ["universal"];
   const region     = activeChild?.region ?? "us";
+  const birthdays  = activeChild?.birthdays ?? [];
 
   const daysInMonth = new Date(year, month, 0).getDate();
   const monthName = MONTH_NAMES[month - 1];
@@ -289,6 +290,7 @@ export default function App() {
           traditions={traditions}
           region={region}
           age={age}
+          birthdays={birthdays}
         />
       </div>
 
@@ -319,6 +321,7 @@ export default function App() {
                   traditions={traditions}
                   region={region}
                   age={age}
+                  birthdays={birthdays}
                 />
               </div>
             ))}

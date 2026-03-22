@@ -53,9 +53,14 @@ export default function ProfileModal({ profiles, onClose, onSave, onSelect, acti
 
   const openNew = () => {
     const nextEmoji = CHILD_EMOJIS[list.length % CHILD_EMOJIS.length];
-    const newProfile: ChildProfile = { id: makeId(), name: "", age: 5, traditions: ["universal"], region: "us", emoji: nextEmoji, birthdays: [] };
+    // Pre-populate from the last child's settings (siblings share family birthdays, traditions, region)
+    const lastChild = list[list.length - 1];
+    const inheritedTraditions = lastChild ? [...lastChild.traditions] : ["universal"];
+    const inheritedRegion = lastChild?.region ?? "us";
+    const inheritedBirthdays = lastChild ? lastChild.birthdays.map(b => ({ ...b, id: makeId() })) : [];
+    const newProfile: ChildProfile = { id: makeId(), name: "", age: 5, traditions: inheritedTraditions, region: inheritedRegion, emoji: nextEmoji, birthdays: inheritedBirthdays };
     setEditing(newProfile);
-    setForm({ name: "", age: 5, traditions: ["universal"], region: "us", birthdays: [] });
+    setForm({ name: "", age: 5, traditions: inheritedTraditions, region: inheritedRegion, birthdays: inheritedBirthdays });
     setNewBday({ name: "", month: 1, day: 1 });
   };
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { getDayContent } from '../../content';
-import { Holiday, Affirmation, DayTheme } from '../../content/types';
+import { Holiday, Affirmation, DayTheme, Birthday } from '../../content/types';
 import { RuledLine } from '../../shared/DrawingPrimitives';
 import LetterTracing from './LetterTracing';
 import ColorActivity from './ColorActivity';
@@ -25,10 +25,11 @@ interface DayPageProps {
   traditions: string[]; // e.g. ["hindu", "christian-catholic"]
   region: string;       // e.g. "us"
   age: number;          // 3-6
+  birthdays?: Birthday[]; // family birthdays to check
   id?: string;          // DOM id for PDF capture
 }
 
-export default function DayPage({ day, month, year, childName, traditions, region, age, id }: DayPageProps) {
+export default function DayPage({ day, month, year, childName, traditions, region, age, birthdays = [], id }: DayPageProps) {
   const content = getDayContent(traditions, region, month, day, year);
   const { theme, holidays, affirmation, dominantTradition } = content;
 
@@ -45,6 +46,9 @@ export default function DayPage({ day, month, year, childName, traditions, regio
 
   // Pick the first holiday sentence to show (if any)
   const holiday = holidays.length > 0 ? holidays[0] : null;
+
+  // Check for birthdays on this day
+  const todaysBirthdays = birthdays.filter(b => b.month === month && b.day === day);
 
   return (
     <div id={id} style={{ width: "100%", background: "white", borderRadius: 4, overflow: "hidden", fontFamily: "Georgia,serif" }}>
@@ -73,6 +77,17 @@ export default function DayPage({ day, month, year, childName, traditions, regio
                 {holiday.sentence}
               </div>
             )}
+            {todaysBirthdays.map(b => (
+              <div key={b.id} style={{ fontSize: 11, color: "#1f2937", fontWeight: "bold", lineHeight: 1.5, marginTop: 2, display: "flex", alignItems: "center", gap: 4 }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" style={{ display: "inline-block", flexShrink: 0 }}>
+                  <rect x="3" y="12" width="18" height="9" rx="2" fill="none" stroke="#1f2937" strokeWidth="1.8"/>
+                  <rect x="6" y="15" width="12" height="6" rx="1" fill="none" stroke="#1f2937" strokeWidth="1"/>
+                  <line x1="12" y1="12" x2="12" y2="8" stroke="#1f2937" strokeWidth="1.5" strokeLinecap="round"/>
+                  <path d="M10.5 8 Q12 5 13.5 8" fill="none" stroke="#1f2937" strokeWidth="1.2" strokeLinecap="round"/>
+                </svg>
+                Happy Birthday, {b.name}!
+              </div>
+            ))}
           </div>
         </div>
 
