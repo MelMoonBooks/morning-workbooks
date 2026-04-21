@@ -100,23 +100,42 @@ export function getDayContent(
   const matchesDate = (h: Holiday) => h.date === dateKeyMM && (h.year == null || h.year === year);
 
   // 1. Collect ALL holidays from all selected traditions + region
-  const allHolidays: Holiday[] = [];
+  const rawHolidays: Holiday[] = [];
 
   // Always include universal holidays
-  allHolidays.push(...universalHolidays.filter(matchesDate));
+  rawHolidays.push(...universalHolidays.filter(matchesDate));
 
   // Add tradition-specific holidays
   for (const t of traditions) {
     const traditionHolidays = holidaysByTradition[t] ?? [];
-    allHolidays.push(...traditionHolidays.filter(matchesDate));
+    rawHolidays.push(...traditionHolidays.filter(matchesDate));
   }
 
   // Add region holidays
   const regionHolidays = holidaysByRegion[region] ?? [];
-  allHolidays.push(...regionHolidays.filter(matchesDate));
+  rawHolidays.push(...regionHolidays.filter(matchesDate));
 
   // 2. Determine dominant tradition
-  const dominantTradition = getDominantTradition(traditions, day, allHolidays);
+  const dominantTradition = getDominantTradition(traditions, day, rawHolidays);
+
+  // 3. Deduplicate: if the same holiday name appears from multiple traditions,
+  //    keep the dominant tradition's version (or the most specific one)
+  const allHolidays: Holiday[] = [];
+  const seenNames = new Set<string>();
+  // Sort so dominant tradition comes first, then other traditions, then universal
+  const sorted = [...rawHolidays].sort((a, b) => {
+    if (a.tradition === dominantTradition && b.tradition !== dominantTradition) return -1;
+    if (b.tradition === dominantTradition && a.tradition !== dominantTradition) return 1;
+    if (a.tradition !== 'universal' && b.tradition === 'universal') return -1;
+    if (b.tradition !== 'universal' && a.tradition === 'universal') return 1;
+    return 0;
+  });
+  for (const h of sorted) {
+    if (!seenNames.has(h.name)) {
+      seenNames.add(h.name);
+      allHolidays.push(h);
+    }
+  }
 
   // 3. Start with universal activities for this day
   let theme: DayTheme = universalActivities[dateKey] ?? {
