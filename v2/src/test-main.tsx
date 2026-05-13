@@ -114,7 +114,7 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
         </h1>
         <p style={{ fontSize: 16, color: theme.textSecondary, lineHeight: 1.6, margin: 0 }}>
           Personalized daily workbooks for ages 3–6 with letter tracing, math, and coloring.
-          Choose your family's faith traditions — Christian, Hindu, Jewish, Muslim, or non-religious — and every page reflects what matters to you.
+             Choose a region to add international holidays — and if your family has a faith tradition, you can include that too. Every page reflects what matters to you.
         </p>
       </section>
 
