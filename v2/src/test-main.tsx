@@ -16,13 +16,13 @@ const MONTH_NAMES = ["January","February","March","April","May","June",
   "July","August","September","October","November","December"];
 
 const TRADITIONS = [
-  { id: "universal",            label: "Non-religious" },
-  { id: "christian-catholic",   label: "Catholic" },
-  { id: "christian-protestant", label: "Protestant" },
-  { id: "hindu",                label: "Hindu" },
-  { id: "jewish",               label: "Jewish" },
-  { id: "muslim",               label: "Muslim" },
-];
+     { id: "universal",            label: "Non-religious" },
+     { id: "hindu",                label: "Hindu" },
+     { id: "christian-catholic",   label: "Catholic" },
+     { id: "christian-protestant", label: "Protestant" },
+     { id: "jewish",               label: "Jewish" },
+     { id: "muslim",               label: "Muslim" },
+   ];
 
 function makeId() { return Math.random().toString(36).slice(2, 10); }
 const BDAY_MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
