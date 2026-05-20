@@ -28,6 +28,34 @@ const TRADITIONS = [
 function makeId() { return Math.random().toString(36).slice(2, 10); }
 const BDAY_MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
+// ── Analytics helper ──
+// Wraps PostHog's capture in a try/catch so a missing/stub key never breaks
+// the app. The PostHog script in index.html stubs `window.posthog.capture`
+// when no key is present, so this is also safe at first load.
+function track(eventName: string, properties: Record<string, any> = {}) {
+  try {
+    const ph = (window as any).posthog;
+    if (ph && typeof ph.capture === "function") {
+      ph.capture(eventName, properties);
+    }
+  } catch (e) {
+    // Never let analytics errors break the user experience
+    console.warn("Analytics tracking error:", e);
+  }
+}
+
+// Identify a person (used when they submit their email)
+function identifyUser(email: string, properties: Record<string, any> = {}) {
+  try {
+    const ph = (window as any).posthog;
+    if (ph && typeof ph.identify === "function") {
+      ph.identify(email, { email, ...properties });
+    }
+  } catch (e) {
+    console.warn("Analytics identify error:", e);
+  }
+}
+
 // ── Coloring Book Card ──
 function BookCard({ book }: { book: any }) {
   return (
@@ -170,7 +198,35 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
   const [birthdays, setBirthdays] = useState<Birthday[]>([]);
 
   const addBirthday = () => {
+    track("birthday_added");
     setBirthdays(prev => [...prev, { id: makeId(), name: "", month: 1, day: 1 }]);
+  };
+
+  // ── Printed-books waitlist email capture ──
+  const [waitlistEmail, setWaitlistEmail] = useState("");
+  const [waitlistSubmitted, setWaitlistSubmitted] = useState(false);
+  const [waitlistError, setWaitlistError] = useState<string | null>(null);
+
+  const handleWaitlistSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = waitlistEmail.trim();
+    // Basic email validation — enough for capture, not RFC-strict
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+      setWaitlistError("Please enter a valid email address.");
+      return;
+    }
+    setWaitlistError(null);
+    // Identify in PostHog so we can pull email list later
+    identifyUser(trimmed, { signed_up_for: "printed_books_waitlist" });
+    track("printed_books_interest", {
+      email: trimmed,
+      // Carry the customer's current customization context — useful to know
+      // what kind of family is most interested in printed books.
+      currentTraditions: traditions,
+      currentRegions: regions,
+      currentAge: age,
+    });
+    setWaitlistSubmitted(true);
   };
   const updateBirthday = (id: string, patch: Partial<Birthday>) => {
     setBirthdays(prev => prev.map(b => b.id === id ? { ...b, ...patch } : b));
@@ -185,6 +241,12 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
   const STRIPE_PAYMENT_LINK: string | null = "https://buy.stripe.com/eVq4gr8hAd32gVX32M2wU00";
 
   const handleBuyMonthPDF = () => {
+    track("get_full_month_clicked", {
+      childName: childName || "(unnamed)",
+      age, month, year,
+      traditions, regions,
+      birthdayCount: birthdays.length,
+    });
     if (STRIPE_PAYMENT_LINK) {
       // Save the customer's customization to localStorage so the
       // success page (after Stripe redirects back) can regenerate the
@@ -198,12 +260,15 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
       } catch (e) {
         console.warn("Could not save pending order to localStorage:", e);
       }
+      track("payment_started", { paymentMethod: "stripe_payment_link" });
       window.location.href = STRIPE_PAYMENT_LINK;
     }
   };
 
   const toggleTradition = (id: string) => {
     setTraditions(prev => {
+      const action = prev.includes(id) ? "remove" : "add";
+      track("tradition_toggled", { tradition: id, action });
       if (prev.includes(id)) { if (prev.length <= 1) return prev; return prev.filter(t => t !== id); }
       if (prev.length >= 3) return prev;
       return [...prev, id];
@@ -212,6 +277,8 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
 
   const toggleRegion = (id: string) => {
     setRegions(prev => {
+      const action = prev.includes(id) ? "remove" : "add";
+      track("country_toggled", { country: id, action });
       if (prev.includes(id)) { if (prev.length <= 1) return prev; return prev.filter(r => r !== id); }
       return [...prev, id];
     });
@@ -295,10 +362,19 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
       setPdfProgress(null);
       const safeName = (childName || "MorningWork").replace(/[^a-zA-Z0-9]/g, "");
       pdf.save(`${safeName}_${monthName}${day}_${year}.pdf`);
+
+      // Track successful free PDF generation with full customization context
+      track("free_pdf_generated", {
+        childName: childName || "(unnamed)",
+        age, month, day, year,
+        traditions, regions,
+        birthdayCount: birthdays.length,
+      });
     } catch (err) {
       console.error("PDF error:", err);
       setPdfProgress(null);
       alert(`PDF failed: ${(err as Error).message}`);
+      track("free_pdf_error", { error: (err as Error).message });
     }
   };
 
@@ -500,7 +576,11 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
 
         {/* ── Show all 31 days + paid full-month CTA ── */}
         <div style={{ textAlign: "center", padding: "8px 0 24px" }}>
-          <button onClick={() => setShowMonth(v => !v)}
+          <button onClick={() => {
+              const next = !showMonth;
+              setShowMonth(next);
+              if (next) track("show_full_month_clicked", { month, daysInMonth });
+            }}
             style={{
               padding: "10px 22px", fontSize: 14, fontWeight: "bold", cursor: "pointer",
               border: `2px solid ${colors.deepTeal}`, borderRadius: 10,
@@ -593,7 +673,7 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
       )}
 
       {/* Bottom CTA — re-offers the free download for scrollers who didn't convert above */}
-      <section style={{ position: "relative", zIndex: 1, textAlign: "center", padding: "32px 24px 48px" }}>
+      <section style={{ position: "relative", zIndex: 1, textAlign: "center", padding: "32px 24px 24px" }}>
         <div style={{ fontSize: 18, fontWeight: "bold", color: theme.textPrimary, marginBottom: 12 }}>
           Ready to start a calmer morning?
         </div>
@@ -611,6 +691,59 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
             : `↓ Get today's free worksheet`}
         </button>
         <div style={{ fontSize: 12, color: theme.textPlaceholder, marginTop: 8 }}>Free instant download · No account needed</div>
+      </section>
+
+      {/* Printed Workbooks waitlist — coming soon */}
+      <section style={{
+        position: "relative", zIndex: 1, maxWidth: 540, margin: "16px auto 32px",
+        padding: "24px 24px",
+        background: theme.cardBg, borderRadius: 14,
+        border: `1.5px solid ${theme.cardBorder}`,
+        textAlign: "center",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+      }}>
+        <div style={{ fontSize: 11, fontWeight: "bold", color: colors.deepTeal, letterSpacing: 1.5, marginBottom: 8 }}>
+          COMING SOON
+        </div>
+        <div style={{ fontSize: 20, fontWeight: "bold", color: theme.textPrimary, marginBottom: 6 }}>
+          Printed workbooks!
+        </div>
+        {waitlistSubmitted ? (
+          <div style={{ fontSize: 14, color: theme.textSecondary, marginTop: 12, lineHeight: 1.5 }}>
+            ✓ Thank you! We'll email you the moment printed workbooks are ready.
+          </div>
+        ) : (
+          <>
+            <div style={{ fontSize: 13, color: theme.textSecondary, lineHeight: 1.5, marginBottom: 16 }}>
+              A whole month of personalized worksheets, professionally printed and shipped to your door. Submit your email if you'd like to be notified when they're available.
+            </div>
+            <form onSubmit={handleWaitlistSubmit} style={{
+              display: "flex", gap: 8, flexWrap: "wrap",
+              maxWidth: 380, margin: "0 auto",
+            }}>
+              <input type="email" value={waitlistEmail}
+                onChange={e => { setWaitlistEmail(e.target.value); setWaitlistError(null); }}
+                placeholder="you@example.com" required
+                style={{
+                  flex: "1 1 200px", padding: "10px 12px",
+                  borderRadius: 8, border: `1.5px solid ${theme.cardBorder}`,
+                  fontSize: 14, fontFamily: "Georgia,serif",
+                  boxSizing: "border-box",
+                }} />
+              <button type="submit" style={{
+                padding: "10px 20px", borderRadius: 8, border: "none",
+                background: colors.deepTeal, color: theme.buttonText,
+                fontSize: 14, fontWeight: "bold", cursor: "pointer",
+                flexShrink: 0,
+              }}>
+                Notify me
+              </button>
+            </form>
+            {waitlistError && (
+              <div style={{ fontSize: 12, color: "#b91c1c", marginTop: 8 }}>{waitlistError}</div>
+            )}
+          </>
+        )}
       </section>
 
       <footer style={{ position: "relative", zIndex: 1, borderTop: `1px solid ${theme.navBorder}`, padding: "16px 24px", textAlign: "center", fontSize: 11, color: theme.textPlaceholder }}>
@@ -911,6 +1044,16 @@ function PaidSuccessPage({ onBackToLanding }: { onBackToLanding: () => void }) {
         setEditTraditions(parsed.traditions || ["universal"]);
         setEditRegions(parsed.regions || ["us"]);
         setEditBirthdays(parsed.birthdays || []);
+        // Track successful payment completion with the customization context
+        track("payment_completed", {
+          childName: parsed.name || "(unnamed)",
+          age: parsed.age,
+          month: parsed.month,
+          year: parsed.year,
+          traditions: parsed.traditions,
+          regions: parsed.regions,
+          birthdayCount: (parsed.birthdays || []).length,
+        });
       } else {
         // No pending order found — customer reached this URL directly.
         // We'll still let them generate a PDF, just with defaults.
@@ -918,6 +1061,7 @@ function PaidSuccessPage({ onBackToLanding }: { onBackToLanding: () => void }) {
           name: "", age: 5, month: new Date().getMonth() + 1, year: new Date().getFullYear(),
           traditions: ["universal"], regions: ["us"], birthdays: [],
         });
+        track("paid_success_direct_visit");
       }
     } catch (e) {
       console.warn("Could not load pending order:", e);
@@ -1033,6 +1177,15 @@ function PaidSuccessPage({ onBackToLanding }: { onBackToLanding: () => void }) {
       setPdfProgress(null);
       setHasDownloaded(true);
 
+      // Track each PDF generation — combined with payment_completed, this
+      // lets us see how many children each paying family generates a PDF for.
+      track("month_pdf_generated", {
+        childName: name || "(unnamed)",
+        age, month, year, traditions, regions,
+        birthdayCount: birthdays.length,
+        isRegeneration: isRegen,
+      });
+
       // Clear the pending order only after the first auto-download — keep around
       // if customer wants to regenerate for siblings.
       if (!isRegen) {
@@ -1042,6 +1195,7 @@ function PaidSuccessPage({ onBackToLanding }: { onBackToLanding: () => void }) {
       console.error("PDF error:", err);
       setPdfProgress(null);
       setError(`PDF generation failed: ${(err as Error).message}. Please try again, or email melanie@melmoonbooks.com with your order info.`);
+      track("month_pdf_error", { error: (err as Error).message, isRegeneration: isRegen });
     }
   };
 
