@@ -87,15 +87,16 @@ function PaidMonthCTA({ monthName, daysInMonth, isLive, onBuy, onNotify }: {
         </>
       ) : (
         <>
-          <button onClick={onNotify} style={{
-            padding: "14px 32px", fontSize: 15, fontWeight: "bold", cursor: "pointer",
-            border: `2px solid ${colors.deepTeal}`, borderRadius: 10,
+          <div style={{
+            padding: "14px 32px", fontSize: 15, fontWeight: "bold",
+            border: `2px dashed ${colors.deepTeal}`, borderRadius: 10,
             background: theme.cardBg, color: colors.deepTeal,
+            display: "inline-block",
           }}>
-            Notify me when it launches
-          </button>
+            Coming soon
+          </div>
           <div style={{ fontSize: 11, color: theme.textPlaceholder, marginTop: 10 }}>
-            Coming this week · Sign up free to get an early-bird notification
+            Full month PDF coming this week
           </div>
         </>
       )}
@@ -310,7 +311,7 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
       <section style={{ position: "relative", zIndex: 1, maxWidth: 800, margin: "0 auto", padding: "0 24px 16px" }}>
         <div style={{ background: theme.cardBg, borderRadius: 12, border: `1.5px solid ${theme.cardBorder}`, padding: 20, marginBottom: 16, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
           <div style={{ fontSize: 13, fontWeight: "bold", color: theme.textPrimary, marginBottom: 2, textTransform: "uppercase", letterSpacing: 0.8 }}>Customize the preview</div>
-          <div style={{ fontSize: 11, color: theme.textPlaceholder, marginBottom: 12, fontStyle: "italic" }}>Try different combinations — nothing is saved until you create a free account.</div>
+          <div style={{ fontSize: 11, color: theme.textPlaceholder, marginBottom: 12, fontStyle: "italic" }}>Try different combinations to see how the worksheet adapts.</div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
             <div style={{ flex: "1 1 160px" }}>
               <div style={{ fontSize: 10, fontWeight: "bold", color: theme.textMuted, marginBottom: 4 }}>CHILD'S NAME</div>
@@ -496,16 +497,6 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
           </>
         )}
 
-        {/* Below the action area, the "Want more?" sign-up nudge */}
-        <div style={{ textAlign: "center", padding: "8px 0 24px" }}>
-          <div style={{ fontSize: 12, color: theme.textMuted, lineHeight: 1.5 }}>
-            Want more?{" "}
-            <button onClick={onSwitch} style={{ background: "none", border: "none", color: theme.textPrimary, fontWeight: "bold", cursor: "pointer", fontSize: 12, textDecoration: "underline", padding: 0 }}>
-              Create a free account
-            </button>{" "}
-            to save profiles for each of your kids and unlock printed books.
-          </div>
-        </div>
       </section>
 
       {/* Coloring Books — hidden for first launch */}
