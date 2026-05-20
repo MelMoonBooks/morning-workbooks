@@ -25,6 +25,39 @@ const TRADITIONS = [
   { id: "muslim",               label: "Muslim" },
 ];
 
+// Grade levels — replaces raw ages in the UI. Internally we still pass
+// the corresponding `age` to DayPage so the existing letter/math/coloring
+// difficulty logic doesn't have to change. During summer months (Jun-Aug)
+// the display label switches to "Rising [next grade]".
+// `hidden: true` removes a grade from the UI without deleting its data
+// (useful while we're still building grade-specific content).
+const GRADES = [
+  { id: "preschool",    label: "Preschool",    risingLabel: "Rising TK",   age: 3, hidden: false },
+  { id: "tk",           label: "TK",           risingLabel: "Rising K",    age: 4, hidden: false },
+  { id: "kindergarten", label: "Kindergarten", risingLabel: "Rising 1st",  age: 5, hidden: false },
+  { id: "first",        label: "1st",          risingLabel: "Rising 2nd",  age: 6, hidden: true  }, // hidden until 1st-grade-specific exercises are built
+];
+
+// During Jun/Jul/Aug, kids are "rising" to the next grade
+const isSummerMonth = (month: number) => month >= 6 && month <= 8;
+
+// Returns the display label for a given grade id in a given month
+function gradeDisplayLabel(gradeId: string, month: number): string {
+  const grade = GRADES.find(g => g.id === gradeId);
+  if (!grade) return "";
+  return isSummerMonth(month) ? grade.risingLabel : grade.label;
+}
+
+// Convert grade id → age (used to pass to DayPage / activities)
+function gradeToAge(gradeId: string): number {
+  return GRADES.find(g => g.id === gradeId)?.age ?? 5;
+}
+
+// Convert age → grade id (used for backward compatibility with stored profiles)
+function ageToGradeId(age: number): string {
+  return GRADES.find(g => g.age === age)?.id ?? "kindergarten";
+}
+
 function makeId() { return Math.random().toString(36).slice(2, 10); }
 const BDAY_MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
@@ -190,7 +223,8 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
   const [month, setMonth] = useState(now.getMonth() + 1);
   const [day, setDay] = useState(now.getDate());
   const [year] = useState(now.getFullYear());
-  const [age, setAge] = useState(5);
+  const [grade, setGrade] = useState<string>("kindergarten");
+  const age = gradeToAge(grade);  // derived for backward compat with DayPage/activities
   const [traditions, setTraditions] = useState<string[]>(["universal"]);
   const [regions, setRegions] = useState<string[]>(["us"]);
   const [showMonth, setShowMonth] = useState(false);
@@ -447,13 +481,28 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
                 style={{ width: "100%", padding: "6px 10px", borderRadius: 7, border: `1.5px solid ${theme.cardBorder}`, fontSize: 13, boxSizing: "border-box", fontFamily: "Georgia,serif" }} />
             </div>
             <div>
-              <div style={{ fontSize: 10, fontWeight: "bold", color: theme.textMuted, marginBottom: 4 }}>AGE</div>
-              <div style={{ display: "flex", gap: 4 }}>
-                {[3,4,5,6].map(a => (
-                  <button key={a} onClick={() => setAge(a)} style={{ width: 36, height: 32, borderRadius: 6, cursor: "pointer", fontSize: 13, fontWeight: "bold",
-                    border: `1.5px solid ${age === a ? theme.pillActive : theme.pillInactive}`, background: age === a ? theme.pillActive : theme.cardBg, color: age === a ? theme.buttonText : theme.textPrimary }}>{a}</button>
+              <div style={{ fontSize: 10, fontWeight: "bold", color: theme.textMuted, marginBottom: 4 }}>
+                GRADE
+              </div>
+              <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+                {GRADES.filter(g => !g.hidden).map(g => (
+                  <button key={g.id} onClick={() => setGrade(g.id)}
+                    style={{
+                      padding: "6px 12px", height: 32, borderRadius: 6, cursor: "pointer",
+                      fontSize: 12, fontWeight: "bold",
+                      border: `1.5px solid ${grade === g.id ? theme.pillActive : theme.pillInactive}`,
+                      background: grade === g.id ? theme.pillActive : theme.cardBg,
+                      color: grade === g.id ? theme.buttonText : theme.textPrimary,
+                    }}>
+                    {isSummerMonth(month) ? g.risingLabel : g.label}
+                  </button>
                 ))}
               </div>
+              {isSummerMonth(month) && (
+                <div style={{ fontSize: 10, color: theme.textPlaceholder, fontStyle: "italic", marginTop: 5, maxWidth: 280, lineHeight: 1.4 }}>
+                  It's summer! Pick the grade your child just finished, or the one they're starting in the fall — either works for review and prep.
+                </div>
+              )}
             </div>
             <div>
               <div style={{ fontSize: 10, fontWeight: "bold", color: theme.textMuted, marginBottom: 4 }}>MONTH</div>
@@ -1320,19 +1369,23 @@ function PaidSuccessPage({ onBackToLanding }: { onBackToLanding: () => void }) {
               style={{ width: "100%", padding: "8px 10px", borderRadius: 7, border: `1.5px solid ${theme.cardBorder}`, fontSize: 14, boxSizing: "border-box", fontFamily: "Georgia,serif" }} />
           </div>
 
-          {/* Age + Country + Traditions in a compact row */}
+          {/* Grade + Country + Traditions in a compact row */}
           <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginBottom: 12 }}>
             <div>
-              <div style={{ fontSize: 10, fontWeight: "bold", color: theme.textMuted, marginBottom: 4 }}>AGE</div>
-              <div style={{ display: "flex", gap: 4 }}>
-                {[3,4,5,6].map(a => (
-                  <button key={a} onClick={() => setEditAge(a)} style={{
-                    width: 36, height: 32, borderRadius: 6, cursor: "pointer",
-                    fontSize: 13, fontWeight: "bold",
-                    border: `1.5px solid ${editAge === a ? theme.pillActive : theme.pillInactive}`,
-                    background: editAge === a ? theme.pillActive : theme.cardBg,
-                    color: editAge === a ? theme.buttonText : theme.textPrimary,
-                  }}>{a}</button>
+              <div style={{ fontSize: 10, fontWeight: "bold", color: theme.textMuted, marginBottom: 4 }}>
+                GRADE {order && isSummerMonth(order.month) && <span style={{ fontWeight: "normal", color: theme.textPlaceholder }}>(rising)</span>}
+              </div>
+              <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+                {GRADES.filter(g => !g.hidden).map(g => (
+                  <button key={g.id} onClick={() => setEditAge(g.age)} style={{
+                    padding: "6px 12px", height: 32, borderRadius: 6, cursor: "pointer",
+                    fontSize: 12, fontWeight: "bold",
+                    border: `1.5px solid ${editAge === g.age ? theme.pillActive : theme.pillInactive}`,
+                    background: editAge === g.age ? theme.pillActive : theme.cardBg,
+                    color: editAge === g.age ? theme.buttonText : theme.textPrimary,
+                  }}>
+                    {order && isSummerMonth(order.month) ? g.risingLabel : g.label}
+                  </button>
                 ))}
               </div>
             </div>

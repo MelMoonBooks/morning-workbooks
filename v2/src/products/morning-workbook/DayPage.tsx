@@ -11,6 +11,61 @@ const DAY_NAMES = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","
 const MONTH_NAMES = ["January","February","March","April","May","June",
   "July","August","September","October","November","December"];
 
+// ── Sight words ──
+// Words are ordered roughly by difficulty/frequency, with the simplest first.
+// Curriculum-informed progression: kids learn the first words at the start of
+// the year and build up through May; summer is a review of everything.
+//
+// K list ordered from easiest (high-frequency, short) to harder (multi-syllable
+// or less common). Same for 1st.
+const SIGHT_WORDS_K = [
+  // First 15 — taught Aug-Dec in most K curricula
+  "I","a","the","my","is","to","go","see","like","can",
+  "we","at","look","you","and",
+  // Next 15 — mid-year (Jan-Mar)
+  "in","on","it","he","she","up","do","no","yes","of",
+  "are","for","this","what","said",
+  // Last 10 — end-of-year (Apr-May)
+  "they","with","was","were","have","from","had","but","one","when",
+];
+const SIGHT_WORDS_1 = [
+  // First 15 — taught Aug-Dec in most 1st curricula
+  "after","again","any","ask","by","could","every","from","give","going",
+  "had","has","her","him","just",
+  // Next 15 — mid-year
+  "know","let","live","may","old","once","open","over","put","round",
+  "some","stop","take","them","then",
+  // Last 10 — end-of-year
+  "think","walk","were","when","where","white","who","why","first","green",
+];
+
+// How many words from the list are "available" by month, mirroring how
+// curricula introduce new sight words throughout the school year.
+// Sep–Dec = first chunk only · Jan–May = expand to middle · Jun–Aug = full list (review)
+function sightWordAvailability(month: number, listLength: number): number {
+  if (month >= 9 && month <= 12) return Math.min(15, listLength);                // Sept-Dec
+  if (month >= 1 && month <= 5)  return Math.min(30, listLength);                // Jan-May
+  return listLength;                                                              // Jun-Aug (full review)
+}
+
+function pickSightWords(age: number, month: number, day: number): string[] {
+  const list = age <= 5 ? SIGHT_WORDS_K : SIGHT_WORDS_1;
+  const available = sightWordAvailability(month, list.length);
+  const pool = list.slice(0, available);
+  // Day-of-year-ish index for stable rotation (same date always picks same words)
+  const idx = (month - 1) * 31 + day;
+  return [
+    pool[idx % pool.length],
+    pool[(idx + 1) % pool.length],
+    pool[(idx + 2) % pool.length],
+  ];
+}
+
+// Show sight words for kids who are at K level or higher (age 5+)
+function shouldShowSightWords(age: number): boolean {
+  return age >= 5;
+}
+
 function getMiniCalendar(month: number, year: number) {
   const firstDay    = new Date(year, month - 1, 1).getDay();
   const daysInMonth = new Date(year, month, 0).getDate();
@@ -89,6 +144,25 @@ export default function DayPage({ day, month, year, childName, traditions, regio
               </div>
             ))}
           </div>
+
+          {/* ── Today's Sight Words (K + 1st grade) ── */}
+          {shouldShowSightWords(age) && (
+            <div style={{
+              border: "1.5px dashed #9ca3af", borderRadius: 6,
+              padding: "5px 10px", marginTop: 4,
+            }}>
+              <div style={{ fontSize: 9, fontWeight: "bold", color: "#6b7280", letterSpacing: 1, textTransform: "uppercase", marginBottom: 3 }}>
+                Today's Sight Words
+              </div>
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                {pickSightWords(age, month, day).map((word, i) => (
+                  <div key={i} style={{ fontSize: 16, fontWeight: "bold", color: "#1f2937", fontFamily: "Georgia, serif" }}>
+                    {word}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Right: mini calendar */}
