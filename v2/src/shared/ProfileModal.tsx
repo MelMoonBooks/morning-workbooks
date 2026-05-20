@@ -6,9 +6,9 @@ const CHILD_EMOJIS = ["🌟","🌈","🦋","🐣","🌻","🦄","🐬","🍎","�
 
 const TRADITIONS = [
   { id: "universal",             label: "Non-religious",  color: "#6366f1" },
+  { id: "hindu",                 label: "Hindu",          color: "#b45309" },
   { id: "christian-catholic",    label: "Catholic",       color: "#0369a1" },
   { id: "christian-protestant",  label: "Protestant",     color: "#0e7490" },
-  { id: "hindu",                 label: "Hindu",          color: "#b45309" },
   { id: "jewish",                label: "Jewish",         color: "#4338ca" },
   { id: "muslim",                label: "Muslim",         color: "#047857" },
 ];

@@ -11,15 +11,16 @@ import { coloringBooks } from './content/coloring-books';
 import ProfileModal from './shared/ProfileModal';
 import ContentDashboard from './ContentDashboard';
 import { colors, theme } from './shared/theme';
+import { ImageCacheContext } from './shared/ImageCache';
 
 const MONTH_NAMES = ["January","February","March","April","May","June",
   "July","August","September","October","November","December"];
 
 const TRADITIONS = [
   { id: "universal",            label: "Non-religious" },
+  { id: "hindu",                label: "Hindu" },
   { id: "christian-catholic",   label: "Catholic" },
   { id: "christian-protestant", label: "Protestant" },
-  { id: "hindu",                label: "Hindu" },
   { id: "jewish",               label: "Jewish" },
   { id: "muslim",               label: "Muslim" },
 ];
@@ -46,6 +47,62 @@ function BookCard({ book }: { book: any }) {
   );
 }
 
+// ── Paid Month CTA card ──
+function PaidMonthCTA({ monthName, daysInMonth, isLive, onBuy, onNotify }: {
+  monthName: string; daysInMonth: number; isLive: boolean;
+  onBuy: () => void; onNotify: () => void;
+}) {
+  return (
+    <div style={{
+      position: "relative", zIndex: 1, maxWidth: 540, margin: "12px auto",
+      background: theme.cardBg, borderRadius: 14, border: `2px solid ${colors.deepTeal}`,
+      padding: "24px 28px", textAlign: "center",
+      boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
+    }}>
+      <div style={{ fontSize: 18, fontWeight: "bold", color: theme.textPrimary, marginBottom: 6 }}>
+        Loved what you see?
+      </div>
+      <div style={{ fontSize: 14, color: theme.textSecondary, marginBottom: 14, lineHeight: 1.5 }}>
+        Get the full month of {monthName} for your family — {daysInMonth} personalized pages per child, ready to print.
+      </div>
+      <div style={{ fontSize: 28, fontWeight: "bold", color: theme.textPrimary, marginBottom: 4 }}>
+        $2.99
+      </div>
+      <div style={{ fontSize: 11, color: theme.textPlaceholder, marginBottom: 14, fontStyle: "italic" }}>
+        One purchase covers all your kids
+      </div>
+      {isLive ? (
+        <>
+          <button onClick={onBuy} style={{
+            padding: "14px 32px", fontSize: 15, fontWeight: "bold", cursor: "pointer",
+            border: "none", borderRadius: 10,
+            background: colors.deepTeal, color: theme.buttonText,
+            boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+          }}>
+            Get the full month →
+          </button>
+          <div style={{ fontSize: 11, color: theme.textPlaceholder, marginTop: 10 }}>
+            Instant PDF download · Secure checkout via Stripe
+          </div>
+        </>
+      ) : (
+        <>
+          <button onClick={onNotify} style={{
+            padding: "14px 32px", fontSize: 15, fontWeight: "bold", cursor: "pointer",
+            border: `2px solid ${colors.deepTeal}`, borderRadius: 10,
+            background: theme.cardBg, color: colors.deepTeal,
+          }}>
+            Notify me when it launches
+          </button>
+          <div style={{ fontSize: 11, color: theme.textPlaceholder, marginTop: 10 }}>
+            Coming this week · Sign up free to get an early-bird notification
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 // ── Landing Page (no Clerk) ──
 function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
   const now = new Date();
@@ -55,7 +112,42 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
   const [year] = useState(now.getFullYear());
   const [age, setAge] = useState(5);
   const [traditions, setTraditions] = useState<string[]>(["universal"]);
-  const [region, setRegion] = useState("us");
+  const [regions, setRegions] = useState<string[]>(["us"]);
+  const [showMonth, setShowMonth] = useState(false);
+  const [showBirthdays, setShowBirthdays] = useState(false);
+  const [birthdays, setBirthdays] = useState<Birthday[]>([]);
+
+  const addBirthday = () => {
+    setBirthdays(prev => [...prev, { id: makeId(), name: "", month: 1, day: 1 }]);
+  };
+  const updateBirthday = (id: string, patch: Partial<Birthday>) => {
+    setBirthdays(prev => prev.map(b => b.id === id ? { ...b, ...patch } : b));
+  };
+  const removeBirthday = (id: string) => {
+    setBirthdays(prev => prev.filter(b => b.id !== id));
+  };
+
+  // ──────────────────────────────────────────────────────────────
+  // STRIPE PAYMENT LINK — paste your live Stripe Payment Link here
+  // once your Stripe account is verified. While this is null, the
+  // "Get the full month PDF — $2.99" button shows a "Coming this week"
+  // disabled state so the messaging is live for ads but no broken
+  // checkout exists. Replace `null` with the URL string when ready.
+  // ──────────────────────────────────────────────────────────────
+  const STRIPE_PAYMENT_LINK: string | null = null;
+
+  const handleBuyMonthPDF = () => {
+    if (STRIPE_PAYMENT_LINK) {
+      // Pass customization through URL params so the success page
+      // can regenerate the same PDF the customer saw on screen.
+      const params = new URLSearchParams({
+        name: childName, age: String(age), month: String(month), year: String(year),
+        traditions: traditions.join(","), regions: regions.join(","),
+        birthdays: JSON.stringify(birthdays),
+      });
+      window.location.href = `${STRIPE_PAYMENT_LINK}?client_reference_id=${encodeURIComponent(params.toString())}`;
+    }
+  };
 
   const toggleTradition = (id: string) => {
     setTraditions(prev => {
@@ -65,9 +157,97 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
     });
   };
 
-  const content = useMemo(() => getDayContent(traditions, region, month, day, year), [traditions, region, month, day, year]);
+  const toggleRegion = (id: string) => {
+    setRegions(prev => {
+      if (prev.includes(id)) { if (prev.length <= 1) return prev; return prev.filter(r => r !== id); }
+      return [...prev, id];
+    });
+  };
+
+  const content = useMemo(() => getDayContent(traditions, regions, month, day, year), [traditions, regions, month, day, year]);
   const suggestedBooks = content.suggestedColoringBooks;
   const daysInMonth = new Date(year, month, 0).getDate();
+  const monthName = MONTH_NAMES[month - 1];
+  const [pdfProgress, setPdfProgress] = useState<number | null>(null);
+
+  // ── Single-day PDF download (free, no login required) ──
+  const handleDownloadDayPDF = async () => {
+    const loadScript = (src: string) => new Promise<void>((resolve, reject) => {
+      if (document.querySelector(`script[src="${src}"]`)) { resolve(); return; }
+      const s = document.createElement("script");
+      s.src = src; s.onload = () => resolve(); s.onerror = () => reject();
+      document.head.appendChild(s);
+    });
+    const fetchBase64 = (url: string): Promise<string | null> =>
+      fetch(url).then(r => r.ok ? r.blob() : Promise.reject())
+        .then(blob => new Promise<string>(res => {
+          const reader = new FileReader();
+          reader.onload = () => res(reader.result as string);
+          reader.readAsDataURL(blob);
+        })).catch(() => null);
+
+    try {
+      setPdfProgress(10);
+      await loadScript("https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js");
+      await loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js");
+      const { jsPDF } = (window as any).jspdf;
+      const html2canvas = (window as any).html2canvas;
+      const ReactDOM = await import("react-dom/client");
+      const React2 = await import("react");
+
+      setPdfProgress(30);
+      const imageCache: Record<string, string> = {};
+      const paddedDay = String(day).padStart(2, "0");
+      const baseKey = `${monthName.toLowerCase()}_${paddedDay}`;
+      const primaryRegion = regions[0] ?? "us";
+      const candidates = [
+        ...(content.theme.imageFile ? [content.theme.imageFile.replace(/\.png$/, "")] : []),
+        ...(content.dominantTradition !== "universal" ? [`${content.dominantTradition}/${baseKey}`] : []),
+        `${primaryRegion}/${baseKey}`,
+        baseKey,
+      ];
+      for (const key of candidates) {
+        const b64 = await fetchBase64(`/images/${key}.png`);
+        if (b64) { imageCache[key] = b64; break; }
+      }
+
+      setPdfProgress(50);
+      const pdf = new jsPDF({ orientation: "portrait", unit: "pt", format: [612, 792] });
+      const margin = 54;
+      const contentW = 612 - margin * 2;
+      const contentH = 792 - margin * 2;
+      const container = document.createElement("div");
+      container.style.cssText = "position:fixed;left:-9999px;top:0;width:540px;background:white;z-index:-1;";
+      document.body.appendChild(container);
+      const wrapper = document.createElement("div");
+      container.appendChild(wrapper);
+      await new Promise<void>(resolve => {
+        const root = ReactDOM.createRoot(wrapper);
+        root.render(
+          React2.createElement(ImageCacheContext.Provider, { value: imageCache },
+            React2.createElement(DayPage, { day, month, year, childName, traditions, region: regions, age, birthdays })
+          )
+        );
+        setTimeout(resolve, 300);
+      });
+      setPdfProgress(80);
+      const canvas = await html2canvas(wrapper, {
+        scale: 2, useCORS: true, allowTaint: true,
+        backgroundColor: "#ffffff", width: 540, windowWidth: 600, logging: false,
+      });
+      const imgData = canvas.toDataURL("image/jpeg", 0.93);
+      const imgH = Math.min(contentW * (canvas.height / canvas.width), contentH);
+      pdf.addImage(imgData, "JPEG", margin, margin, contentW, imgH);
+      document.body.removeChild(container);
+      setPdfProgress(null);
+      const safeName = (childName || "MorningWork").replace(/[^a-zA-Z0-9]/g, "");
+      pdf.save(`${safeName}_${monthName}${day}_${year}.pdf`);
+    } catch (err) {
+      console.error("PDF error:", err);
+      setPdfProgress(null);
+      alert(`PDF failed: ${(err as Error).message}`);
+    }
+  };
 
   return (
     <div style={{ minHeight: "100vh", background: `linear-gradient(to bottom, ${theme.pageBg} 0%, ${theme.pageBg} 30%, #dceef2 60%, #c8e2ed 100%)`, fontFamily: "Georgia,serif", position: "relative", overflow: "hidden" }}>
@@ -95,27 +275,35 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
       }} />
 
       {/* Nav */}
-      <nav style={{ position: "relative", zIndex: 1, display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 24px", borderBottom: `1px solid ${theme.navBorder}`, background: "rgba(255,255,255,0.85)", backdropFilter: "blur(8px)" }}>
+      <nav style={{ position: "relative", zIndex: 1, display: "flex", justifyContent: "center", alignItems: "center", padding: "14px 24px", borderBottom: `1px solid ${theme.navBorder}`, background: "rgba(255,255,255,0.85)", backdropFilter: "blur(8px)" }}>
         <div style={{ fontSize: 18, fontWeight: "bold", color: theme.textPrimary }}>MelMoon Books</div>
-        <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-          <button onClick={onSwitch} style={{ padding: "7px 16px", borderRadius: 8, border: `1.5px solid ${theme.cardBorder}`, background: theme.cardBg, color: theme.textPrimary, fontSize: 13, fontWeight: "bold", cursor: "pointer" }}>
-            Sign In (test)
-          </button>
-          <button style={{ padding: "7px 16px", borderRadius: 8, border: "none", background: colors.deepTeal, color: theme.buttonText, fontSize: 13, fontWeight: "bold", cursor: "pointer" }}>
-            Get Started Free
-          </button>
-        </div>
       </nav>
 
       {/* Hero */}
-      <section style={{ position: "relative", zIndex: 1, textAlign: "center", padding: "56px 24px 40px", maxWidth: 640, margin: "0 auto" }}>
-        <h1 style={{ fontSize: 32, fontWeight: "bold", color: theme.textPrimary, margin: "0 0 12px", lineHeight: 1.2 }}>
-          Morning Workbooks for Little Learners
+      <section style={{ position: "relative", zIndex: 1, textAlign: "center", padding: "48px 24px 32px", maxWidth: 680, margin: "0 auto" }}>
+        <h1 style={{ fontSize: 34, fontWeight: "bold", color: theme.textPrimary, margin: "0 0 14px", lineHeight: 1.15 }}>
+          Start the morning with a playful worksheet, not a screen.
         </h1>
-        <p style={{ fontSize: 16, color: theme.textSecondary, lineHeight: 1.6, margin: 0 }}>
-          Personalized daily workbooks for ages 3–6 with letter tracing, math, and coloring.
-          Choose your family's faith traditions — Christian, Hindu, Jewish, Muslim, or non-religious — and every page reflects what matters to you.
+        <p style={{ fontSize: 16, color: theme.textSecondary, lineHeight: 1.6, margin: "0 0 24px" }}>
+          Personalized daily worksheets for ages 3–6 with letter tracing, math, and a coloring page.
+          Customize to your child's age, your country, and your family's traditions.
         </p>
+        <button onClick={handleDownloadDayPDF} disabled={pdfProgress !== null}
+          style={{
+            padding: "14px 32px", fontSize: 16, fontWeight: "bold",
+            cursor: pdfProgress !== null ? "wait" : "pointer",
+            border: "none", borderRadius: 10,
+            background: colors.deepTeal, color: theme.buttonText,
+            opacity: pdfProgress !== null ? 0.7 : 1,
+            boxShadow: "0 4px 14px rgba(0,0,0,0.15)",
+          }}>
+          {pdfProgress !== null
+            ? `Building your PDF… ${pdfProgress}%`
+            : `↓ Get today's free worksheet`}
+        </button>
+        <div style={{ fontSize: 12, color: theme.textPlaceholder, marginTop: 10 }}>
+          Free instant download · No account needed · Customize below
+        </div>
       </section>
 
       {/* Controls */}
@@ -153,17 +341,20 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
               </select>
             </div>
             <div>
-              <div style={{ fontSize: 10, fontWeight: "bold", color: theme.textMuted, marginBottom: 4 }}>REGION</div>
-              <div style={{ display: "flex", gap: 4 }}>
-                {REGIONS.map(r => (
-                  <button key={r.id} onClick={() => setRegion(r.id)} style={{ padding: "6px 10px", borderRadius: 6, cursor: "pointer", fontSize: 11, fontWeight: "bold",
-                    border: `1.5px solid ${region === r.id ? theme.pillActive : theme.pillInactive}`, background: region === r.id ? theme.pillActive : theme.cardBg, color: region === r.id ? theme.buttonText : theme.textPrimary }}>{r.flag} {r.label}</button>
-                ))}
+              <div style={{ fontSize: 10, fontWeight: "bold", color: theme.textMuted, marginBottom: 4 }}>COUNTRY <span style={{ fontWeight: "normal", color: theme.textPlaceholder }}>(select all that apply)</span></div>
+              <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+                {REGIONS.map(r => {
+                  const selected = regions.includes(r.id);
+                  return (
+                    <button key={r.id} onClick={() => toggleRegion(r.id)} style={{ padding: "6px 10px", borderRadius: 6, cursor: "pointer", fontSize: 11, fontWeight: "bold",
+                      border: `1.5px solid ${selected ? theme.pillActive : theme.pillInactive}`, background: selected ? theme.pillActive : theme.cardBg, color: selected ? theme.buttonText : theme.textPrimary }}>{r.flag} {r.label}</button>
+                  );
+                })}
               </div>
             </div>
           </div>
           <div style={{ marginTop: 12 }}>
-            <div style={{ fontSize: 10, fontWeight: "bold", color: theme.textMuted, marginBottom: 4 }}>FAITH TRADITIONS <span style={{ fontWeight: "normal", color: theme.textPlaceholder }}>(select up to 3 — they alternate daily)</span></div>
+            <div style={{ fontSize: 10, fontWeight: "bold", color: theme.textMuted, marginBottom: 4 }}>TRADITIONS <span style={{ fontWeight: "normal", color: theme.textPlaceholder }}>(select up to 3 — they alternate daily)</span></div>
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
               {TRADITIONS.map(t => {
                 const selected = traditions.includes(t.id);
@@ -174,20 +365,151 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
               })}
             </div>
           </div>
+
+          {/* ── Family birthdays (optional, collapsed by default) ── */}
+          <div style={{ marginTop: 14, paddingTop: 14, borderTop: `1px dashed ${theme.cardBorder}` }}>
+            <button onClick={() => setShowBirthdays(v => !v)} style={{
+              background: "none", border: "none", padding: 0, cursor: "pointer",
+              fontSize: 12, fontWeight: "bold", color: theme.textPrimary,
+              display: "flex", alignItems: "center", gap: 6,
+            }}>
+              <span style={{ fontSize: 11 }}>{showBirthdays ? "▼" : "▶"}</span>
+              {showBirthdays ? "Hide family birthdays" : "+ Add family birthdays (optional)"}
+              {!showBirthdays && birthdays.length > 0 && (
+                <span style={{ fontSize: 11, color: theme.textMuted, fontWeight: "normal" }}>
+                  · {birthdays.length} added
+                </span>
+              )}
+            </button>
+            {showBirthdays && (
+              <div style={{ marginTop: 10 }}>
+                <div style={{ fontSize: 11, color: theme.textMuted, marginBottom: 10, lineHeight: 1.5 }}>
+                  Birthdays appear on the worksheet that day (e.g. "Today is Nana Jo's birthday! 🎂").
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                  {birthdays.map(b => {
+                    const daysInBdayMonth = new Date(year, b.month, 0).getDate();
+                    return (
+                      <div key={b.id} style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
+                        <input value={b.name} onChange={e => updateBirthday(b.id, { name: e.target.value })}
+                          placeholder="e.g. Nana Jo"
+                          style={{ flex: "1 1 140px", padding: "5px 8px", borderRadius: 6, border: `1.5px solid ${theme.cardBorder}`, fontSize: 12, fontFamily: "Georgia,serif" }} />
+                        <select value={b.month} onChange={e => updateBirthday(b.id, { month: Number(e.target.value), day: Math.min(b.day, new Date(year, Number(e.target.value), 0).getDate()) })}
+                          style={{ padding: "5px 6px", borderRadius: 6, border: `1.5px solid ${theme.cardBorder}`, fontSize: 12, fontFamily: "Georgia,serif" }}>
+                          {BDAY_MONTHS.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
+                        </select>
+                        <select value={b.day} onChange={e => updateBirthday(b.id, { day: Number(e.target.value) })}
+                          style={{ padding: "5px 6px", borderRadius: 6, border: `1.5px solid ${theme.cardBorder}`, fontSize: 12 }}>
+                          {Array.from({ length: daysInBdayMonth }, (_, i) => <option key={i} value={i + 1}>{i + 1}</option>)}
+                        </select>
+                        <button onClick={() => removeBirthday(b.id)} style={{
+                          background: "none", border: "none", padding: "3px 6px",
+                          color: theme.textPlaceholder, fontSize: 16, cursor: "pointer",
+                          lineHeight: 1,
+                        }} aria-label="Remove birthday">×</button>
+                      </div>
+                    );
+                  })}
+                </div>
+                <button onClick={addBirthday} style={{
+                  marginTop: 10, padding: "6px 12px", borderRadius: 6,
+                  border: `1.5px dashed ${theme.cardBorder}`, background: "none",
+                  fontSize: 11, fontWeight: "bold", color: theme.textPrimary, cursor: "pointer",
+                }}>
+                  + Add a birthday
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* DayPage — fixed width to match real printed page proportions */}
         <div style={{ display: "flex", justifyContent: "center" }}>
           <div style={{ width: 540, maxWidth: "100%", boxShadow: "0 4px 20px rgba(0,0,0,0.08)", borderRadius: 8, overflow: "hidden" }}>
-            <DayPage day={day} month={month} year={year} childName={childName} traditions={traditions} region={region} age={age} />
+            <DayPage day={day} month={month} year={year} childName={childName} traditions={traditions} region={regions} age={age} birthdays={birthdays} />
           </div>
         </div>
-        <div style={{ textAlign: "center", padding: "16px 0", fontSize: 12, color: theme.textMuted }}>
-          PDF download and printed book ordering require a free account.
+        <div style={{ textAlign: "center", padding: "20px 0 8px" }}>
+          <button onClick={handleDownloadDayPDF} disabled={pdfProgress !== null}
+            style={{
+              padding: "12px 28px", fontSize: 15, fontWeight: "bold",
+              cursor: pdfProgress !== null ? "wait" : "pointer",
+              border: `2px solid ${colors.deepTeal}`, borderRadius: 10,
+              background: colors.deepTeal, color: theme.buttonText,
+              opacity: pdfProgress !== null ? 0.7 : 1,
+              boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+            }}>
+            {pdfProgress !== null
+              ? `Building PDF… ${pdfProgress}%`
+              : `↓ Download this page — Free`}
+          </button>
+        </div>
+
+        {/* ── Show all 31 days + paid full-month CTA ── */}
+        <div style={{ textAlign: "center", padding: "8px 0 24px" }}>
+          <button onClick={() => setShowMonth(v => !v)}
+            style={{
+              padding: "10px 22px", fontSize: 14, fontWeight: "bold", cursor: "pointer",
+              border: `2px solid ${colors.deepTeal}`, borderRadius: 10,
+              background: showMonth ? theme.cardBg : "white",
+              color: theme.textPrimary,
+            }}>
+            {showMonth ? `▲ Hide the full month` : `▼ See all ${daysInMonth} days of ${monthName}`}
+          </button>
+        </div>
+
+        {showMonth && (
+          <>
+            {/* Paid CTA at top of month view */}
+            <PaidMonthCTA
+              monthName={monthName}
+              daysInMonth={daysInMonth}
+              isLive={STRIPE_PAYMENT_LINK !== null}
+              onBuy={handleBuyMonthPDF}
+              onNotify={onSwitch}
+            />
+
+            {/* All 31 days inline */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 32, padding: "8px 0 24px" }}>
+              {Array.from({ length: daysInMonth }, (_, i) => i + 1).map(d => (
+                <div key={d}>
+                  <div style={{ textAlign: "center", fontSize: 11, fontWeight: "bold", color: theme.textMuted, letterSpacing: 1.5, marginBottom: 8 }}>
+                    — DAY {d} —
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "center" }}>
+                    <div style={{ width: 540, maxWidth: "100%", boxShadow: "0 4px 20px rgba(0,0,0,0.08)", borderRadius: 8, overflow: "hidden" }}>
+                      <DayPage day={d} month={month} year={year} childName={childName} traditions={traditions} region={regions} age={age} birthdays={birthdays} />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Paid CTA at bottom of month view */}
+            <PaidMonthCTA
+              monthName={monthName}
+              daysInMonth={daysInMonth}
+              isLive={STRIPE_PAYMENT_LINK !== null}
+              onBuy={handleBuyMonthPDF}
+              onNotify={onSwitch}
+            />
+          </>
+        )}
+
+        {/* Below the action area, the "Want more?" sign-up nudge */}
+        <div style={{ textAlign: "center", padding: "8px 0 24px" }}>
+          <div style={{ fontSize: 12, color: theme.textMuted, lineHeight: 1.5 }}>
+            Want more?{" "}
+            <button onClick={onSwitch} style={{ background: "none", border: "none", color: theme.textPrimary, fontWeight: "bold", cursor: "pointer", fontSize: 12, textDecoration: "underline", padding: 0 }}>
+              Create a free account
+            </button>{" "}
+            to save profiles for each of your kids and unlock printed books.
+          </div>
         </div>
       </section>
 
-      {/* Coloring Books */}
+      {/* Coloring Books — hidden for first launch */}
+      {false && (
       <section style={{ position: "relative", zIndex: 1, maxWidth: 800, margin: "0 auto", padding: "32px 24px", background: colors.paleSage, borderRadius: 20, marginTop: 8 }}>
         <div style={{ fontSize: 18, fontWeight: "bold", color: theme.textPrimary, marginBottom: 4 }}>Coloring Books</div>
         <div style={{ fontSize: 13, color: theme.textMuted, marginBottom: 16 }}>Themed coloring books that match your family's traditions. Change traditions above to see different suggestions!</div>
@@ -199,8 +521,10 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
           <div style={{ textAlign: "center", padding: "24px 0", color: theme.textPlaceholder, fontSize: 13 }}>No coloring books match the current selection yet. More coming soon!</div>
         )}
       </section>
+      )}
 
-      {/* Pricing */}
+      {/* Pricing — hidden for first launch */}
+      {false && (
       <section style={{ position: "relative", zIndex: 1, maxWidth: 800, margin: "0 auto", padding: "32px 24px", background: colors.softTeal, borderRadius: 20, marginTop: 8 }}>
         <div style={{ textAlign: "center", marginBottom: 24 }}>
           <div style={{ fontSize: 22, fontWeight: "bold", color: theme.textPrimary }}>Simple Pricing</div>
@@ -223,13 +547,27 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
           ))}
         </div>
       </section>
+      )}
 
-      {/* CTA */}
+      {/* Bottom CTA — re-offers the free download for scrollers who didn't convert above */}
       <section style={{ position: "relative", zIndex: 1, textAlign: "center", padding: "32px 24px 48px" }}>
-        <button style={{ padding: "14px 36px", borderRadius: 10, border: "none", background: colors.deepTeal, color: theme.buttonText, fontSize: 16, fontWeight: "bold", cursor: "pointer", boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }}>
-          Create Free Account
+        <div style={{ fontSize: 18, fontWeight: "bold", color: theme.textPrimary, marginBottom: 12 }}>
+          Ready to start a calmer morning?
+        </div>
+        <button onClick={handleDownloadDayPDF} disabled={pdfProgress !== null}
+          style={{
+            padding: "14px 36px", borderRadius: 10, border: "none",
+            background: colors.deepTeal, color: theme.buttonText,
+            fontSize: 16, fontWeight: "bold",
+            cursor: pdfProgress !== null ? "wait" : "pointer",
+            opacity: pdfProgress !== null ? 0.7 : 1,
+            boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+          }}>
+          {pdfProgress !== null
+            ? `Building your PDF… ${pdfProgress}%`
+            : `↓ Get today's free worksheet`}
         </button>
-        <div style={{ fontSize: 12, color: theme.textPlaceholder, marginTop: 8 }}>No credit card required</div>
+        <div style={{ fontSize: 12, color: theme.textPlaceholder, marginTop: 8 }}>Free instant download · No account needed</div>
       </section>
 
       <footer style={{ position: "relative", zIndex: 1, borderTop: `1px solid ${theme.navBorder}`, padding: "16px 24px", textAlign: "center", fontSize: 11, color: theme.textPlaceholder }}>
@@ -406,7 +744,7 @@ function TestWorkbook({ onSwitch, onDashboard }: { onSwitch: () => void; onDashb
 
             {/* Row 3: Region */}
             <div style={{ marginBottom: 12 }}>
-              <div style={{ fontSize: 10, fontWeight: "bold", color: theme.textMuted, marginBottom: 4 }}>REGION</div>
+              <div style={{ fontSize: 10, fontWeight: "bold", color: theme.textMuted, marginBottom: 4 }}>COUNTRY</div>
               <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
                 {REGIONS.map(r => (
                   <button key={r.id} onClick={() => updateChild({ region: r.id })}
@@ -421,7 +759,7 @@ function TestWorkbook({ onSwitch, onDashboard }: { onSwitch: () => void; onDashb
             {/* Row 4: Birthdays */}
             <div>
               <div style={{ fontSize: 10, fontWeight: "bold", color: theme.textMuted, marginBottom: 4 }}>
-                FAMILY BIRTHDAYS <span style={{ fontWeight: "normal", color: theme.textPlaceholder }}>(appear on the workbook page)</span>
+                FAMILY BIRTHDAYS <span style={{ fontWeight: "normal", color: theme.textPlaceholder }}>(appear on the worksheet)</span>
               </div>
               {activeChild.birthdays.map(b => (
                 <div key={b.id} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, padding: "4px 8px", background: theme.cardBg, borderRadius: 6, border: `1px solid ${theme.cardBorder}` }}>

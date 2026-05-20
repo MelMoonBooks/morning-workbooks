@@ -23,13 +23,15 @@ interface DayPageProps {
   year: number;
   childName: string;
   traditions: string[]; // e.g. ["hindu", "christian-catholic"]
-  region: string;       // e.g. "us"
+  region: string | string[];  // e.g. "us" or ["us", "india"] for multi-country families
   age: number;          // 3-6
   birthdays?: Birthday[]; // family birthdays to check
   id?: string;          // DOM id for PDF capture
 }
 
 export default function DayPage({ day, month, year, childName, traditions, region, age, birthdays = [], id }: DayPageProps) {
+  // Multi-country families: use the primary (first) country for image fallback paths
+  const primaryRegion: string = Array.isArray(region) ? (region[0] ?? 'us') : region;
   const content = getDayContent(traditions, region, month, day, year);
   const { theme, holidays, affirmation, dominantTradition } = content;
 
@@ -130,7 +132,7 @@ export default function DayPage({ day, month, year, childName, traditions, regio
             subject={theme.subject}
             colorWord={theme.colorWord}
             tradition={dominantTradition}
-            region={region}
+            region={primaryRegion}
             imageFile={theme.imageFile}
           />
         </div>

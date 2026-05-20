@@ -3,15 +3,16 @@ import { SignInButton, SignUpButton } from '@clerk/clerk-react';
 import DayPage from './products/morning-workbook/DayPage';
 import { getDayContent, REGIONS } from './content';
 import { ColoringBook } from './content/types';
+import { ImageCacheContext } from './shared/ImageCache';
 
 const MONTH_NAMES = ["January","February","March","April","May","June",
   "July","August","September","October","November","December"];
 
 const TRADITIONS = [
   { id: "universal",            label: "Non-religious" },
+  { id: "hindu",                label: "Hindu" },
   { id: "christian-catholic",   label: "Catholic" },
   { id: "christian-protestant", label: "Protestant" },
-  { id: "hindu",                label: "Hindu" },
   { id: "jewish",               label: "Jewish" },
   { id: "muslim",               label: "Muslim" },
 ];
@@ -56,6 +57,7 @@ export default function LandingPage() {
   const [age, setAge] = useState(5);
   const [traditions, setTraditions] = useState<string[]>(["universal"]);
   const [region, setRegion] = useState("us");
+  const [pdfProgress, setPdfProgress] = useState<number | null>(null);
 
   const toggleTradition = (id: string) => {
     setTraditions(prev => {
@@ -73,6 +75,104 @@ export default function LandingPage() {
   const suggestedBooks = content.suggestedColoringBooks;
 
   const daysInMonth = new Date(year, month, 0).getDate();
+  const monthName = MONTH_NAMES[month - 1];
+
+  // ── Single-day PDF download (free, no login required) ──
+  const handleDownloadDayPDF = async () => {
+    const loadScript = (src: string) => new Promise<void>((resolve, reject) => {
+      if (document.querySelector(`script[src="${src}"]`)) { resolve(); return; }
+      const s = document.createElement("script");
+      s.src = src; s.onload = () => resolve(); s.onerror = () => reject();
+      document.head.appendChild(s);
+    });
+
+    const fetchBase64 = (url: string): Promise<string | null> =>
+      fetch(url)
+        .then(r => r.ok ? r.blob() : Promise.reject())
+        .then(blob => new Promise<string>(res => {
+          const reader = new FileReader();
+          reader.onload = () => res(reader.result as string);
+          reader.readAsDataURL(blob);
+        }))
+        .catch(() => null);
+
+    try {
+      setPdfProgress(10);
+      await loadScript("https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js");
+      await loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js");
+
+      const { jsPDF } = (window as any).jspdf;
+      const html2canvas = (window as any).html2canvas;
+      const ReactDOM = await import("react-dom/client");
+      const React2 = await import("react");
+
+      setPdfProgress(30);
+
+      // Pre-fetch the image for this single day (tradition → region → universal fallback)
+      const imageCache: Record<string, string> = {};
+      const paddedDay = String(day).padStart(2, "0");
+      const baseKey = `${monthName.toLowerCase()}_${paddedDay}`;
+      const candidates = [
+        ...(content.theme.imageFile ? [content.theme.imageFile.replace(/\.png$/, "")] : []),
+        ...(content.dominantTradition !== "universal" ? [`${content.dominantTradition}/${baseKey}`] : []),
+        `${region}/${baseKey}`,
+        baseKey,
+      ];
+      for (const key of candidates) {
+        const b64 = await fetchBase64(`/images/${key}.png`);
+        if (b64) { imageCache[key] = b64; break; }
+      }
+
+      setPdfProgress(50);
+
+      const pdf = new jsPDF({ orientation: "portrait", unit: "pt", format: [612, 792] });
+      const margin = 54;
+      const contentW = 612 - margin * 2;
+      const contentH = 792 - margin * 2;
+
+      const container = document.createElement("div");
+      container.style.cssText = "position:fixed;left:-9999px;top:0;width:540px;background:white;z-index:-1;";
+      document.body.appendChild(container);
+
+      const wrapper = document.createElement("div");
+      container.appendChild(wrapper);
+
+      await new Promise<void>(resolve => {
+        const root = ReactDOM.createRoot(wrapper);
+        root.render(
+          React2.createElement(
+            ImageCacheContext.Provider,
+            { value: imageCache },
+            React2.createElement(DayPage, {
+              day, month, year, childName, traditions, region, age,
+            })
+          )
+        );
+        setTimeout(resolve, 300);
+      });
+
+      setPdfProgress(80);
+
+      const canvas = await html2canvas(wrapper, {
+        scale: 2, useCORS: true, allowTaint: true,
+        backgroundColor: "#ffffff", width: 540, windowWidth: 600, logging: false,
+      });
+
+      const imgData = canvas.toDataURL("image/jpeg", 0.93);
+      const imgH = Math.min(contentW * (canvas.height / canvas.width), contentH);
+
+      pdf.addImage(imgData, "JPEG", margin, margin, contentW, imgH);
+
+      document.body.removeChild(container);
+      setPdfProgress(null);
+      const safeName = (childName || "MorningWork").replace(/[^a-zA-Z0-9]/g, "");
+      pdf.save(`${safeName}_${monthName}${day}_${year}.pdf`);
+    } catch (err) {
+      console.error("PDF error:", err);
+      setPdfProgress(null);
+      alert(`PDF failed: ${(err as Error).message}`);
+    }
+  };
 
   return (
     <div style={{ minHeight: "100vh", background: "#faf9f6", fontFamily: "Georgia,serif" }}>
@@ -88,26 +188,42 @@ export default function LandingPage() {
             <button style={{
               padding: "7px 16px", borderRadius: 8, border: "1.5px solid #d1d5db",
               background: "white", color: "#374151", fontSize: 13, fontWeight: "bold", cursor: "pointer",
-            }}>Sign In</button>
+            }}>Log In</button>
           </SignInButton>
           <SignUpButton mode="modal">
             <button style={{
               padding: "7px 16px", borderRadius: 8, border: "none",
               background: "#1f2937", color: "white", fontSize: 13, fontWeight: "bold", cursor: "pointer",
-            }}>Get Started Free</button>
+            }}>Create Free Account</button>
           </SignUpButton>
         </div>
       </nav>
 
       {/* ── Hero ── */}
-      <section style={{ textAlign: "center", padding: "48px 24px 32px", maxWidth: 640, margin: "0 auto" }}>
+      <section style={{ textAlign: "center", padding: "40px 24px 24px", maxWidth: 680, margin: "0 auto" }}>
         <h1 style={{ fontSize: 32, fontWeight: "bold", color: "#1f2937", margin: "0 0 12px", lineHeight: 1.2 }}>
           Morning Workbooks for Little Learners
         </h1>
-        <p style={{ fontSize: 16, color: "#4b5563", lineHeight: 1.6, margin: 0 }}>
+        <p style={{ fontSize: 16, color: "#4b5563", lineHeight: 1.6, margin: "0 0 22px" }}>
           Personalized daily workbooks for ages 3–6 with letter tracing, math, and coloring.
-          Choose your family's faith traditions — Christian, Hindu, Jewish, Muslim, or non-religious — and every page reflects what matters to you.
+          Choose a region to add international holidays — and if your family has a faith tradition, you can include that too. Every page reflects what matters to you.
         </p>
+        <button onClick={handleDownloadDayPDF} disabled={pdfProgress !== null}
+          style={{
+            padding: "14px 32px", fontSize: 16, fontWeight: "bold",
+            cursor: pdfProgress !== null ? "wait" : "pointer",
+            border: "none", borderRadius: 10,
+            background: "#1f2937", color: "white",
+            opacity: pdfProgress !== null ? 0.7 : 1,
+            boxShadow: "0 4px 14px rgba(0,0,0,0.15)",
+          }}>
+          {pdfProgress !== null
+            ? `Building your PDF… ${pdfProgress}%`
+            : `↓ Get today's free workbook page`}
+        </button>
+        <div style={{ fontSize: 12, color: "#9ca3af", marginTop: 10 }}>
+          Free instant download · No account needed · Customize below
+        </div>
       </section>
 
       {/* ── Interactive Preview Controls ── */}
@@ -208,16 +324,30 @@ export default function LandingPage() {
           />
         </div>
 
-        {/* Locked actions tooltip */}
-        <div style={{
-          textAlign: "center", padding: "16px 0", fontSize: 12, color: "#6b7280",
-        }}>
-          PDF download and printed book ordering require a free account.{" "}
-          <SignUpButton mode="modal">
-            <button style={{ background: "none", border: "none", color: "#1f2937", fontWeight: "bold", cursor: "pointer", fontSize: 12, textDecoration: "underline" }}>
-              Sign up free
-            </button>
-          </SignUpButton>
+        {/* Free single-day PDF download + signup CTA */}
+        <div style={{ textAlign: "center", padding: "20px 0 8px" }}>
+          <button onClick={handleDownloadDayPDF} disabled={pdfProgress !== null}
+            style={{
+              padding: "12px 28px", fontSize: 15, fontWeight: "bold",
+              cursor: pdfProgress !== null ? "wait" : "pointer",
+              border: "2px solid #1f2937", borderRadius: 10,
+              background: "#1f2937", color: "white",
+              opacity: pdfProgress !== null ? 0.7 : 1,
+              boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+            }}>
+            {pdfProgress !== null
+              ? `Building PDF… ${pdfProgress}%`
+              : `↓ Download this page — Free`}
+          </button>
+          <div style={{ fontSize: 12, color: "#6b7280", marginTop: 12, lineHeight: 1.5 }}>
+            Want more?{" "}
+            <SignUpButton mode="modal">
+              <button style={{ background: "none", border: "none", color: "#1f2937", fontWeight: "bold", cursor: "pointer", fontSize: 12, textDecoration: "underline", padding: 0 }}>
+                Create a free account
+              </button>
+            </SignUpButton>{" "}
+            to save profiles for each of your kids and unlock full-month PDFs and printed books.
+          </div>
         </div>
       </section>
 

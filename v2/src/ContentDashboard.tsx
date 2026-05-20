@@ -8,9 +8,9 @@ const MONTH_NAMES = ["January","February","March","April","May","June",
 
 const TRADITIONS = [
   { id: "universal",            label: "Non-religious" },
+  { id: "hindu",                label: "Hindu" },
   { id: "christian-catholic",   label: "Catholic" },
   { id: "christian-protestant", label: "Protestant" },
-  { id: "hindu",                label: "Hindu" },
   { id: "jewish",               label: "Jewish" },
   { id: "muslim",               label: "Muslim" },
 ];

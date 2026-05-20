@@ -85,21 +85,25 @@ export interface DayContent {
   suggestedColoringBooks: ColoringBook[];
 }
 
-// Given a child's traditions, region, month, and day — return the complete content for that day
+// Given a child's traditions, country/countries, month, and day — return the complete content for that day
+// `regions` accepts either a single country string (backward compatible) or an array for multi-country families
 export function getDayContent(
   traditions: string[],
-  region: string,
+  regions: string | string[],
   month: number,
   day: number,
   year: number
 ): DayContent {
+  const regionList: string[] = Array.isArray(regions) ? regions : [regions];
+  const primaryRegion: string = regionList[0] ?? 'us';
+
   const dateKey = `${month}-${day}`;
   const dateKeyMM = `${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 
   // Helper: match holiday by date, and by year if the holiday has one
   const matchesDate = (h: Holiday) => h.date === dateKeyMM && (h.year == null || h.year === year);
 
-  // 1. Collect ALL holidays from all selected traditions + region
+  // 1. Collect ALL holidays from all selected traditions + ALL selected countries
   const rawHolidays: Holiday[] = [];
 
   // Always include universal holidays
@@ -111,9 +115,11 @@ export function getDayContent(
     rawHolidays.push(...traditionHolidays.filter(matchesDate));
   }
 
-  // Add region holidays
-  const regionHolidays = holidaysByRegion[region] ?? [];
-  rawHolidays.push(...regionHolidays.filter(matchesDate));
+  // Add holidays from every selected country
+  for (const r of regionList) {
+    const regionHolidays = holidaysByRegion[r] ?? [];
+    rawHolidays.push(...regionHolidays.filter(matchesDate));
+  }
 
   // 2. Determine dominant tradition
   const dominantTradition = getDominantTradition(traditions, day, rawHolidays);
@@ -146,8 +152,9 @@ export function getDayContent(
     tags: [],
   };
 
-  // 4. Apply region activity overlay if available
-  const regionActivities = activitiesByRegion[region];
+  // 4. Apply primary country's activity overlay if available
+  // (Multi-country families: activities come from the first selected country to avoid daily whiplash)
+  const regionActivities = activitiesByRegion[primaryRegion];
   if (regionActivities?.[dateKey]) {
     theme = { ...theme, ...regionActivities[dateKey] };
   }
@@ -170,11 +177,11 @@ export function getDayContent(
     ?? universalAffirmations[dateKey]
     ?? { quote: '', ref: '', tradition: 'universal' };
 
-  // 8. Find suggested coloring books matching traditions + current month
+  // 8. Find suggested coloring books matching traditions + any of the selected countries + current month
   const suggestedColoringBooks = coloringBooks.filter(book =>
     book.months.includes(month) &&
     book.traditions.some(t => traditions.includes(t) || t === 'universal') &&
-    (book.regions.includes(region) || book.regions.includes('global'))
+    (book.regions.some(r => regionList.includes(r)) || book.regions.includes('global'))
   );
 
   return {
