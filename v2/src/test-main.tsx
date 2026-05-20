@@ -48,54 +48,48 @@ function BookCard({ book }: { book: any }) {
 }
 
 // ── ScaledWorksheet ──
-// Wraps the worksheet at its native 540px width and scales the entire
-// rendering down on narrow screens, so content stays at proper proportions
-// instead of reflowing (e.g. "kite" wrapping with the "e" on a second row).
+// Wraps the worksheet at its native 540px width and proportionally scales
+// the entire rendering on narrow screens so content stays at proper
+// proportions instead of reflowing (e.g. "kite" wrapping the "e" to a
+// second row).
+//
+// Uses CSS `zoom` because (unlike `transform: scale`) it actually changes
+// layout — so the parent's height adjusts automatically and we don't have
+// to manually calculate scaled heights, which was the bug in the original.
 function ScaledWorksheet({ children, nativeWidth = 540 }: { children: React.ReactNode; nativeWidth?: number }) {
   const outerRef = useRef<HTMLDivElement>(null);
-  const innerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
-  const [scaledHeight, setScaledHeight] = useState<number | undefined>(undefined);
 
   useEffect(() => {
     const update = () => {
-      if (!outerRef.current || !innerRef.current) return;
+      if (!outerRef.current) return;
       const available = outerRef.current.clientWidth;
-      const newScale = Math.min(1, available / nativeWidth);
-      setScale(newScale);
-      // Match outer container height to scaled inner content
-      // so the layout doesn't leave a big gap below the worksheet
-      setScaledHeight(innerRef.current.offsetHeight * newScale);
+      if (available <= 0) return;  // wait until layout is real
+      setScale(Math.min(1, available / nativeWidth));
     };
     update();
-    // Re-measure shortly after mount in case content takes a tick to lay out
-    const t = setTimeout(update, 50);
+    // Re-measure shortly after mount in case the parent took a tick to lay out
+    const t = setTimeout(update, 100);
     window.addEventListener("resize", update);
-    // Also observe inner ref size changes (in case DayPage content grows/shrinks)
-    let ro: ResizeObserver | null = null;
-    if (innerRef.current && typeof ResizeObserver !== "undefined") {
-      ro = new ResizeObserver(update);
-      ro.observe(innerRef.current);
-    }
     return () => {
       clearTimeout(t);
       window.removeEventListener("resize", update);
-      if (ro) ro.disconnect();
     };
   }, [nativeWidth]);
 
   return (
     <div ref={outerRef} style={{
       width: "100%",
-      height: scaledHeight,
       display: "flex",
       justifyContent: "center",
       overflow: "hidden",
     }}>
-      <div ref={innerRef} style={{
+      <div style={{
         width: nativeWidth,
-        transform: `scale(${scale})`,
-        transformOrigin: "top center",
+        // @ts-expect-error — `zoom` is a valid CSS property, supported in all
+        // modern browsers (Chrome/Safari forever, Firefox since 126 in 2024),
+        // but TypeScript's CSS types are sometimes behind the standard.
+        zoom: scale,
         flexShrink: 0,
       }}>
         {children}
