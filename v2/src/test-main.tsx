@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 
 // Test entrypoint — bypasses Clerk auth to test v2 components directly
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import DayPage from './products/morning-workbook/DayPage';
 import { getDayContent, REGIONS } from './content';
 import { Birthday, ChildProfile } from './content/types';
@@ -42,6 +42,63 @@ function BookCard({ book }: { book: any }) {
           <div style={{ fontSize: 14, fontWeight: "bold", color: theme.textPrimary }}>${book.price.toFixed(2)}</div>
           {!book.available && <div style={{ fontSize: 10, fontWeight: "bold", color: theme.textMuted, background: colors.driftwood, borderRadius: 4, padding: "2px 8px" }}>Coming Soon</div>}
         </div>
+      </div>
+    </div>
+  );
+}
+
+// ── ScaledWorksheet ──
+// Wraps the worksheet at its native 540px width and scales the entire
+// rendering down on narrow screens, so content stays at proper proportions
+// instead of reflowing (e.g. "kite" wrapping with the "e" on a second row).
+function ScaledWorksheet({ children, nativeWidth = 540 }: { children: React.ReactNode; nativeWidth?: number }) {
+  const outerRef = useRef<HTMLDivElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+  const [scaledHeight, setScaledHeight] = useState<number | undefined>(undefined);
+
+  useEffect(() => {
+    const update = () => {
+      if (!outerRef.current || !innerRef.current) return;
+      const available = outerRef.current.clientWidth;
+      const newScale = Math.min(1, available / nativeWidth);
+      setScale(newScale);
+      // Match outer container height to scaled inner content
+      // so the layout doesn't leave a big gap below the worksheet
+      setScaledHeight(innerRef.current.offsetHeight * newScale);
+    };
+    update();
+    // Re-measure shortly after mount in case content takes a tick to lay out
+    const t = setTimeout(update, 50);
+    window.addEventListener("resize", update);
+    // Also observe inner ref size changes (in case DayPage content grows/shrinks)
+    let ro: ResizeObserver | null = null;
+    if (innerRef.current && typeof ResizeObserver !== "undefined") {
+      ro = new ResizeObserver(update);
+      ro.observe(innerRef.current);
+    }
+    return () => {
+      clearTimeout(t);
+      window.removeEventListener("resize", update);
+      if (ro) ro.disconnect();
+    };
+  }, [nativeWidth]);
+
+  return (
+    <div ref={outerRef} style={{
+      width: "100%",
+      height: scaledHeight,
+      display: "flex",
+      justifyContent: "center",
+      overflow: "hidden",
+    }}>
+      <div ref={innerRef} style={{
+        width: nativeWidth,
+        transform: `scale(${scale})`,
+        transformOrigin: "top center",
+        flexShrink: 0,
+      }}>
+        {children}
       </div>
     </div>
   );
@@ -129,24 +186,25 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
   };
 
   // ──────────────────────────────────────────────────────────────
-  // STRIPE PAYMENT LINK — paste your live Stripe Payment Link here
-  // once your Stripe account is verified. While this is null, the
-  // "Get the full month PDF — $2.99" button shows a "Coming this week"
-  // disabled state so the messaging is live for ads but no broken
-  // checkout exists. Replace `null` with the URL string when ready.
+  // STRIPE PAYMENT LINK — live URL for the $2.99 Full Month PDF product
   // ──────────────────────────────────────────────────────────────
-  const STRIPE_PAYMENT_LINK: string | null = null;
+  const STRIPE_PAYMENT_LINK: string | null = "https://buy.stripe.com/eVq4gr8hAd32gVX32M2wU00";
 
   const handleBuyMonthPDF = () => {
     if (STRIPE_PAYMENT_LINK) {
-      // Pass customization through URL params so the success page
-      // can regenerate the same PDF the customer saw on screen.
-      const params = new URLSearchParams({
-        name: childName, age: String(age), month: String(month), year: String(year),
-        traditions: traditions.join(","), regions: regions.join(","),
-        birthdays: JSON.stringify(birthdays),
-      });
-      window.location.href = `${STRIPE_PAYMENT_LINK}?client_reference_id=${encodeURIComponent(params.toString())}`;
+      // Save the customer's customization to localStorage so the
+      // success page (after Stripe redirects back) can regenerate the
+      // 31-page PDF with the same name/age/traditions/country/birthdays
+      // the customer saw on screen.
+      try {
+        localStorage.setItem("pendingMonthPDF", JSON.stringify({
+          name: childName, age, month, year, traditions, regions, birthdays,
+          timestamp: Date.now(),
+        }));
+      } catch (e) {
+        console.warn("Could not save pending order to localStorage:", e);
+      }
+      window.location.href = STRIPE_PAYMENT_LINK;
     }
   };
 
@@ -424,12 +482,12 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
           </div>
         </div>
 
-        {/* DayPage — fixed width to match real printed page proportions */}
-        <div style={{ display: "flex", justifyContent: "center" }}>
-          <div style={{ width: 540, maxWidth: "100%", boxShadow: "0 4px 20px rgba(0,0,0,0.08)", borderRadius: 8, overflow: "hidden" }}>
+        {/* DayPage — fixed native width 540, scales proportionally on narrow screens */}
+        <ScaledWorksheet>
+          <div style={{ boxShadow: "0 4px 20px rgba(0,0,0,0.08)", borderRadius: 8, overflow: "hidden" }}>
             <DayPage day={day} month={month} year={year} childName={childName} traditions={traditions} region={regions} age={age} birthdays={birthdays} />
           </div>
-        </div>
+        </ScaledWorksheet>
         <div style={{ textAlign: "center", padding: "20px 0 8px" }}>
           <button onClick={handleDownloadDayPDF} disabled={pdfProgress !== null}
             style={{
@@ -477,11 +535,11 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
                   <div style={{ textAlign: "center", fontSize: 11, fontWeight: "bold", color: theme.textMuted, letterSpacing: 1.5, marginBottom: 8 }}>
                     — DAY {d} —
                   </div>
-                  <div style={{ display: "flex", justifyContent: "center" }}>
-                    <div style={{ width: 540, maxWidth: "100%", boxShadow: "0 4px 20px rgba(0,0,0,0.08)", borderRadius: 8, overflow: "hidden" }}>
+                  <ScaledWorksheet>
+                    <div style={{ boxShadow: "0 4px 20px rgba(0,0,0,0.08)", borderRadius: 8, overflow: "hidden" }}>
                       <DayPage day={d} month={month} year={year} childName={childName} traditions={traditions} region={regions} age={age} birthdays={birthdays} />
                     </div>
-                  </div>
+                  </ScaledWorksheet>
                 </div>
               ))}
             </div>
@@ -826,9 +884,393 @@ function TestWorkbook({ onSwitch, onDashboard }: { onSwitch: () => void; onDashb
   );
 }
 
-// ── Root: toggle between landing page and workbook ──
+// ── Paid Success Page ──
+// Shown after a customer successfully pays via Stripe. Reads their
+// customization from localStorage and auto-generates a 31-page PDF
+// for download. Customer can also re-customize for additional kids
+// (one purchase covers the whole family).
+function PaidSuccessPage({ onBackToLanding }: { onBackToLanding: () => void }) {
+  const [order, setOrder] = useState<{
+    name: string; age: number; month: number; year: number;
+    traditions: string[]; regions: string[]; birthdays: Birthday[];
+  } | null>(null);
+  const [pdfProgress, setPdfProgress] = useState<number | null>(null);
+  const [hasDownloaded, setHasDownloaded] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const autoRanRef = useRef(false);
+
+  // Editable copy of the order so customer can regenerate for siblings
+  const [editName, setEditName] = useState("");
+  const [editAge, setEditAge] = useState(5);
+  const [editTraditions, setEditTraditions] = useState<string[]>(["universal"]);
+  const [editRegions, setEditRegions] = useState<string[]>(["us"]);
+  const [editBirthdays, setEditBirthdays] = useState<Birthday[]>([]);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("pendingMonthPDF");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        setOrder(parsed);
+        setEditName(parsed.name || "");
+        setEditAge(parsed.age || 5);
+        setEditTraditions(parsed.traditions || ["universal"]);
+        setEditRegions(parsed.regions || ["us"]);
+        setEditBirthdays(parsed.birthdays || []);
+      } else {
+        // No pending order found — customer reached this URL directly.
+        // We'll still let them generate a PDF, just with defaults.
+        setOrder({
+          name: "", age: 5, month: new Date().getMonth() + 1, year: new Date().getFullYear(),
+          traditions: ["universal"], regions: ["us"], birthdays: [],
+        });
+      }
+    } catch (e) {
+      console.warn("Could not load pending order:", e);
+    }
+  }, []);
+
+  // Auto-generate the first PDF once the order loads
+  useEffect(() => {
+    if (order && !autoRanRef.current) {
+      autoRanRef.current = true;
+      setTimeout(() => generateMonthPDF(order, false), 600);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [order]);
+
+  const generateMonthPDF = async (data: {
+    name: string; age: number; month: number; year: number;
+    traditions: string[]; regions: string[]; birthdays: Birthday[];
+  }, isRegen: boolean) => {
+    const { name, age, month, year, traditions, regions, birthdays } = data;
+    const monthName = MONTH_NAMES[month - 1];
+    const daysInMonth = new Date(year, month, 0).getDate();
+
+    const loadScript = (src: string) => new Promise<void>((resolve, reject) => {
+      if (document.querySelector(`script[src="${src}"]`)) { resolve(); return; }
+      const s = document.createElement("script");
+      s.src = src; s.onload = () => resolve(); s.onerror = () => reject();
+      document.head.appendChild(s);
+    });
+    const fetchBase64 = (url: string): Promise<string | null> =>
+      fetch(url).then(r => r.ok ? r.blob() : Promise.reject())
+        .then(blob => new Promise<string>(res => {
+          const reader = new FileReader();
+          reader.onload = () => res(reader.result as string);
+          reader.readAsDataURL(blob);
+        })).catch(() => null);
+
+    try {
+      setError(null);
+      setPdfProgress(2);
+      await loadScript("https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js");
+      await loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js");
+      const { jsPDF } = (window as any).jspdf;
+      const html2canvas = (window as any).html2canvas;
+      const ReactDOM = await import("react-dom/client");
+      const React2 = await import("react");
+
+      // Pre-fetch all images for the month (tradition / region / universal fallback)
+      setPdfProgress(8);
+      const imageCache: Record<string, string> = {};
+      const primaryRegion = regions[0] ?? "us";
+      for (let d = 1; d <= daysInMonth; d++) {
+        const paddedDay = String(d).padStart(2, "0");
+        const baseKey = `${monthName.toLowerCase()}_${paddedDay}`;
+        const dayContent = getDayContent(traditions, regions, month, d, year);
+        const candidates = [
+          ...(dayContent.theme.imageFile ? [dayContent.theme.imageFile.replace(/\.png$/, "")] : []),
+          ...(dayContent.dominantTradition !== "universal" ? [`${dayContent.dominantTradition}/${baseKey}`] : []),
+          `${primaryRegion}/${baseKey}`,
+          baseKey,
+        ];
+        for (const key of candidates) {
+          if (imageCache[key]) break;
+          const b64 = await fetchBase64(`/images/${key}.png`);
+          if (b64) { imageCache[key] = b64; break; }
+        }
+      }
+
+      const pdf = new jsPDF({ orientation: "portrait", unit: "pt", format: [612, 792] });
+      const margin = 54;
+      const contentW = 612 - margin * 2;
+      const contentH = 792 - margin * 2;
+
+      const container = document.createElement("div");
+      container.style.cssText = "position:fixed;left:-9999px;top:0;width:540px;background:white;z-index:-1;";
+      document.body.appendChild(container);
+
+      for (let d = 1; d <= daysInMonth; d++) {
+        // Progress: 10% setup + 85% rendering + 5% finalizing
+        setPdfProgress(10 + Math.round((d / daysInMonth) * 85));
+
+        const wrapper = document.createElement("div");
+        container.innerHTML = "";
+        container.appendChild(wrapper);
+
+        await new Promise<void>(resolve => {
+          const root = ReactDOM.createRoot(wrapper);
+          root.render(
+            React2.createElement(ImageCacheContext.Provider, { value: imageCache },
+              React2.createElement(DayPage, {
+                day: d, month, year, childName: name, traditions, region: regions, age, birthdays,
+              })
+            )
+          );
+          setTimeout(resolve, 250);
+        });
+
+        const canvas = await html2canvas(wrapper, {
+          scale: 2, useCORS: true, allowTaint: true,
+          backgroundColor: "#ffffff", width: 540, windowWidth: 600, logging: false,
+        });
+        const imgData = canvas.toDataURL("image/jpeg", 0.93);
+        const imgH = Math.min(contentW * (canvas.height / canvas.width), contentH);
+        if (d > 1) pdf.addPage();
+        pdf.addImage(imgData, "JPEG", margin, margin, contentW, imgH);
+      }
+
+      document.body.removeChild(container);
+      setPdfProgress(98);
+
+      const safeName = (name || "MorningWork").replace(/[^a-zA-Z0-9]/g, "");
+      pdf.save(`${safeName}_${monthName}_${year}.pdf`);
+      setPdfProgress(null);
+      setHasDownloaded(true);
+
+      // Clear the pending order only after the first auto-download — keep around
+      // if customer wants to regenerate for siblings.
+      if (!isRegen) {
+        try { localStorage.removeItem("pendingMonthPDF"); } catch {}
+      }
+    } catch (err) {
+      console.error("PDF error:", err);
+      setPdfProgress(null);
+      setError(`PDF generation failed: ${(err as Error).message}. Please try again, or email melanie@melmoonbooks.com with your order info.`);
+    }
+  };
+
+  const handleRegenerate = () => {
+    if (!order) return;
+    generateMonthPDF({
+      name: editName, age: editAge, month: order.month, year: order.year,
+      traditions: editTraditions, regions: editRegions, birthdays: editBirthdays,
+    }, true);
+  };
+
+  const toggleEditTradition = (id: string) => {
+    setEditTraditions(prev => {
+      if (prev.includes(id)) { if (prev.length <= 1) return prev; return prev.filter(t => t !== id); }
+      if (prev.length >= 3) return prev;
+      return [...prev, id];
+    });
+  };
+  const toggleEditRegion = (id: string) => {
+    setEditRegions(prev => {
+      if (prev.includes(id)) { if (prev.length <= 1) return prev; return prev.filter(r => r !== id); }
+      return [...prev, id];
+    });
+  };
+
+  if (!order) {
+    return (
+      <div style={{ minHeight: "100vh", background: theme.pageBg, fontFamily: "Georgia,serif", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+        <div style={{ textAlign: "center", color: theme.textMuted }}>Loading your order…</div>
+      </div>
+    );
+  }
+
+  const monthName = MONTH_NAMES[order.month - 1];
+  const daysInMonth = new Date(order.year, order.month, 0).getDate();
+
+  return (
+    <div style={{ minHeight: "100vh", background: `linear-gradient(to bottom, ${theme.pageBg} 0%, ${theme.pageBg} 50%, #dceef2 100%)`, fontFamily: "Georgia,serif", padding: "48px 24px" }}>
+      <div style={{ maxWidth: 640, margin: "0 auto" }}>
+        {/* Thank you header */}
+        <div style={{ textAlign: "center", marginBottom: 32 }}>
+          <div style={{ fontSize: 48, marginBottom: 12 }}>🎉</div>
+          <h1 style={{ fontSize: 28, fontWeight: "bold", color: theme.textPrimary, margin: "0 0 8px" }}>
+            Thank you for your purchase!
+          </h1>
+          <p style={{ fontSize: 15, color: theme.textSecondary, margin: 0, lineHeight: 1.5 }}>
+            Your full month of {monthName} {order.year} — {daysInMonth} personalized worksheets — is being generated below.
+          </p>
+        </div>
+
+        {/* Download status card */}
+        <div style={{
+          background: theme.cardBg, borderRadius: 14, border: `2px solid ${colors.deepTeal}`,
+          padding: "28px 24px", textAlign: "center", marginBottom: 24,
+          boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
+        }}>
+          {pdfProgress !== null ? (
+            <>
+              <div style={{ fontSize: 16, fontWeight: "bold", color: theme.textPrimary, marginBottom: 16 }}>
+                Building your PDF…
+              </div>
+              <div style={{
+                width: "100%", height: 12, background: theme.cardBorder,
+                borderRadius: 6, overflow: "hidden", marginBottom: 10,
+              }}>
+                <div style={{
+                  width: `${pdfProgress}%`, height: "100%",
+                  background: colors.deepTeal, transition: "width 0.3s ease",
+                }} />
+              </div>
+              <div style={{ fontSize: 12, color: theme.textMuted }}>
+                {pdfProgress}% · this takes about 30-60 seconds for all {daysInMonth} days
+              </div>
+            </>
+          ) : error ? (
+            <>
+              <div style={{ fontSize: 15, color: "#b91c1c", marginBottom: 12, lineHeight: 1.5 }}>{error}</div>
+              <button onClick={() => generateMonthPDF(order, false)} style={{
+                padding: "10px 24px", fontSize: 14, fontWeight: "bold", cursor: "pointer",
+                border: "none", borderRadius: 8, background: colors.deepTeal, color: theme.buttonText,
+              }}>
+                Try again
+              </button>
+            </>
+          ) : hasDownloaded ? (
+            <>
+              <div style={{ fontSize: 16, fontWeight: "bold", color: theme.textPrimary, marginBottom: 8 }}>
+                ✓ PDF downloaded
+              </div>
+              <div style={{ fontSize: 13, color: theme.textMuted, marginBottom: 16 }}>
+                Check your Downloads folder for <strong>{(order.name || "MorningWork").replace(/[^a-zA-Z0-9]/g, "")}_{monthName}_{order.year}.pdf</strong>
+              </div>
+              <button onClick={() => generateMonthPDF(order, true)} style={{
+                padding: "10px 22px", fontSize: 13, fontWeight: "bold", cursor: "pointer",
+                border: `1.5px solid ${colors.deepTeal}`, borderRadius: 8,
+                background: theme.cardBg, color: colors.deepTeal,
+              }}>
+                ↓ Download again
+              </button>
+            </>
+          ) : (
+            <div style={{ fontSize: 14, color: theme.textMuted }}>Preparing your PDF…</div>
+          )}
+        </div>
+
+        {/* Multi-child: regenerate for siblings */}
+        <div style={{
+          background: theme.cardBg, borderRadius: 12, border: `1.5px solid ${theme.cardBorder}`,
+          padding: 20,
+        }}>
+          <div style={{ fontSize: 15, fontWeight: "bold", color: theme.textPrimary, marginBottom: 4 }}>
+            Have more than one child?
+          </div>
+          <div style={{ fontSize: 13, color: theme.textMuted, marginBottom: 16, lineHeight: 1.5 }}>
+            Your purchase covers the whole family. Edit the name and any other details below, then download a personalized PDF for each of your kids.
+          </div>
+
+          {/* Child name */}
+          <div style={{ marginBottom: 12 }}>
+            <div style={{ fontSize: 10, fontWeight: "bold", color: theme.textMuted, marginBottom: 4 }}>CHILD'S NAME</div>
+            <input value={editName} onChange={e => setEditName(e.target.value)} placeholder="e.g. Liam"
+              style={{ width: "100%", padding: "8px 10px", borderRadius: 7, border: `1.5px solid ${theme.cardBorder}`, fontSize: 14, boxSizing: "border-box", fontFamily: "Georgia,serif" }} />
+          </div>
+
+          {/* Age + Country + Traditions in a compact row */}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginBottom: 12 }}>
+            <div>
+              <div style={{ fontSize: 10, fontWeight: "bold", color: theme.textMuted, marginBottom: 4 }}>AGE</div>
+              <div style={{ display: "flex", gap: 4 }}>
+                {[3,4,5,6].map(a => (
+                  <button key={a} onClick={() => setEditAge(a)} style={{
+                    width: 36, height: 32, borderRadius: 6, cursor: "pointer",
+                    fontSize: 13, fontWeight: "bold",
+                    border: `1.5px solid ${editAge === a ? theme.pillActive : theme.pillInactive}`,
+                    background: editAge === a ? theme.pillActive : theme.cardBg,
+                    color: editAge === a ? theme.buttonText : theme.textPrimary,
+                  }}>{a}</button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <div style={{ fontSize: 10, fontWeight: "bold", color: theme.textMuted, marginBottom: 4 }}>COUNTRY</div>
+              <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+                {REGIONS.map(r => {
+                  const selected = editRegions.includes(r.id);
+                  return (
+                    <button key={r.id} onClick={() => toggleEditRegion(r.id)} style={{
+                      padding: "6px 10px", borderRadius: 6, cursor: "pointer",
+                      fontSize: 11, fontWeight: "bold",
+                      border: `1.5px solid ${selected ? theme.pillActive : theme.pillInactive}`,
+                      background: selected ? theme.pillActive : theme.cardBg,
+                      color: selected ? theme.buttonText : theme.textPrimary,
+                    }}>{r.flag} {r.label}</button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+          <div style={{ marginBottom: 16 }}>
+            <div style={{ fontSize: 10, fontWeight: "bold", color: theme.textMuted, marginBottom: 4 }}>TRADITIONS</div>
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+              {TRADITIONS.map(t => {
+                const selected = editTraditions.includes(t.id);
+                return (
+                  <button key={t.id} onClick={() => toggleEditTradition(t.id)} style={{
+                    padding: "6px 12px", borderRadius: 7, cursor: "pointer",
+                    fontSize: 12, fontWeight: "bold",
+                    border: `2px solid ${selected ? theme.pillActive : theme.pillInactive}`,
+                    background: selected ? theme.pillActive : theme.cardBg,
+                    color: selected ? theme.buttonText : theme.textPrimary,
+                  }}>{t.label}</button>
+                );
+              })}
+            </div>
+          </div>
+
+          <button onClick={handleRegenerate} disabled={pdfProgress !== null}
+            style={{
+              width: "100%", padding: "12px", fontSize: 14, fontWeight: "bold",
+              cursor: pdfProgress !== null ? "wait" : "pointer",
+              border: "none", borderRadius: 8,
+              background: colors.deepTeal, color: theme.buttonText,
+              opacity: pdfProgress !== null ? 0.7 : 1,
+            }}>
+            {pdfProgress !== null ? `Building PDF… ${pdfProgress}%` : `↓ Generate PDF for ${editName || "this child"}`}
+          </button>
+        </div>
+
+        {/* Back to landing */}
+        <div style={{ textAlign: "center", marginTop: 24 }}>
+          <button onClick={onBackToLanding} style={{
+            background: "none", border: "none", cursor: "pointer",
+            fontSize: 13, color: theme.textMuted, textDecoration: "underline",
+          }}>
+            ← Back to melmoonbooks.com
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Root: toggle between landing page, workbook, and paid-success ──
 function TestApp() {
-  const [view, setView] = useState<"landing" | "workbook" | "dashboard">("landing");
+  // Detect ?paid=success in URL to auto-route to the success page
+  const initialView: "landing" | "workbook" | "dashboard" | "paid-success" = (() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("paid") === "success") return "paid-success";
+    }
+    return "landing";
+  })();
+  const [view, setView] = useState<"landing" | "workbook" | "dashboard" | "paid-success">(initialView);
+
+  const goToLanding = () => {
+    // Clean query params from URL when navigating back to landing
+    if (typeof window !== "undefined" && window.location.search) {
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+    setView("landing");
+  };
+
+  if (view === "paid-success") return <PaidSuccessPage onBackToLanding={goToLanding} />;
   if (view === "dashboard") return <ContentDashboard onBack={() => setView("workbook")} />;
   if (view === "workbook") return <TestWorkbook onSwitch={() => setView("landing")} onDashboard={() => setView("dashboard")} />;
   return <TestLandingPage onSwitch={() => setView("workbook")} />;
