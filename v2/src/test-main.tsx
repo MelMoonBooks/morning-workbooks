@@ -507,14 +507,14 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
         zIndex: 0,
       }} />
 
-      {/* Nav — full brand logo image (logo includes "Melmoon Books" text) */}
-      <nav style={{ position: "relative", zIndex: 1, display: "flex", justifyContent: "center", alignItems: "center", padding: "14px 24px", borderBottom: `1px solid ${theme.navBorder}`, background: "rgba(255,255,255,0.85)", backdropFilter: "blur(8px)" }}>
+      {/* Nav — horizontal "Melmoon Books" wordmark on cream background
+          that blends with the logo's own cream/off-white background. */}
+      <nav style={{ position: "relative", zIndex: 1, display: "flex", justifyContent: "center", alignItems: "center", padding: "16px 24px", background: "#f8f1de" }}>
         <img
           src="/logo.png"
           alt="Melmoon Books"
-          style={{ height: 110, width: "auto", display: "block", maxWidth: "90vw", objectFit: "contain" }}
+          style={{ height: 70, width: "auto", display: "block", maxWidth: "90vw", objectFit: "contain" }}
           onError={(e) => {
-            // If logo fails to load, fall back to a styled wordmark
             const img = e.currentTarget as HTMLImageElement;
             img.style.display = "none";
             const fallback = document.createElement("div");
