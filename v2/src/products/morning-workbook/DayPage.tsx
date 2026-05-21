@@ -218,6 +218,16 @@ export default function DayPage({ day, month, year, childName, traditions, regio
         <div style={{ fontSize: 20, fontWeight: "bold", color: "#1f2937", letterSpacing: 0.3 }}>
           {greetingWord}, {childName || "Friend"}!
         </div>
+        {culturalFact && (
+          <div style={{ marginTop: 6 }}>
+            <span style={{ fontSize: 10, fontWeight: "bold", color: "#6b7280", letterSpacing: 0.8, textTransform: "uppercase", marginRight: 6 }}>
+              Did you know?
+            </span>
+            <span style={{ fontSize: 11, color: "#4b5563", fontStyle: "italic" }}>
+              {culturalFact}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* ── Name / Date | Calendar ── */}
@@ -359,21 +369,6 @@ export default function DayPage({ day, month, year, childName, traditions, regio
         {/* Bottom: math activity */}
         <MathActivity day={day} month={monthName} age={age} />
       </div>
-
-      {/* ── Did you know? (region/tradition-personalized, rotates by day) ── */}
-      {culturalFact && (
-        <div style={{
-          borderTop: "1px dashed #d1d5db", padding: "6px 20px", textAlign: "center",
-          background: "#fafaf7",
-        }}>
-          <span style={{ fontSize: 10, fontWeight: "bold", color: "#6b7280", letterSpacing: 0.8, textTransform: "uppercase", marginRight: 6 }}>
-            Did you know?
-          </span>
-          <span style={{ fontSize: 11, color: "#4b5563", fontStyle: "italic" }}>
-            {culturalFact}
-          </span>
-        </div>
-      )}
 
       {/* ── Footer (affirmation) ── */}
       <div style={{

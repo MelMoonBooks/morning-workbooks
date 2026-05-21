@@ -585,7 +585,8 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
       <section style={{ position: "relative", zIndex: 1, maxWidth: 800, margin: "0 auto", padding: "0 24px 16px" }}>
         <div style={{ background: theme.cardBg, borderRadius: 12, border: `1.5px solid ${theme.cardBorder}`, padding: 20, marginBottom: 16, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
           <div style={{ fontSize: 13, fontWeight: "bold", color: theme.textPrimary, marginBottom: 2, textTransform: "uppercase", letterSpacing: 0.8 }}>Customize the preview</div>
-          <div style={{ fontSize: 11, color: theme.textPlaceholder, marginBottom: 12, fontStyle: "italic" }}>Try different combinations to see how the worksheet adapts.</div>
+          <div style={{ fontSize: 11, color: theme.textPlaceholder, marginBottom: 4, fontStyle: "italic" }}>Try different combinations to see how the worksheet adapts.</div>
+          <div style={{ fontSize: 11, color: theme.textPlaceholder, marginBottom: 12, fontStyle: "italic" }}>Launching with May &amp; June — more months added every few weeks.</div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
             <div style={{ flex: "1 1 160px" }}>
               <div style={{ fontSize: 10, fontWeight: "bold", color: theme.textMuted, marginBottom: 4 }}>CHILD'S NAME</div>
@@ -634,9 +635,6 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
                   );
                 })}
               </select>
-              <div style={{ fontSize: 10, color: theme.textPlaceholder, fontStyle: "italic", marginTop: 4, lineHeight: 1.4 }}>
-                Launching with May &amp; June — more months added every few weeks
-              </div>
             </div>
             <div>
               <div style={{ fontSize: 10, fontWeight: "bold", color: theme.textMuted, marginBottom: 4 }}>DAY</div>
