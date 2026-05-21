@@ -469,8 +469,21 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
         backgroundColor: "#ffffff", width: 540, windowWidth: 600, logging: false,
       });
       const imgData = canvas.toDataURL("image/jpeg", 0.93);
-      const imgH = Math.min(contentW * (canvas.height / canvas.width), contentH);
-      pdf.addImage(imgData, "JPEG", margin, margin, contentW, imgH);
+      // Preserve aspect ratio — if worksheet would be taller than the page,
+      // scale BOTH dimensions down (don't just cap height, which squishes).
+      const aspectW = canvas.width;
+      const aspectH = canvas.height;
+      const widthIfFullWidth = contentW;
+      const heightIfFullWidth = contentW * (aspectH / aspectW);
+      let drawW = widthIfFullWidth;
+      let drawH = heightIfFullWidth;
+      if (heightIfFullWidth > contentH) {
+        drawH = contentH;
+        drawW = contentH * (aspectW / aspectH);
+      }
+      // Center horizontally if scaled-down width is less than contentW
+      const xOffset = margin + (contentW - drawW) / 2;
+      pdf.addImage(imgData, "JPEG", xOffset, margin, drawW, drawH);
       document.body.removeChild(container);
       setPdfProgress(null);
       const safeName = (childName || "MorningWork").replace(/[^a-zA-Z0-9]/g, "");
@@ -1356,9 +1369,18 @@ function PaidSuccessPage({ onBackToLanding }: { onBackToLanding: () => void }) {
           backgroundColor: "#ffffff", width: 540, windowWidth: 600, logging: false,
         });
         const imgData = canvas.toDataURL("image/jpeg", 0.93);
-        const imgH = Math.min(contentW * (canvas.height / canvas.width), contentH);
+        // Preserve aspect ratio (don't squish vertically when content is tall)
+        const aspectW = canvas.width;
+        const aspectH = canvas.height;
+        let drawW = contentW;
+        let drawH = contentW * (aspectH / aspectW);
+        if (drawH > contentH) {
+          drawH = contentH;
+          drawW = contentH * (aspectW / aspectH);
+        }
+        const xOffset = margin + (contentW - drawW) / 2;
         if (d > 1) pdf.addPage();
-        pdf.addImage(imgData, "JPEG", margin, margin, contentW, imgH);
+        pdf.addImage(imgData, "JPEG", xOffset, margin, drawW, drawH);
       }
 
       document.body.removeChild(container);
