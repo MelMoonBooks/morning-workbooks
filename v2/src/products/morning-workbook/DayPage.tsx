@@ -196,9 +196,47 @@ export default function DayPage({ day, month, year, childName, traditions, regio
   const dateDisplay = `${DAY_NAMES[date.getDay()]}, ${monthName} ${day}`;
   const lineH       = age <= 4 ? 48 : 40;
 
-  // Personalized greeting + rotating cultural fact (Rita-feedback fixes)
+  // Personalized greeting (Rita-feedback fix)
   const greetingWord = getGreetingWord(regionList, dominantTradition);
-  const culturalFact = pickCulturalFact(regionList, dominantTradition, month, day);
+
+  // ── Cultural slot ("Did you know?") ──
+  // Goal: avoid clutter. If today's picture is tied to a holiday/region blurb,
+  // promote that blurb up to the "Did you know?" slot and remove it from the
+  // date box (so the same sentence doesn't appear twice). If no matching blurb,
+  // fall back to the rotating fact pool. On days with no eligible content,
+  // the slot is hidden entirely.
+  let pictureMatchedHoliday: Holiday | null = null;
+  if (dominantTradition !== "universal") {
+    // Tradition-themed picture → grab the matching tradition holiday today
+    pictureMatchedHoliday = holidays.find(h => h.tradition === dominantTradition) ?? null;
+  } else {
+    // Region-themed picture? Check if any selected region tag matches the theme.
+    const themeTags = (theme.tags || []) as string[];
+    const regionTag = regionList.find(r => themeTags.includes(r));
+    if (regionTag) {
+      // Find a universal holiday whose sentence references the picture's word/subject
+      const themeWord    = (theme.word || "").toLowerCase();
+      const subjectWords = (theme.subject || "").toLowerCase().split(/\s+/).filter(w => w.length > 3);
+      pictureMatchedHoliday = holidays.find(h => {
+        if (h.tradition !== "universal") return false;
+        const s = h.sentence.toLowerCase();
+        return (themeWord && s.includes(themeWord)) || subjectWords.some(w => s.includes(w));
+      }) ?? null;
+    }
+  }
+
+  // The text shown in the "Did you know?" slot:
+  //   - Promoted holiday sentence, OR
+  //   - Generic rotating cultural fact (when no holiday matches the picture)
+  const culturalFactPlain = pictureMatchedHoliday?.sentence ?? null;
+  const culturalFactRotating = culturalFactPlain
+    ? null
+    : pickCulturalFact(regionList, dominantTradition, month, day);
+
+  // Filter the promoted holiday out of the date-box list so it doesn't duplicate
+  const holidaysForDateBox = pictureMatchedHoliday
+    ? holidays.filter(h => h !== pictureMatchedHoliday)
+    : holidays;
 
   // Build calendar grid cells
   const calendarCells: (number | null)[] = [];
@@ -207,7 +245,7 @@ export default function DayPage({ day, month, year, childName, traditions, regio
 
   // Check for birthdays on this day
   const todaysBirthdays = birthdays.filter(b => b.month === month && b.day === day);
-  const hasMessages = holidays.length > 0 || todaysBirthdays.length > 0;
+  const hasMessages = holidaysForDateBox.length > 0 || todaysBirthdays.length > 0;
 
   return (
     <div id={id} style={{ width: "100%", background: "white", borderRadius: 4, overflow: "hidden", fontFamily: "Georgia,serif" }}>
@@ -217,16 +255,25 @@ export default function DayPage({ day, month, year, childName, traditions, regio
         <div style={{ fontSize: 20, fontWeight: "bold", color: "#1f2937", letterSpacing: 0.3 }}>
           {greetingWord}, {childName || "Friend"}!
         </div>
-        {culturalFact && (
+        {culturalFactPlain ? (
+          // Promoted holiday/region blurb — no "Did you know?" label since the
+          // sentence is already context-rich (e.g. "Happy Mother's Day!")
+          <div style={{ marginTop: 6 }}>
+            <span style={{ fontSize: 11, color: "#4b5563", fontStyle: "italic" }}>
+              {culturalFactPlain}
+            </span>
+          </div>
+        ) : culturalFactRotating ? (
+          // Generic rotating fact — keep the "Did you know?" label
           <div style={{ marginTop: 6 }}>
             <span style={{ fontSize: 10, fontWeight: "bold", color: "#6b7280", letterSpacing: 0.8, textTransform: "uppercase", marginRight: 6 }}>
               Did you know?
             </span>
             <span style={{ fontSize: 11, color: "#4b5563", fontStyle: "italic" }}>
-              {culturalFact}
+              {culturalFactRotating}
             </span>
           </div>
-        )}
+        ) : null}
       </div>
 
       {/* ── Name / Date | Calendar ── */}
@@ -282,7 +329,7 @@ export default function DayPage({ day, month, year, childName, traditions, regio
             <div style={{ fontSize: 14, fontWeight: "bold", color: "#1f2937", marginBottom: hasMessages ? 4 : 0 }}>
               {dateDisplay}
             </div>
-            {holidays.map((h, i) => (
+            {holidaysForDateBox.map((h, i) => (
               <div key={i} style={{ fontSize: 11, color: "#374151", fontStyle: "italic", lineHeight: 1.5, marginTop: i > 0 ? 2 : 0 }}>
                 {h.sentence}
               </div>
