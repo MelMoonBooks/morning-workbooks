@@ -152,14 +152,13 @@ const CULTURAL_FACTS: Record<string, string[]> = {
 };
 
 function pickCulturalFact(regions: string[], dominantTradition: string, month: number, day: number): string | null {
-  // Prefer region-specific facts (most personalized to the family's home),
-  // then tradition-specific. Don't show anything for "universal" defaults.
+  // "Did you know?" shows for India + UK regions, plus Hindu tradition.
+  // Other traditions (Catholic, Protestant, Jewish, Muslim) already get cultural
+  // content through their affirmation quotes, so we don't double up there.
   const pools: string[] = [];
   if (regions.includes("india")) pools.push(...CULTURAL_FACTS.india);
   if (regions.includes("uk")) pools.push(...CULTURAL_FACTS.uk);
-  if (dominantTradition && dominantTradition !== "universal" && CULTURAL_FACTS[dominantTradition]) {
-    pools.push(...CULTURAL_FACTS[dominantTradition]);
-  }
+  if (dominantTradition === "hindu") pools.push(...CULTURAL_FACTS.hindu);
   if (pools.length === 0) return null;
   // Stable index — same date always picks same fact
   const idx = (month - 1) * 31 + day;
