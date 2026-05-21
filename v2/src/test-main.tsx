@@ -160,10 +160,22 @@ function ScaledWorksheet({ children, nativeWidth = 540 }: { children: React.Reac
 }
 
 // ── Paid Month CTA card ──
-function PaidMonthCTA({ monthName, daysInMonth, isLive, onBuy, onNotify }: {
-  monthName: string; daysInMonth: number; isLive: boolean;
-  onBuy: () => void; onNotify: () => void;
+// Supports an optional second "available month" so end-of-month visitors can
+// buy either the current month or next month directly from the card without
+// hunting through the month dropdown.
+function PaidMonthCTA({
+  monthName, daysInMonth, monthNum, year,
+  altMonthName, altDaysInMonth, altMonthNum, altYear,
+  isLive, onBuy, onNotify,
+}: {
+  monthName: string; daysInMonth: number; monthNum: number; year: number;
+  altMonthName?: string; altDaysInMonth?: number; altMonthNum?: number; altYear?: number;
+  isLive: boolean;
+  onBuy: (overrideMonth?: number, overrideYear?: number) => void;
+  onNotify: () => void;
 }) {
+  const hasAlt = altMonthName !== undefined;
+
   return (
     <div style={{
       position: "relative", zIndex: 1, maxWidth: 540, margin: "12px auto",
@@ -175,24 +187,37 @@ function PaidMonthCTA({ monthName, daysInMonth, isLive, onBuy, onNotify }: {
         Loved what you see?
       </div>
       <div style={{ fontSize: 14, color: theme.textSecondary, marginBottom: 14, lineHeight: 1.5 }}>
-        Get the full month of {monthName} for your family — {daysInMonth} personalized pages per child, ready to print.
+        {hasAlt
+          ? <>Get a full month of personalized worksheets for your family — pick {monthName} or {altMonthName}.</>
+          : <>Get the full month of {monthName} for your family — {daysInMonth} personalized pages per child, ready to print.</>}
       </div>
       <div style={{ fontSize: 28, fontWeight: "bold", color: theme.textPrimary, marginBottom: 4 }}>
-        $2.99
+        $2.99 <span style={{ fontSize: 14, fontWeight: "normal", color: theme.textMuted }}>per month</span>
       </div>
       <div style={{ fontSize: 11, color: theme.textPlaceholder, marginBottom: 14, fontStyle: "italic" }}>
         One purchase covers all your kids
       </div>
       {isLive ? (
         <>
-          <button onClick={onBuy} style={{
-            padding: "14px 32px", fontSize: 15, fontWeight: "bold", cursor: "pointer",
-            border: "none", borderRadius: 10,
-            background: colors.deepTeal, color: theme.buttonText,
-            boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-          }}>
-            Get the full month →
-          </button>
+          <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
+            <button onClick={() => onBuy(monthNum, year)} style={{
+              padding: "14px 22px", fontSize: 14, fontWeight: "bold", cursor: "pointer",
+              border: "none", borderRadius: 10,
+              background: colors.deepTeal, color: theme.buttonText,
+              boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+            }}>
+              ↓ Get {monthName} ({daysInMonth} days)
+            </button>
+            {hasAlt && (
+              <button onClick={() => onBuy(altMonthNum, altYear)} style={{
+                padding: "14px 22px", fontSize: 14, fontWeight: "bold", cursor: "pointer",
+                border: `2px solid ${colors.deepTeal}`, borderRadius: 10,
+                background: theme.cardBg, color: colors.deepTeal,
+              }}>
+                ↓ Get {altMonthName} ({altDaysInMonth} days)
+              </button>
+            )}
+          </div>
           <div style={{ fontSize: 11, color: theme.textPlaceholder, marginTop: 10 }}>
             Instant PDF download · Secure checkout via Stripe
           </div>
@@ -220,9 +245,21 @@ function PaidMonthCTA({ monthName, daysInMonth, isLive, onBuy, onNotify }: {
 function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
   const now = new Date();
   const [childName, setChildName] = useState("");
-  const [month, setMonth] = useState(now.getMonth() + 1);
-  const [day, setDay] = useState(now.getDate());
-  const [year] = useState(now.getFullYear());
+
+  // Default to the current month/day. From the 20th onward we also show a
+  // banner letting people know NEXT month's worksheets are ready to preview
+  // and buy — but we don't auto-switch, since kids who haven't done a month's
+  // worksheets yet still enjoy them.
+  const ROLLOVER_DAY = 20;
+  const todayMonth = now.getMonth() + 1;
+  const todayDay = now.getDate();
+  const todayYear = now.getFullYear();
+  const nextMonthReady = todayDay >= ROLLOVER_DAY;
+  const nextMonthNum   = todayMonth === 12 ? 1 : todayMonth + 1;
+
+  const [month, setMonth] = useState(todayMonth);
+  const [day, setDay]     = useState(todayDay);
+  const [year]            = useState(todayYear);
   const [grade, setGrade] = useState<string>("kindergarten");
   const age = gradeToAge(grade);  // derived for backward compat with DayPage/activities
   const [traditions, setTraditions] = useState<string[]>(["universal"]);
@@ -274,10 +311,15 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
   // ──────────────────────────────────────────────────────────────
   const STRIPE_PAYMENT_LINK: string | null = "https://buy.stripe.com/eVq4gr8hAd32gVX32M2wU00";
 
-  const handleBuyMonthPDF = () => {
+  // Accept an optional month override — so the paid CTA can offer both the
+  // current AND next month independently of which month is selected in the
+  // preview picker.
+  const handleBuyMonthPDF = (overrideMonth?: number, overrideYear?: number) => {
+    const buyMonth = overrideMonth ?? month;
+    const buyYear  = overrideYear  ?? year;
     track("get_full_month_clicked", {
       childName: childName || "(unnamed)",
-      age, month, year,
+      age, month: buyMonth, year: buyYear,
       traditions, regions,
       birthdayCount: birthdays.length,
     });
@@ -288,7 +330,7 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
       // the customer saw on screen.
       try {
         localStorage.setItem("pendingMonthPDF", JSON.stringify({
-          name: childName, age, month, year, traditions, regions, birthdays,
+          name: childName, age, month: buyMonth, year: buyYear, traditions, regions, birthdays,
           timestamp: Date.now(),
         }));
       } catch (e) {
@@ -322,6 +364,34 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
   const suggestedBooks = content.suggestedColoringBooks;
   const daysInMonth = new Date(year, month, 0).getDate();
   const monthName = MONTH_NAMES[month - 1];
+
+  // Always offer both the current actual month AND next actual month on the
+  // paid CTA. If the user is viewing either of those, the OTHER appears as
+  // a second button. (If they navigated to an unrelated month like August,
+  // no alt — only one button so it's not confusing.)
+  let altMonthProps: {
+    altMonthName?: string; altDaysInMonth?: number;
+    altMonthNum?: number;  altYear?: number;
+  } = {};
+  const isViewingCurrent = month === todayMonth && year === todayYear;
+  const isViewingNext    = month === nextMonthNum && year === (nextMonthNum === 1 ? todayYear + 1 : todayYear);
+  if (isViewingCurrent) {
+    const altNum = nextMonthNum;
+    const altYr  = altNum === 1 ? todayYear + 1 : todayYear;
+    altMonthProps = {
+      altMonthName:   MONTH_NAMES[altNum - 1],
+      altDaysInMonth: new Date(altYr, altNum, 0).getDate(),
+      altMonthNum:    altNum,
+      altYear:        altYr,
+    };
+  } else if (isViewingNext) {
+    altMonthProps = {
+      altMonthName:   MONTH_NAMES[todayMonth - 1],
+      altDaysInMonth: new Date(todayYear, todayMonth, 0).getDate(),
+      altMonthNum:    todayMonth,
+      altYear:        todayYear,
+    };
+  }
   const [pdfProgress, setPdfProgress] = useState<number | null>(null);
 
   // ── Single-day PDF download (free, no login required) ──
@@ -623,60 +693,123 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
           </button>
         </div>
 
-        {/* ── Show all 31 days + paid full-month CTA ── */}
-        <div style={{ textAlign: "center", padding: "8px 0 24px" }}>
-          <button onClick={() => {
-              const next = !showMonth;
-              setShowMonth(next);
-              if (next) track("show_full_month_clicked", { month, daysInMonth });
-            }}
-            style={{
-              padding: "10px 22px", fontSize: 14, fontWeight: "bold", cursor: "pointer",
-              border: `2px solid ${colors.deepTeal}`, borderRadius: 10,
-              background: showMonth ? theme.cardBg : "white",
-              color: theme.textPrimary,
-            }}>
-            {showMonth ? `▲ Hide the full month` : `▼ See all ${daysInMonth} days of ${monthName}`}
-          </button>
-        </div>
+        {/* ── Show all days + paid full-month CTA. When an alt month is
+            available, expand BOTH months stacked so parents can preview the
+            full content of each before deciding which to buy. ── */}
+        {(() => {
+          const hasAlt = altMonthProps.altMonthName !== undefined;
+          const primaryDays  = daysInMonth;
+          const altDays      = altMonthProps.altDaysInMonth ?? 0;
+          const totalDays    = primaryDays + altDays;
+          const buttonLabel  = showMonth
+            ? `▲ Hide the full months`
+            : hasAlt
+              ? `▼ See all days of ${monthName} & ${altMonthProps.altMonthName} (${totalDays} days)`
+              : `▼ See all ${primaryDays} days of ${monthName}`;
+          return (
+            <>
+              <div style={{ textAlign: "center", padding: "8px 0 24px" }}>
+                <button onClick={() => {
+                    const next = !showMonth;
+                    setShowMonth(next);
+                    if (next) track("show_full_month_clicked", {
+                      primaryMonth: month, primaryDays,
+                      altMonth: altMonthProps.altMonthNum, altDays,
+                      bothMonths: hasAlt,
+                    });
+                  }}
+                  style={{
+                    padding: "10px 22px", fontSize: 14, fontWeight: "bold", cursor: "pointer",
+                    border: `2px solid ${colors.deepTeal}`, borderRadius: 10,
+                    background: showMonth ? theme.cardBg : "white",
+                    color: theme.textPrimary,
+                  }}>
+                  {buttonLabel}
+                </button>
+              </div>
 
-        {showMonth && (
-          <>
-            {/* Paid CTA at top of month view */}
-            <PaidMonthCTA
-              monthName={monthName}
-              daysInMonth={daysInMonth}
-              isLive={STRIPE_PAYMENT_LINK !== null}
-              onBuy={handleBuyMonthPDF}
-              onNotify={onSwitch}
-            />
+              {showMonth && (
+                <>
+                  {/* Paid CTA at top of month view */}
+                  <PaidMonthCTA
+                    monthName={monthName}
+                    daysInMonth={daysInMonth}
+                    monthNum={month}
+                    year={year}
+                    {...altMonthProps}
+                    isLive={STRIPE_PAYMENT_LINK !== null}
+                    onBuy={handleBuyMonthPDF}
+                    onNotify={onSwitch}
+                  />
 
-            {/* All 31 days inline */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 32, padding: "8px 0 24px" }}>
-              {Array.from({ length: daysInMonth }, (_, i) => i + 1).map(d => (
-                <div key={d}>
-                  <div style={{ textAlign: "center", fontSize: 11, fontWeight: "bold", color: theme.textMuted, letterSpacing: 1.5, marginBottom: 8 }}>
-                    — DAY {d} —
+                  {/* Primary month — all days */}
+                  <div style={{
+                    textAlign: "center", fontSize: 14, fontWeight: "bold",
+                    color: theme.textPrimary, letterSpacing: 1.2,
+                    margin: "16px 0 12px", paddingBottom: 6,
+                    borderBottom: `1.5px solid ${colors.deepTeal}`,
+                  }}>
+                    {monthName.toUpperCase()} {year}
                   </div>
-                  <ScaledWorksheet>
-                    <div style={{ boxShadow: "0 4px 20px rgba(0,0,0,0.08)", borderRadius: 8, overflow: "hidden" }}>
-                      <DayPage day={d} month={month} year={year} childName={childName} traditions={traditions} region={regions} age={age} birthdays={birthdays} />
-                    </div>
-                  </ScaledWorksheet>
-                </div>
-              ))}
-            </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 32, padding: "8px 0 24px" }}>
+                    {Array.from({ length: primaryDays }, (_, i) => i + 1).map(d => (
+                      <div key={`p-${d}`}>
+                        <div style={{ textAlign: "center", fontSize: 11, fontWeight: "bold", color: theme.textMuted, letterSpacing: 1.5, marginBottom: 8 }}>
+                          — DAY {d} —
+                        </div>
+                        <ScaledWorksheet>
+                          <div style={{ boxShadow: "0 4px 20px rgba(0,0,0,0.08)", borderRadius: 8, overflow: "hidden" }}>
+                            <DayPage day={d} month={month} year={year} childName={childName} traditions={traditions} region={regions} age={age} birthdays={birthdays} />
+                          </div>
+                        </ScaledWorksheet>
+                      </div>
+                    ))}
+                  </div>
 
-            {/* Paid CTA at bottom of month view */}
-            <PaidMonthCTA
-              monthName={monthName}
-              daysInMonth={daysInMonth}
-              isLive={STRIPE_PAYMENT_LINK !== null}
-              onBuy={handleBuyMonthPDF}
-              onNotify={onSwitch}
-            />
-          </>
-        )}
+                  {/* Alt month — all days */}
+                  {hasAlt && altMonthProps.altMonthNum && altMonthProps.altYear && (
+                    <>
+                      <div style={{
+                        textAlign: "center", fontSize: 14, fontWeight: "bold",
+                        color: theme.textPrimary, letterSpacing: 1.2,
+                        margin: "24px 0 12px", paddingBottom: 6,
+                        borderBottom: `1.5px solid ${colors.deepTeal}`,
+                      }}>
+                        {altMonthProps.altMonthName!.toUpperCase()} {altMonthProps.altYear}
+                      </div>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 32, padding: "8px 0 24px" }}>
+                        {Array.from({ length: altDays }, (_, i) => i + 1).map(d => (
+                          <div key={`a-${d}`}>
+                            <div style={{ textAlign: "center", fontSize: 11, fontWeight: "bold", color: theme.textMuted, letterSpacing: 1.5, marginBottom: 8 }}>
+                              — DAY {d} —
+                            </div>
+                            <ScaledWorksheet>
+                              <div style={{ boxShadow: "0 4px 20px rgba(0,0,0,0.08)", borderRadius: 8, overflow: "hidden" }}>
+                                <DayPage day={d} month={altMonthProps.altMonthNum!} year={altMonthProps.altYear!} childName={childName} traditions={traditions} region={regions} age={age} birthdays={birthdays} />
+                              </div>
+                            </ScaledWorksheet>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )}
+
+                  {/* Paid CTA at bottom of month view */}
+                  <PaidMonthCTA
+                    monthName={monthName}
+                    daysInMonth={daysInMonth}
+                    monthNum={month}
+                    year={year}
+                    {...altMonthProps}
+                    isLive={STRIPE_PAYMENT_LINK !== null}
+                    onBuy={handleBuyMonthPDF}
+                    onNotify={onSwitch}
+                  />
+                </>
+              )}
+            </>
+          );
+        })()}
 
       </section>
 
@@ -720,27 +853,6 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
         </div>
       </section>
       )}
-
-      {/* Bottom CTA — re-offers the free download for scrollers who didn't convert above */}
-      <section style={{ position: "relative", zIndex: 1, textAlign: "center", padding: "32px 24px 24px" }}>
-        <div style={{ fontSize: 18, fontWeight: "bold", color: theme.textPrimary, marginBottom: 12 }}>
-          Ready to start a calmer morning?
-        </div>
-        <button onClick={handleDownloadDayPDF} disabled={pdfProgress !== null}
-          style={{
-            padding: "14px 36px", borderRadius: 10, border: "none",
-            background: colors.deepTeal, color: theme.buttonText,
-            fontSize: 16, fontWeight: "bold",
-            cursor: pdfProgress !== null ? "wait" : "pointer",
-            opacity: pdfProgress !== null ? 0.7 : 1,
-            boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-          }}>
-          {pdfProgress !== null
-            ? `Building your PDF… ${pdfProgress}%`
-            : `↓ Get today's free worksheet`}
-        </button>
-        <div style={{ fontSize: 12, color: theme.textPlaceholder, marginTop: 8 }}>Free instant download · No account needed</div>
-      </section>
 
       {/* Printed Workbooks waitlist — coming soon */}
       <section style={{
@@ -1076,11 +1188,14 @@ function PaidSuccessPage({ onBackToLanding }: { onBackToLanding: () => void }) {
   const autoRanRef = useRef(false);
 
   // Editable copy of the order so customer can regenerate for siblings
+  // (and pick a different month if they paid for the wrong one)
   const [editName, setEditName] = useState("");
   const [editAge, setEditAge] = useState(5);
   const [editTraditions, setEditTraditions] = useState<string[]>(["universal"]);
   const [editRegions, setEditRegions] = useState<string[]>(["us"]);
   const [editBirthdays, setEditBirthdays] = useState<Birthday[]>([]);
+  const [editMonth, setEditMonth] = useState(1);
+  const [editYear, setEditYear] = useState(new Date().getFullYear());
 
   useEffect(() => {
     try {
@@ -1093,6 +1208,8 @@ function PaidSuccessPage({ onBackToLanding }: { onBackToLanding: () => void }) {
         setEditTraditions(parsed.traditions || ["universal"]);
         setEditRegions(parsed.regions || ["us"]);
         setEditBirthdays(parsed.birthdays || []);
+        setEditMonth(parsed.month || new Date().getMonth() + 1);
+        setEditYear(parsed.year || new Date().getFullYear());
         // Track successful payment completion with the customization context
         track("payment_completed", {
           childName: parsed.name || "(unnamed)",
@@ -1251,7 +1368,7 @@ function PaidSuccessPage({ onBackToLanding }: { onBackToLanding: () => void }) {
   const handleRegenerate = () => {
     if (!order) return;
     generateMonthPDF({
-      name: editName, age: editAge, month: order.month, year: order.year,
+      name: editName, age: editAge, month: editMonth, year: editYear,
       traditions: editTraditions, regions: editRegions, birthdays: editBirthdays,
     }, true);
   };
@@ -1356,10 +1473,25 @@ function PaidSuccessPage({ onBackToLanding }: { onBackToLanding: () => void }) {
           padding: 20,
         }}>
           <div style={{ fontSize: 15, fontWeight: "bold", color: theme.textPrimary, marginBottom: 4 }}>
-            Have more than one child?
+            Have more than one child, or need a different month?
           </div>
           <div style={{ fontSize: 13, color: theme.textMuted, marginBottom: 16, lineHeight: 1.5 }}>
-            Your purchase covers the whole family. Edit the name and any other details below, then download a personalized PDF for each of your kids.
+            Your purchase covers the whole family. Edit the name, month, or any other details below, then download a personalized PDF.
+          </div>
+
+          {/* Month selector — lets customer fix a wrong-month purchase */}
+          <div style={{ marginBottom: 12 }}>
+            <div style={{ fontSize: 10, fontWeight: "bold", color: theme.textMuted, marginBottom: 4 }}>MONTH</div>
+            <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+              <select value={editMonth} onChange={e => setEditMonth(Number(e.target.value))}
+                style={{ padding: "6px 10px", borderRadius: 7, border: `1.5px solid ${theme.cardBorder}`, fontSize: 14, fontFamily: "Georgia,serif" }}>
+                {MONTH_NAMES.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
+              </select>
+              <select value={editYear} onChange={e => setEditYear(Number(e.target.value))}
+                style={{ padding: "6px 10px", borderRadius: 7, border: `1.5px solid ${theme.cardBorder}`, fontSize: 14, fontFamily: "Georgia,serif" }}>
+                {[editYear - 1, editYear, editYear + 1].map(y => <option key={y} value={y}>{y}</option>)}
+              </select>
+            </div>
           </div>
 
           {/* Child name */}
@@ -1433,7 +1565,9 @@ function PaidSuccessPage({ onBackToLanding }: { onBackToLanding: () => void }) {
               background: colors.deepTeal, color: theme.buttonText,
               opacity: pdfProgress !== null ? 0.7 : 1,
             }}>
-            {pdfProgress !== null ? `Building PDF… ${pdfProgress}%` : `↓ Generate PDF for ${editName || "this child"}`}
+            {pdfProgress !== null
+              ? `Building PDF… ${pdfProgress}%`
+              : `↓ Generate ${MONTH_NAMES[editMonth - 1]} ${editYear} PDF for ${editName || "this child"}`}
           </button>
         </div>
 
