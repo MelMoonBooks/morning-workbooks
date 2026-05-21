@@ -152,17 +152,20 @@ const CULTURAL_FACTS: Record<string, string[]> = {
 };
 
 function pickCulturalFact(regions: string[], dominantTradition: string, month: number, day: number): string | null {
-  // "Did you know?" shows for India + UK regions, plus Hindu tradition.
-  // Other traditions (Catholic, Protestant, Jewish, Muslim) already get cultural
-  // content through their affirmation quotes, so we don't double up there.
-  const pools: string[] = [];
-  if (regions.includes("india")) pools.push(...CULTURAL_FACTS.india);
-  if (regions.includes("uk")) pools.push(...CULTURAL_FACTS.uk);
-  if (dominantTradition === "hindu") pools.push(...CULTURAL_FACTS.hindu);
-  if (pools.length === 0) return null;
-  // Stable index — same date always picks same fact
+  // "Did you know?" shows for India region and Hindu tradition only.
+  // UK, plus other traditions (Catholic, Protestant, Jewish, Muslim), get the
+  // affirmation quote instead. When BOTH India and Hindu are selected, days
+  // alternate between the two pools so families see a mix.
+  const sourcePools: string[][] = [];
+  if (regions.includes("india")) sourcePools.push(CULTURAL_FACTS.india);
+  if (dominantTradition === "hindu") sourcePools.push(CULTURAL_FACTS.hindu);
+  if (sourcePools.length === 0) return null;
+
+  // Stable index — same date always picks same fact (so PDF regenerations match)
   const idx = (month - 1) * 31 + day;
-  return pools[idx % pools.length];
+  const pool = sourcePools[idx % sourcePools.length];
+  const factIdx = Math.floor(idx / sourcePools.length) % pool.length;
+  return pool[factIdx];
 }
 
 function getMiniCalendar(month: number, year: number) {
@@ -255,25 +258,6 @@ export default function DayPage({ day, month, year, childName, traditions, regio
         <div style={{ fontSize: 20, fontWeight: "bold", color: "#1f2937", letterSpacing: 0.3 }}>
           {greetingWord}, {childName || "Friend"}!
         </div>
-        {culturalFactPlain ? (
-          // Promoted holiday/region blurb — no "Did you know?" label since the
-          // sentence is already context-rich (e.g. "Happy Mother's Day!")
-          <div style={{ marginTop: 6 }}>
-            <span style={{ fontSize: 11, color: "#4b5563", fontStyle: "italic" }}>
-              {culturalFactPlain}
-            </span>
-          </div>
-        ) : culturalFactRotating ? (
-          // Generic rotating fact — keep the "Did you know?" label
-          <div style={{ marginTop: 6 }}>
-            <span style={{ fontSize: 10, fontWeight: "bold", color: "#6b7280", letterSpacing: 0.8, textTransform: "uppercase", marginRight: 6 }}>
-              Did you know?
-            </span>
-            <span style={{ fontSize: 11, color: "#4b5563", fontStyle: "italic" }}>
-              {culturalFactRotating}
-            </span>
-          </div>
-        ) : null}
       </div>
 
       {/* ── Name / Date | Calendar ── */}
@@ -416,18 +400,35 @@ export default function DayPage({ day, month, year, childName, traditions, regio
         <MathActivity day={day} month={monthName} age={age} />
       </div>
 
-      {/* ── Footer (affirmation) ── */}
+      {/* ── Footer ──
+          One slot, three modes (priority order):
+          1. Picture-matching holiday/region blurb (any family on a special day)
+          2. Rotating "Did you know?" fact (India/UK regions + Hindu tradition)
+          3. Affirmation quote (everyone else's default) */}
       <div style={{
         borderTop: "2px solid #1f2937", padding: "10px 20px", textAlign: "center",
         minHeight: 58, display: "flex", flexDirection: "column",
         alignItems: "center", justifyContent: "center", gap: 3,
       }}>
-        <div style={{ fontSize: 12, color: "#4b5563", fontStyle: "italic", maxWidth: 400 }}>
-          &ldquo;{affirmation.quote}&rdquo;
-          {affirmation.ref && (
-            <span style={{ fontSize: 11, color: "#6b7280", fontStyle: "normal" }}> — {affirmation.ref}</span>
-          )}
-        </div>
+        {culturalFactPlain ? (
+          <div style={{ fontSize: 12, color: "#4b5563", fontStyle: "italic", maxWidth: 400 }}>
+            {culturalFactPlain}
+          </div>
+        ) : culturalFactRotating ? (
+          <div style={{ fontSize: 12, color: "#4b5563", fontStyle: "italic", maxWidth: 400 }}>
+            <span style={{ fontSize: 10, fontWeight: "bold", color: "#6b7280", letterSpacing: 0.8, textTransform: "uppercase", marginRight: 6, fontStyle: "normal" }}>
+              Did you know?
+            </span>
+            {culturalFactRotating}
+          </div>
+        ) : (
+          <div style={{ fontSize: 12, color: "#4b5563", fontStyle: "italic", maxWidth: 400 }}>
+            &ldquo;{affirmation.quote}&rdquo;
+            {affirmation.ref && (
+              <span style={{ fontSize: 11, color: "#6b7280", fontStyle: "normal" }}> — {affirmation.ref}</span>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
