@@ -508,13 +508,20 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
       }} />
 
       {/* Nav */}
-      <nav style={{ position: "relative", zIndex: 1, display: "flex", justifyContent: "center", alignItems: "center", padding: "14px 24px", borderBottom: `1px solid ${theme.navBorder}`, background: "rgba(255,255,255,0.85)", backdropFilter: "blur(8px)" }}>
-        <div style={{ fontSize: 18, fontWeight: "bold", color: theme.textPrimary }}>MelMoon Books</div>
+      <nav style={{ position: "relative", zIndex: 1, display: "flex", justifyContent: "center", alignItems: "center", gap: 10, padding: "14px 24px", borderBottom: `1px solid ${theme.navBorder}`, background: "rgba(255,255,255,0.85)", backdropFilter: "blur(8px)" }}>
+        {/* Logo — uses /logo.png if available, otherwise just shows the wordmark */}
+        <img src="/logo.png" alt="" style={{ height: 36, width: "auto", display: "block" }}
+          onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
+        <div style={{ fontSize: 22, fontWeight: 700, color: theme.textPrimary, fontFamily: "'Playfair Display', Georgia, serif", letterSpacing: 0.3 }}>Melmoon Books</div>
       </nav>
 
       {/* Hero */}
       <section style={{ position: "relative", zIndex: 1, textAlign: "center", padding: "48px 24px 32px", maxWidth: 680, margin: "0 auto" }}>
-        <h1 style={{ fontSize: 34, fontWeight: "bold", color: theme.textPrimary, margin: "0 0 14px", lineHeight: 1.15 }}>
+        <h1 style={{
+          fontSize: 36, fontWeight: 700, color: theme.textPrimary,
+          margin: "0 0 14px", lineHeight: 1.15,
+          fontFamily: "'Playfair Display', Georgia, serif",
+        }}>
           Start the morning with a playful worksheet, not a screen.
         </h1>
         <p style={{ fontSize: 16, color: theme.textSecondary, lineHeight: 1.6, margin: "0 0 24px" }}>
@@ -908,7 +915,7 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
       </section>
 
       <footer style={{ position: "relative", zIndex: 1, borderTop: `1px solid ${theme.navBorder}`, padding: "16px 24px", textAlign: "center", fontSize: 11, color: theme.textPlaceholder }}>
-        MelMoon Books · melmoonbooks.com
+        Melmoon Books · melmoonbooks.com
       </footer>
     </div>
   );
@@ -994,7 +1001,7 @@ function TestWorkbook({ onSwitch, onDashboard }: { onSwitch: () => void; onDashb
       <div style={{ maxWidth: 640, margin: "0 auto" }}>
         {/* Header */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-          <h1 style={{ fontSize: 24, color: theme.textPrimary, margin: 0 }}>MelMoon Books</h1>
+          <h1 style={{ fontSize: 24, color: theme.textPrimary, margin: 0 }}>Melmoon Books</h1>
           <div style={{ display: "flex", gap: 8 }}>
             <button onClick={onDashboard} style={{ padding: "6px 14px", borderRadius: 8, border: `1.5px solid ${colors.deepTeal}`, background: colors.deepTeal, color: "white", fontSize: 12, fontWeight: "bold", cursor: "pointer" }}>
               Content Dashboard
