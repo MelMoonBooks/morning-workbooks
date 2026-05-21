@@ -38,7 +38,4 @@ export const muslimActivities: ActivityMap = {
 
   // Generic Friday prayer (jumu'ah) — every Friday is special in Islam,
   // but we won't add per-Friday entries (too many; universal coverage is fine)
-
-  // ── December (Quran-themed for kids who want Islamic content year-round) ──
-  "12-1":  { word: "stars",    subject: "a sky full of stars and the crescent moon", instruction: "Color the night sky!",                  colorWord: "yellow", tags: ["muslim", "general"] },
 };

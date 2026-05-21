@@ -24,10 +24,10 @@ export const christianProtestantActivities: ActivityMap = {
   // ── November ──
   "11-26": { word: "harvest",  subject: "a Thanksgiving table with a turkey", instruction: "Color the Thanksgiving feast!",                colorWord: "brown",  tags: ["protestant", "thanksgiving"] },
 
-  // ── December (Advent + Christmas) ──
-  "12-7":  { word: "candles",  subject: "an Advent wreath with candles",  instruction: "Color the Advent candles!",                        colorWord: "purple", tags: ["protestant", "advent"] },
-  "12-14": { word: "candles",  subject: "an Advent wreath with two candles lit", instruction: "Color the second week of Advent!",          colorWord: "purple", tags: ["protestant", "advent"] },
-  "12-21": { word: "candles",  subject: "an Advent wreath with three candles lit", instruction: "Color the third week of Advent — joy!",   colorWord: "pink",   tags: ["protestant", "advent"] },
+  // ── December (Advent + Christmas) ── dates align with 2026 Advent Sundays
+  "12-6":  { word: "candles",  subject: "an Advent wreath with two candles lit", instruction: "Color the second Sunday of Advent!",         colorWord: "purple", tags: ["protestant", "advent"] },
+  "12-13": { word: "candles",  subject: "an Advent wreath with three candles lit", instruction: "Color the third Sunday of Advent — joy!", colorWord: "pink",   tags: ["protestant", "advent"] },
+  "12-20": { word: "candles",  subject: "an Advent wreath with four candles lit", instruction: "Color the fourth Sunday of Advent!",        colorWord: "purple", tags: ["protestant", "advent"] },
   "12-24": { word: "star",     subject: "the star of Bethlehem over the stable", instruction: "Color the Christmas Eve star!",             colorWord: "yellow", tags: ["protestant", "christmas-eve"] },
   "12-25": { word: "Jesus",    subject: "baby Jesus in the manger",       instruction: "Color baby Jesus — born for us!",                  colorWord: "gold",   tags: ["protestant", "christmas"] },
 };
