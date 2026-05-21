@@ -507,12 +507,22 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
         zIndex: 0,
       }} />
 
-      {/* Nav */}
-      <nav style={{ position: "relative", zIndex: 1, display: "flex", justifyContent: "center", alignItems: "center", gap: 14, padding: "18px 24px", borderBottom: `1px solid ${theme.navBorder}`, background: "rgba(255,255,255,0.85)", backdropFilter: "blur(8px)" }}>
-        {/* Logo — uses /logo.png if available, otherwise just shows the wordmark */}
-        <img src="/logo.png" alt="" style={{ height: 72, width: "auto", display: "block" }}
-          onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
-        <div style={{ fontSize: 34, fontWeight: 600, color: theme.textPrimary, fontFamily: "'Cormorant Garamond', Georgia, serif", letterSpacing: 0.5, lineHeight: 1 }}>Melmoon Books</div>
+      {/* Nav — full brand logo image (logo includes "Melmoon Books" text) */}
+      <nav style={{ position: "relative", zIndex: 1, display: "flex", justifyContent: "center", alignItems: "center", padding: "14px 24px", borderBottom: `1px solid ${theme.navBorder}`, background: "rgba(255,255,255,0.85)", backdropFilter: "blur(8px)" }}>
+        <img
+          src="/logo.png"
+          alt="Melmoon Books"
+          style={{ height: 110, width: "auto", display: "block", maxWidth: "90vw", objectFit: "contain" }}
+          onError={(e) => {
+            // If logo fails to load, fall back to a styled wordmark
+            const img = e.currentTarget as HTMLImageElement;
+            img.style.display = "none";
+            const fallback = document.createElement("div");
+            fallback.textContent = "Melmoon Books";
+            fallback.style.cssText = `font-size: 32px; font-weight: 600; color: ${theme.textPrimary}; font-family: 'Cormorant Garamond', Georgia, serif; letter-spacing: 0.5px;`;
+            img.parentElement?.appendChild(fallback);
+          }}
+        />
       </nav>
 
       {/* Hero */}
