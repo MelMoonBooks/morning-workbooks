@@ -16,6 +16,15 @@ import { ImageCacheContext } from './shared/ImageCache';
 const MONTH_NAMES = ["January","February","March","April","May","June",
   "July","August","September","October","November","December"];
 
+// ── AVAILABLE MONTHS ──
+// Only months in this list appear in the public month picker and paid CTA.
+// Add a month here (1-12) once you've uploaded all its coloring images and
+// you're ready to sell that month's PDF. Currently: May + June only.
+const AVAILABLE_MONTHS: number[] = [5, 6];
+const isMonthAvailable = (m: number) => AVAILABLE_MONTHS.includes(m);
+// First available month, used as fallback default if today's month isn't ready yet
+const FIRST_AVAILABLE_MONTH = AVAILABLE_MONTHS[0] ?? 1;
+
 const TRADITIONS = [
   { id: "universal",            label: "Non-religious" },
   { id: "hindu",                label: "Hindu" },
@@ -246,10 +255,8 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
   const now = new Date();
   const [childName, setChildName] = useState("");
 
-  // Default to the current month/day. From the 20th onward we also show a
-  // banner letting people know NEXT month's worksheets are ready to preview
-  // and buy — but we don't auto-switch, since kids who haven't done a month's
-  // worksheets yet still enjoy them.
+  // Default to the current month/day — UNLESS today's month doesn't have
+  // images yet, in which case fall back to the first available month.
   const ROLLOVER_DAY = 20;
   const todayMonth = now.getMonth() + 1;
   const todayDay = now.getDate();
@@ -257,8 +264,12 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
   const nextMonthReady = todayDay >= ROLLOVER_DAY;
   const nextMonthNum   = todayMonth === 12 ? 1 : todayMonth + 1;
 
-  const [month, setMonth] = useState(todayMonth);
-  const [day, setDay]     = useState(todayDay);
+  // Pick a sensible default month: today's month if available, else first available
+  const defaultMonthForToday = isMonthAvailable(todayMonth) ? todayMonth : FIRST_AVAILABLE_MONTH;
+  const defaultDayForToday   = isMonthAvailable(todayMonth) ? todayDay : 1;
+
+  const [month, setMonth] = useState(defaultMonthForToday);
+  const [day, setDay]     = useState(defaultDayForToday);
   const [year]            = useState(todayYear);
   const [grade, setGrade] = useState<string>("kindergarten");
   const age = gradeToAge(grade);  // derived for backward compat with DayPage/activities
@@ -365,31 +376,29 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
   const daysInMonth = new Date(year, month, 0).getDate();
   const monthName = MONTH_NAMES[month - 1];
 
-  // Always offer both the current actual month AND next actual month on the
-  // paid CTA. If the user is viewing either of those, the OTHER appears as
-  // a second button. (If they navigated to an unrelated month like August,
-  // no alt — only one button so it's not confusing.)
+  // Always offer both available months on the paid CTA when user is viewing
+  // one of them. Only counts months that are in AVAILABLE_MONTHS — no point
+  // promoting July when July images aren't ready yet.
   let altMonthProps: {
     altMonthName?: string; altDaysInMonth?: number;
     altMonthNum?: number;  altYear?: number;
   } = {};
-  const isViewingCurrent = month === todayMonth && year === todayYear;
-  const isViewingNext    = month === nextMonthNum && year === (nextMonthNum === 1 ? todayYear + 1 : todayYear);
-  if (isViewingCurrent) {
-    const altNum = nextMonthNum;
-    const altYr  = altNum === 1 ? todayYear + 1 : todayYear;
+  // Build a list of available "other months" relative to the currently viewed month
+  const otherAvailable = AVAILABLE_MONTHS.filter(m => m !== month);
+  // Pick the most natural "other" — the next month if it's available, else first
+  let altNum: number | undefined;
+  if (otherAvailable.includes(nextMonthNum)) {
+    altNum = nextMonthNum;
+  } else if (otherAvailable.length > 0) {
+    altNum = otherAvailable[0];
+  }
+  if (altNum !== undefined && isMonthAvailable(month)) {
+    const altYr = (altNum === 1 && todayMonth === 12) ? todayYear + 1 : todayYear;
     altMonthProps = {
       altMonthName:   MONTH_NAMES[altNum - 1],
       altDaysInMonth: new Date(altYr, altNum, 0).getDate(),
       altMonthNum:    altNum,
       altYear:        altYr,
-    };
-  } else if (isViewingNext) {
-    altMonthProps = {
-      altMonthName:   MONTH_NAMES[todayMonth - 1],
-      altDaysInMonth: new Date(todayYear, todayMonth, 0).getDate(),
-      altMonthNum:    todayMonth,
-      altYear:        todayYear,
     };
   }
   const [pdfProgress, setPdfProgress] = useState<number | null>(null);
@@ -507,13 +516,13 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
         zIndex: 0,
       }} />
 
-      {/* Nav — horizontal "Melmoon Books" wordmark on cream background
-          that blends with the logo's own cream/off-white background. */}
-      <nav style={{ position: "relative", zIndex: 1, display: "flex", justifyContent: "center", alignItems: "center", padding: "16px 24px", background: "#f8f1de" }}>
+      {/* Nav — horizontal "Melmoon Books" wordmark on transparent background
+          so the page's watercolor gradient flows through behind the logo. */}
+      <nav style={{ position: "relative", zIndex: 1, display: "flex", justifyContent: "center", alignItems: "center", padding: "20px 24px", background: "transparent" }}>
         <img
           src="/logo.png"
           alt="Melmoon Books"
-          style={{ height: 70, width: "auto", display: "block", maxWidth: "90vw", objectFit: "contain" }}
+          style={{ height: 120, width: "auto", display: "block", maxWidth: "95vw", objectFit: "contain" }}
           onError={(e) => {
             const img = e.currentTarget as HTMLImageElement;
             img.style.display = "none";
@@ -595,7 +604,7 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
               <div style={{ fontSize: 10, fontWeight: "bold", color: theme.textMuted, marginBottom: 4 }}>MONTH</div>
               <select value={month} onChange={e => { setMonth(Number(e.target.value)); setDay(1); }}
                 style={{ padding: "6px 8px", borderRadius: 7, border: `1.5px solid ${theme.cardBorder}`, fontSize: 13, fontFamily: "Georgia,serif" }}>
-                {MONTH_NAMES.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
+                {AVAILABLE_MONTHS.map(num => <option key={num} value={num}>{MONTH_NAMES[num - 1]}</option>)}
               </select>
             </div>
             <div>
@@ -1502,7 +1511,7 @@ function PaidSuccessPage({ onBackToLanding }: { onBackToLanding: () => void }) {
             <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
               <select value={editMonth} onChange={e => setEditMonth(Number(e.target.value))}
                 style={{ padding: "6px 10px", borderRadius: 7, border: `1.5px solid ${theme.cardBorder}`, fontSize: 14, fontFamily: "Georgia,serif" }}>
-                {MONTH_NAMES.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
+                {AVAILABLE_MONTHS.map(num => <option key={num} value={num}>{MONTH_NAMES[num - 1]}</option>)}
               </select>
               <select value={editYear} onChange={e => setEditYear(Number(e.target.value))}
                 style={{ padding: "6px 10px", borderRadius: 7, border: `1.5px solid ${theme.cardBorder}`, fontSize: 14, fontFamily: "Georgia,serif" }}>
