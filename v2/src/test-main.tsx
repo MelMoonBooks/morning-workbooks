@@ -508,19 +508,19 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
       }} />
 
       {/* Nav */}
-      <nav style={{ position: "relative", zIndex: 1, display: "flex", justifyContent: "center", alignItems: "center", gap: 10, padding: "14px 24px", borderBottom: `1px solid ${theme.navBorder}`, background: "rgba(255,255,255,0.85)", backdropFilter: "blur(8px)" }}>
+      <nav style={{ position: "relative", zIndex: 1, display: "flex", justifyContent: "center", alignItems: "center", gap: 14, padding: "18px 24px", borderBottom: `1px solid ${theme.navBorder}`, background: "rgba(255,255,255,0.85)", backdropFilter: "blur(8px)" }}>
         {/* Logo — uses /logo.png if available, otherwise just shows the wordmark */}
-        <img src="/logo.png" alt="" style={{ height: 36, width: "auto", display: "block" }}
+        <img src="/logo.png" alt="" style={{ height: 72, width: "auto", display: "block" }}
           onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
-        <div style={{ fontSize: 22, fontWeight: 700, color: theme.textPrimary, fontFamily: "'Playfair Display', Georgia, serif", letterSpacing: 0.3 }}>Melmoon Books</div>
+        <div style={{ fontSize: 34, fontWeight: 600, color: theme.textPrimary, fontFamily: "'Cormorant Garamond', Georgia, serif", letterSpacing: 0.5, lineHeight: 1 }}>Melmoon Books</div>
       </nav>
 
       {/* Hero */}
       <section style={{ position: "relative", zIndex: 1, textAlign: "center", padding: "48px 24px 32px", maxWidth: 680, margin: "0 auto" }}>
         <h1 style={{
-          fontSize: 36, fontWeight: 700, color: theme.textPrimary,
-          margin: "0 0 14px", lineHeight: 1.15,
-          fontFamily: "'Playfair Display', Georgia, serif",
+          fontSize: 42, fontWeight: 600, color: theme.textPrimary,
+          margin: "0 0 14px", lineHeight: 1.15, letterSpacing: 0.3,
+          fontFamily: "'Cormorant Garamond', Georgia, serif",
         }}>
           Start the morning with a playful worksheet, not a screen.
         </h1>
