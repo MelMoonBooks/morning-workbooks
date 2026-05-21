@@ -1,7 +1,7 @@
 import React from 'react';
 import { getDayContent } from '../../content';
 import { Holiday, Affirmation, DayTheme, Birthday } from '../../content/types';
-import { RuledLine } from '../../shared/DrawingPrimitives';
+import { RuledLine, TraceRow } from '../../shared/DrawingPrimitives';
 import LetterTracing from './LetterTracing';
 import ColorActivity from './ColorActivity';
 import MathActivity from './MathActivities';
@@ -121,7 +121,48 @@ export default function DayPage({ day, month, year, childName, traditions, regio
         <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8, justifyContent: "center" }}>
           <div>
             <div style={{ fontSize: 12, fontWeight: "bold", color: "#374151", marginBottom: 4 }}>Name</div>
-            <RuledLine h={lineH} />
+            {/* PreK/TK (ages 3-4): show name as dashed/traceable letters PLUS a
+                continuation of the ruled line so kids can try writing the name
+                again on their own next to the traced version.
+                Kindergarten+ (5+): just a blank line — they write it themselves. */}
+            {age <= 4 && childName ? (
+              (() => {
+                const nameLen = childName.length;
+                const letterSize =
+                  nameLen <= 4  ? 30 :
+                  nameLen <= 6  ? 26 :
+                  nameLen <= 8  ? 22 :
+                                  18;
+                // Match the TraceLetter's rendered height AND stroke weights so
+                // the continuation visually matches the letters' built-in lines.
+                const traceHeight = Math.round(letterSize * 56 / 40);
+                // TraceLetter uses these exact stroke values — mirror them here
+                // so the continuation line doesn't look heavier than the lines
+                // running under the dashed letters.
+                return (
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: 0 }}>
+                    <div style={{ flexShrink: 0 }}>
+                      <TraceRow text={childName} size={letterSize} gap={2} />
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <svg
+                        width="100%"
+                        height={traceHeight}
+                        viewBox={`0 0 100 56`}
+                        preserveAspectRatio="none"
+                        style={{ display: "block" }}
+                      >
+                        <line x1="0" y1="2"  x2="100" y2="2"  stroke="#d1d5db" strokeWidth="1" vectorEffect="non-scaling-stroke" />
+                        <line x1="0" y1="28" x2="100" y2="28" stroke="#d1d5db" strokeWidth="0.8" strokeDasharray="4 3" vectorEffect="non-scaling-stroke" />
+                        <line x1="0" y1="54" x2="100" y2="54" stroke="#d1d5db" strokeWidth="1" vectorEffect="non-scaling-stroke" />
+                      </svg>
+                    </div>
+                  </div>
+                );
+              })()
+            ) : (
+              <RuledLine h={lineH} />
+            )}
           </div>
           <div style={{ border: "1.5px solid #d1d5db", borderRadius: 6, padding: "6px 10px" }}>
             <div style={{ fontSize: 14, fontWeight: "bold", color: "#1f2937", marginBottom: hasMessages ? 4 : 0 }}>

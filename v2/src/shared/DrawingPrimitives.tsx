@@ -120,10 +120,12 @@ export function TraceLetter({ char, size = 36 }: { char: string; size?: number }
 }
 
 // ── TraceRow ──
-// Renders a row of traced letters for a word
+// Renders a row of traced letters for a word. `flexWrap: "nowrap"` prevents
+// long words like "caterpillar" from breaking to a second line — the
+// LetterTracing parent scales `size` down for long words so they still fit.
 export function TraceRow({ text, size = 34, gap = 3 }: { text: string; size?: number; gap?: number }) {
   return (
-    <div style={{ display: "flex", gap, flexWrap: "wrap" }}>
+    <div style={{ display: "flex", gap, flexWrap: "nowrap", justifyContent: "flex-start" }}>
       {text.split("").map((c, i) => <TraceLetter key={i} char={c} size={size} />)}
     </div>
   );

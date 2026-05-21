@@ -37,6 +37,15 @@ function TraceColorActivity({ month, day, subject, colorWord, tradition, region,
   month: string; day: number; subject: string; colorWord: string;
   tradition?: string; region?: string; imageFile?: string;
 }) {
+  // Scale font down for long color words so they fit on a single line in
+  // the narrower "trace & color" column (~half the page width).
+  const len = colorWord.length;
+  const wordSize =
+    len <= 4  ? 30 :
+    len <= 6  ? 26 :
+    len <= 8  ? 22 :
+    len <= 10 ? 18 :
+                15;
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <div style={{
@@ -45,7 +54,7 @@ function TraceColorActivity({ month, day, subject, colorWord, tradition, region,
       }}>
         Trace &amp; Color
       </div>
-      <TraceRow text={colorWord} size={28} gap={2} />
+      <TraceRow text={colorWord} size={wordSize} gap={2} />
       <div style={{ flex: 1, display: "flex", marginTop: 6 }}>
         <DayImage month={month} day={day} label={subject} tradition={tradition} region={region} imageFile={imageFile} />
       </div>

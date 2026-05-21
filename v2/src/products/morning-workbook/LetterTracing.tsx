@@ -27,7 +27,17 @@ export default function LetterTracing({ word, age }: LetterTracingProps) {
   }
 
   // Ages 5-6: full word tracing
-  const size = word.length <= 4 ? 34 : word.length <= 6 ? 28 : 22;
+  // Size scales down as the word gets longer so that words up to 12 letters
+  // always fit on a single line. Tuned so e.g. "kite" (4) stays big and
+  // friendly, while "caterpillar" (11) shrinks but still fits.
+  const len = word.length;
+  const size =
+    len <= 4  ? 34 :
+    len <= 6  ? 28 :
+    len <= 8  ? 24 :
+    len <= 10 ? 20 :
+    len <= 12 ? 17 :
+                15;
   return (
     <div>
       <div style={LABEL_STYLE}>Trace the letters</div>
