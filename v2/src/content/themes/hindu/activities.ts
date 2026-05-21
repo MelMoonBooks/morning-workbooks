@@ -23,7 +23,7 @@ export const hinduActivities: ActivityMap = {
   "4-13": { word: "Hanuman",  subject: "Hanuman the monkey god",     instruction: "Color Hanuman, the brave helper of Rama!",            colorWord: "orange", tags: ["hindu", "hanuman-jayanti"] },
 
   // ── May ──
-  "5-12": { word: "lotus",    subject: "Buddha sitting on a lotus",  instruction: "Color the Buddha and the lotus flower!",              colorWord: "pink",   tags: ["hindu", "buddha-purnima"] },
+  "5-11": { word: "lotus",    subject: "Buddha sitting on a lotus",  instruction: "Color the Buddha and the lotus flower!",              colorWord: "pink",   tags: ["hindu", "buddha-purnima"] },
 
   // ── July ──
   "7-21": { word: "teacher",  subject: "a guru teaching a student",  instruction: "Color the wise teacher and student!",                 colorWord: "orange", tags: ["hindu", "guru-purnima"] },
