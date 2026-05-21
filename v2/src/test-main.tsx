@@ -195,10 +195,13 @@ function PaidMonthCTA({
       <div style={{ fontSize: 18, fontWeight: "bold", color: theme.textPrimary, marginBottom: 6 }}>
         Loved what you see?
       </div>
-      <div style={{ fontSize: 14, color: theme.textSecondary, marginBottom: 14, lineHeight: 1.5 }}>
+      <div style={{ fontSize: 14, color: theme.textSecondary, marginBottom: 6, lineHeight: 1.5 }}>
         {hasAlt
           ? <>Get a full month of personalized worksheets for your family — pick {monthName} or {altMonthName}.</>
           : <>Get the full month of {monthName} for your family — {daysInMonth} personalized pages per child, ready to print.</>}
+      </div>
+      <div style={{ fontSize: 11, color: theme.textPlaceholder, marginBottom: 14, fontStyle: "italic" }}>
+        Launching with May &amp; June — more months added every few weeks.
       </div>
       <div style={{ fontSize: 28, fontWeight: "bold", color: theme.textPrimary, marginBottom: 4 }}>
         $2.99 <span style={{ fontSize: 14, fontWeight: "normal", color: theme.textMuted }}>per month</span>
@@ -615,10 +618,25 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
             </div>
             <div>
               <div style={{ fontSize: 10, fontWeight: "bold", color: theme.textMuted, marginBottom: 4 }}>MONTH</div>
-              <select value={month} onChange={e => { setMonth(Number(e.target.value)); setDay(1); }}
+              <select value={month} onChange={e => {
+                  const m = Number(e.target.value);
+                  if (!isMonthAvailable(m)) return; // ignore picks on coming-soon months
+                  setMonth(m); setDay(1);
+                }}
                 style={{ padding: "6px 8px", borderRadius: 7, border: `1.5px solid ${theme.cardBorder}`, fontSize: 13, fontFamily: "Georgia,serif" }}>
-                {AVAILABLE_MONTHS.map(num => <option key={num} value={num}>{MONTH_NAMES[num - 1]}</option>)}
+                {MONTH_NAMES.map((name, i) => {
+                  const num = i + 1;
+                  const available = isMonthAvailable(num);
+                  return (
+                    <option key={num} value={num} disabled={!available}>
+                      {available ? name : `${name} — coming soon`}
+                    </option>
+                  );
+                })}
               </select>
+              <div style={{ fontSize: 10, color: theme.textPlaceholder, fontStyle: "italic", marginTop: 4, lineHeight: 1.4 }}>
+                Launching with May &amp; June — more months added every few weeks
+              </div>
             </div>
             <div>
               <div style={{ fontSize: 10, fontWeight: "bold", color: theme.textMuted, marginBottom: 4 }}>DAY</div>
@@ -1531,9 +1549,21 @@ function PaidSuccessPage({ onBackToLanding }: { onBackToLanding: () => void }) {
           <div style={{ marginBottom: 12 }}>
             <div style={{ fontSize: 10, fontWeight: "bold", color: theme.textMuted, marginBottom: 4 }}>MONTH</div>
             <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-              <select value={editMonth} onChange={e => setEditMonth(Number(e.target.value))}
+              <select value={editMonth} onChange={e => {
+                  const m = Number(e.target.value);
+                  if (!isMonthAvailable(m)) return;
+                  setEditMonth(m);
+                }}
                 style={{ padding: "6px 10px", borderRadius: 7, border: `1.5px solid ${theme.cardBorder}`, fontSize: 14, fontFamily: "Georgia,serif" }}>
-                {AVAILABLE_MONTHS.map(num => <option key={num} value={num}>{MONTH_NAMES[num - 1]}</option>)}
+                {MONTH_NAMES.map((name, i) => {
+                  const num = i + 1;
+                  const available = isMonthAvailable(num);
+                  return (
+                    <option key={num} value={num} disabled={!available}>
+                      {available ? name : `${name} — coming soon`}
+                    </option>
+                  );
+                })}
               </select>
               <select value={editYear} onChange={e => setEditYear(Number(e.target.value))}
                 style={{ padding: "6px 10px", borderRadius: 7, border: `1.5px solid ${theme.cardBorder}`, fontSize: 14, fontFamily: "Georgia,serif" }}>

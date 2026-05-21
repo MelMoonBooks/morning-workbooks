@@ -66,6 +66,106 @@ function shouldShowSightWords(age: number): boolean {
   return age >= 5;
 }
 
+// ── Personalized greeting based on region/tradition ──
+// India region → Namaste. Jewish tradition (when today's image is Jewish-themed)
+// → Shalom. Muslim tradition (when today's image is Muslim-themed) → Salaam.
+// Everyone else → Good morning. Greetings drawn from the user's selections so
+// every page feels picked-out for the family.
+function getGreetingWord(regions: string[], dominantTradition: string): string {
+  if (regions.includes("india")) return "Namaste";
+  if (dominantTradition === "jewish") return "Shalom";
+  if (dominantTradition === "muslim") return "Salaam";
+  return "Good morning";
+}
+
+// ── Cultural "Did you know?" facts by region + tradition ──
+// Picked deterministically by day so the same date always shows the same fact
+// (no flicker on PDF regeneration). Returns null when no region/tradition fact
+// applies — caller hides the box entirely in that case.
+const CULTURAL_FACTS: Record<string, string[]> = {
+  india: [
+    "The lotus is India's national flower — it grows in muddy water but blooms beautifully.",
+    "Mango is called the king of fruits in India — there are over 1,000 varieties!",
+    "The peacock is India's national bird. Its feathers shine like jewels.",
+    "Chai means tea — Indian chai is brewed with spices like cardamom and ginger.",
+    "Rangoli is a colorful pattern drawn at doorways to welcome guests and good luck.",
+    "India invented the number zero — without zero, math would look very different!",
+    "The Bengal tiger is India's national animal.",
+    "Indian elephants are honored in festivals and often painted with bright colors.",
+    "Diwali, the festival of lights, lights up homes across India every fall.",
+    "India is home to the Himalayas — the tallest mountains in the world.",
+    "Yoga began in India thousands of years ago.",
+    "More than 1,600 languages are spoken across India.",
+    "Holi, the festival of colors, paints the streets in pink, yellow, and green.",
+    "Indian sweets like jalebi and gulab jamun are loved at every celebration.",
+    "Cricket is the most popular sport in India.",
+  ],
+  uk: [
+    "The robin is the UK's most beloved bird, especially around winter.",
+    "Big Ben is the famous bell inside London's clock tower.",
+    "Afternoon tea is a beloved British tradition — usually with little sandwiches.",
+    "Stonehenge in England is over 4,000 years old.",
+    "Red double-decker buses are a familiar sight on London streets.",
+    "The Queen's guards in tall black hats stand outside Buckingham Palace.",
+    "Scotland is famous for bagpipes and beautiful highland scenery.",
+    "Wales has more sheep than people!",
+    "British weather is famous for changing many times in one day.",
+  ],
+  hindu: [
+    "Diyas are small clay lamps lit during Diwali to welcome the goddess Lakshmi.",
+    "Ganesha, the elephant-headed god, is loved for removing obstacles.",
+    "Hindus believe the cow is sacred and a symbol of gentleness.",
+    "Sanskrit is one of the world's oldest languages — many prayers are spoken in it.",
+    "Saraswati is the goddess of learning and music — students pray to her before exams.",
+    "Krishna loved playing his flute and is often pictured with peacock feathers.",
+  ],
+  "christian-catholic": [
+    "Catholics make the sign of the cross to start and end their prayers.",
+    "Every Catholic church has an altar where the Mass is celebrated.",
+    "Catholics light candles to remember loved ones and to ask for help in prayer.",
+    "St. Francis of Assisi loved animals and is the patron saint of pets.",
+    "Catholics celebrate seven sacraments — special moments of God's love.",
+  ],
+  "christian-protestant": [
+    "Protestants gather to read the Bible together and to sing songs of praise.",
+    "Sunday school is a special time for kids to learn about Jesus.",
+    "Many Protestant churches share a simple meal of bread and grape juice to remember Jesus.",
+    "Hymns are special songs Christians have sung for hundreds of years.",
+    "Christians believe Jesus rose from the dead on Easter morning.",
+  ],
+  jewish: [
+    "Shabbat begins on Friday night when the candles are lit.",
+    "The Star of David has six points and is a symbol of the Jewish people.",
+    "Challah is a soft, braided bread eaten on Shabbat.",
+    "Hebrew is read from right to left — the opposite of English!",
+    "The shofar is a horn blown on Rosh Hashanah to welcome the new year.",
+    "A mezuzah is a small scroll placed on the doorway of Jewish homes.",
+  ],
+  muslim: [
+    "Muslims pray five times a day, facing toward Mecca.",
+    "The crescent moon and star are symbols of Islam, often seen on mosques.",
+    "Ramadan is a special month when Muslims fast from sunrise to sunset.",
+    "Eid is a joyful holiday when families share food, gifts, and prayers.",
+    "Arabic is the language of the Quran, the holy book of Islam.",
+    "Salaam means peace — it's how Muslims greet each other.",
+  ],
+};
+
+function pickCulturalFact(regions: string[], dominantTradition: string, month: number, day: number): string | null {
+  // Prefer region-specific facts (most personalized to the family's home),
+  // then tradition-specific. Don't show anything for "universal" defaults.
+  const pools: string[] = [];
+  if (regions.includes("india")) pools.push(...CULTURAL_FACTS.india);
+  if (regions.includes("uk")) pools.push(...CULTURAL_FACTS.uk);
+  if (dominantTradition && dominantTradition !== "universal" && CULTURAL_FACTS[dominantTradition]) {
+    pools.push(...CULTURAL_FACTS[dominantTradition]);
+  }
+  if (pools.length === 0) return null;
+  // Stable index — same date always picks same fact
+  const idx = (month - 1) * 31 + day;
+  return pools[idx % pools.length];
+}
+
 function getMiniCalendar(month: number, year: number) {
   const firstDay    = new Date(year, month - 1, 1).getDay();
   const daysInMonth = new Date(year, month, 0).getDate();
@@ -87,6 +187,7 @@ interface DayPageProps {
 export default function DayPage({ day, month, year, childName, traditions, region, age, birthdays = [], id }: DayPageProps) {
   // Multi-country families: use the primary (first) country for image fallback paths
   const primaryRegion: string = Array.isArray(region) ? (region[0] ?? 'us') : region;
+  const regionList: string[] = Array.isArray(region) ? region : [region];
   const content = getDayContent(traditions, region, month, day, year);
   const { theme, holidays, affirmation, dominantTradition } = content;
 
@@ -95,6 +196,10 @@ export default function DayPage({ day, month, year, childName, traditions, regio
   const monthName   = MONTH_NAMES[month - 1];
   const dateDisplay = `${DAY_NAMES[date.getDay()]}, ${monthName} ${day}`;
   const lineH       = age <= 4 ? 48 : 40;
+
+  // Personalized greeting + rotating cultural fact (Rita-feedback fixes)
+  const greetingWord = getGreetingWord(regionList, dominantTradition);
+  const culturalFact = pickCulturalFact(regionList, dominantTradition, month, day);
 
   // Build calendar grid cells
   const calendarCells: (number | null)[] = [];
@@ -111,7 +216,7 @@ export default function DayPage({ day, month, year, childName, traditions, regio
       {/* ── Header ── */}
       <div style={{ padding: "12px 20px 10px", borderBottom: "2px solid #1f2937", textAlign: "center" }}>
         <div style={{ fontSize: 20, fontWeight: "bold", color: "#1f2937", letterSpacing: 0.3 }}>
-          Good Morning, {childName || "Friend"}!
+          {greetingWord}, {childName || "Friend"}!
         </div>
       </div>
 
@@ -254,6 +359,21 @@ export default function DayPage({ day, month, year, childName, traditions, regio
         {/* Bottom: math activity */}
         <MathActivity day={day} month={monthName} age={age} />
       </div>
+
+      {/* ── Did you know? (region/tradition-personalized, rotates by day) ── */}
+      {culturalFact && (
+        <div style={{
+          borderTop: "1px dashed #d1d5db", padding: "6px 20px", textAlign: "center",
+          background: "#fafaf7",
+        }}>
+          <span style={{ fontSize: 10, fontWeight: "bold", color: "#6b7280", letterSpacing: 0.8, textTransform: "uppercase", marginRight: 6 }}>
+            Did you know?
+          </span>
+          <span style={{ fontSize: 11, color: "#4b5563", fontStyle: "italic" }}>
+            {culturalFact}
+          </span>
+        </div>
+      )}
 
       {/* ── Footer (affirmation) ── */}
       <div style={{
