@@ -516,13 +516,13 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
         zIndex: 0,
       }} />
 
-      {/* Nav — horizontal "Melmoon Books" wordmark on transparent background
-          so the page's watercolor gradient flows through behind the logo. */}
-      <nav style={{ position: "relative", zIndex: 1, display: "flex", justifyContent: "center", alignItems: "center", padding: "20px 24px", background: "transparent" }}>
+      {/* Nav — white background so the logo's own white background (current
+          PNG is not transparent) blends in seamlessly. */}
+      <nav style={{ position: "relative", zIndex: 2, display: "flex", justifyContent: "center", alignItems: "center", padding: "16px 24px", background: "white" }}>
         <img
           src="/logo.png"
           alt="Melmoon Books"
-          style={{ height: 120, width: "auto", display: "block", maxWidth: "95vw", objectFit: "contain" }}
+          style={{ height: 140, width: "auto", display: "block", maxWidth: "95vw", objectFit: "contain" }}
           onError={(e) => {
             const img = e.currentTarget as HTMLImageElement;
             img.style.display = "none";
