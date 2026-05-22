@@ -18,6 +18,7 @@ export interface Holiday {
   sentence: string;          // "Happy Diwali! Today we celebrate the victory of light!"
   theme?: Partial<DayTheme>; // optional theme override for major holidays
   source?: string;           // set by getDayContent — which file this came from ("universal", tradition id, or region id). Used to pick the icon shown next to the blurb.
+  isObservance?: boolean;    // true = cultural observance paired with a picture (peacock, monsoon, Krishna day, etc.). These never show in the top box on their own — they only appear in the bottom box when the picture matches.
 }
 
 // An affirmation/quote entry

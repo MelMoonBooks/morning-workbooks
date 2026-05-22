@@ -285,10 +285,14 @@ export default function DayPage({ day, month, year, childName, traditions, regio
     }
   }
 
-  // Filter the promoted holiday out of the date-box list so it doesn't duplicate
-  const holidaysForDateBox = pictureMatchedHoliday
+  // Filter the date-box list:
+  //   1. Drop the picture-matched holiday (it's now in the bottom box)
+  //   2. Drop any cultural observances (peacock, mandir, monsoon, etc.) —
+  //      these only ever appear via picture-match promotion, never standalone
+  const holidaysForDateBox = (pictureMatchedHoliday
     ? holidays.filter(h => h !== pictureMatchedHoliday)
-    : holidays;
+    : holidays
+  ).filter(h => !h.isObservance);
 
   // Build calendar grid cells
   const calendarCells: (number | null)[] = [];
