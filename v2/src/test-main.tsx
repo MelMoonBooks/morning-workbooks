@@ -175,11 +175,12 @@ function ScaledWorksheet({ children, nativeWidth = 540 }: { children: React.Reac
 function PaidMonthCTA({
   monthName, daysInMonth, monthNum, year,
   altMonthName, altDaysInMonth, altMonthNum, altYear,
-  isLive, onBuy, onNotify,
+  isLive, launchFree, onBuy, onNotify,
 }: {
   monthName: string; daysInMonth: number; monthNum: number; year: number;
   altMonthName?: string; altDaysInMonth?: number; altMonthNum?: number; altYear?: number;
   isLive: boolean;
+  launchFree: boolean;
   onBuy: (overrideMonth?: number, overrideYear?: number) => void;
   onNotify: () => void;
 }) {
@@ -203,13 +204,27 @@ function PaidMonthCTA({
       <div style={{ fontSize: 11, color: theme.textPlaceholder, marginBottom: 14, fontStyle: "italic" }}>
         Launching with May &amp; June — more months added every few weeks.
       </div>
-      <div style={{ fontSize: 28, fontWeight: "bold", color: theme.textPrimary, marginBottom: 4 }}>
-        $2.99 <span style={{ fontSize: 14, fontWeight: "normal", color: theme.textMuted }}>per month</span>
-      </div>
+      {launchFree ? (
+        <>
+          <div style={{ marginBottom: 4 }}>
+            <span style={{ fontSize: 18, color: theme.textPlaceholder, textDecoration: "line-through", fontWeight: "normal", marginRight: 10 }}>
+              $2.99
+            </span>
+            <span style={{ fontSize: 30, fontWeight: "bold", color: colors.deepTeal }}>FREE</span>
+          </div>
+          <div style={{ fontSize: 12, fontWeight: "bold", color: colors.deepTeal, marginBottom: 4, letterSpacing: 0.5 }}>
+            🎉 LAUNCH SPECIAL
+          </div>
+        </>
+      ) : (
+        <div style={{ fontSize: 28, fontWeight: "bold", color: theme.textPrimary, marginBottom: 4 }}>
+          $2.99 <span style={{ fontSize: 14, fontWeight: "normal", color: theme.textMuted }}>per month</span>
+        </div>
+      )}
       <div style={{ fontSize: 11, color: theme.textPlaceholder, marginBottom: 14, fontStyle: "italic" }}>
-        One purchase covers all your kids
+        One download covers all your kids
       </div>
-      {isLive ? (
+      {isLive || launchFree ? (
         <>
           <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
             <button onClick={() => onBuy(monthNum, year)} style={{
@@ -218,7 +233,7 @@ function PaidMonthCTA({
               background: colors.deepTeal, color: theme.buttonText,
               boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
             }}>
-              ↓ Get {monthName} ({daysInMonth} days)
+              ↓ Get {monthName} {launchFree ? "free" : ""} ({daysInMonth} days)
             </button>
             {hasAlt && (
               <button onClick={() => onBuy(altMonthNum, altYear)} style={{
@@ -226,12 +241,14 @@ function PaidMonthCTA({
                 border: `2px solid ${colors.deepTeal}`, borderRadius: 10,
                 background: theme.cardBg, color: colors.deepTeal,
               }}>
-                ↓ Get {altMonthName} ({altDaysInMonth} days)
+                ↓ Get {altMonthName} {launchFree ? "free" : ""} ({altDaysInMonth} days)
               </button>
             )}
           </div>
           <div style={{ fontSize: 11, color: theme.textPlaceholder, marginTop: 10 }}>
-            Instant PDF download · Secure checkout via Stripe
+            {launchFree
+              ? "Instant PDF download · No account, no checkout"
+              : "Instant PDF download · Secure checkout via Stripe"}
           </div>
         </>
       ) : (
@@ -325,6 +342,10 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
   // ──────────────────────────────────────────────────────────────
   const STRIPE_PAYMENT_LINK: string | null = "https://buy.stripe.com/eVq4gr8hAd32gVX32M2wU00";
 
+  // ── LAUNCH SPECIAL: month PDFs are free while we burn through free ad spend.
+  // Flip this to false to re-enable paid Stripe checkout.
+  const LAUNCH_FREE = true;
+
   // Accept an optional month override — so the paid CTA can offer both the
   // current AND next month independently of which month is selected in the
   // preview picker.
@@ -336,8 +357,9 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
       age, month: buyMonth, year: buyYear,
       traditions, regions,
       birthdayCount: birthdays.length,
+      launchFree: LAUNCH_FREE,
     });
-    if (STRIPE_PAYMENT_LINK) {
+    if (LAUNCH_FREE || STRIPE_PAYMENT_LINK) {
       // Save the customer's customization to localStorage so the
       // success page (after Stripe redirects back) can regenerate the
       // 31-page PDF with the same name/age/traditions/country/birthdays
@@ -350,8 +372,15 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
       } catch (e) {
         console.warn("Could not save pending order to localStorage:", e);
       }
-      track("payment_started", { paymentMethod: "stripe_payment_link" });
-      window.location.href = STRIPE_PAYMENT_LINK;
+      if (LAUNCH_FREE) {
+        // Skip Stripe entirely — go straight to the success page where the
+        // PDF is generated client-side, same as if we'd come back from Stripe.
+        track("free_month_started", { paymentMethod: "launch_free" });
+        window.location.href = window.location.pathname + "?paid=success";
+      } else if (STRIPE_PAYMENT_LINK) {
+        track("payment_started", { paymentMethod: "stripe_payment_link" });
+        window.location.href = STRIPE_PAYMENT_LINK;
+      }
     }
   };
 
@@ -792,6 +821,7 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
                     year={year}
                     {...altMonthProps}
                     isLive={STRIPE_PAYMENT_LINK !== null}
+                    launchFree={LAUNCH_FREE}
                     onBuy={handleBuyMonthPDF}
                     onNotify={onSwitch}
                   />
@@ -856,6 +886,7 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
                     year={year}
                     {...altMonthProps}
                     isLive={STRIPE_PAYMENT_LINK !== null}
+                    launchFree={LAUNCH_FREE}
                     onBuy={handleBuyMonthPDF}
                     onNotify={onSwitch}
                   />
