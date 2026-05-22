@@ -47,9 +47,9 @@ const diwali = {
 const buddhaPurnima = {
   name: "Buddha Purnima",
   tradition: "hindu" as const,
-  isMajor: false,
+  isMajor: true,  // Forces Hindu to be dominantTradition on this day so Buddha activity + image apply for multi-tradition families
   sentence: "Happy Buddha Purnima! Today we celebrate the Buddha's birthday — the wise teacher who taught kindness and peace.",
-  theme: { word: "Buddha", subject: "Buddha sitting on a lotus", instruction: "Color the Buddha and the lotus flower!", colorWord: "pink", tags: ["buddha", "purnima", "wisdom", "peace"] },
+  theme: { word: "Buddha", subject: "Buddha sitting on a lotus", instruction: "Color the Buddha and the lotus flower!", colorWord: "pink", tags: ["buddha", "purnima", "wisdom", "peace", "hindu"] },
 };
 
 // Fixed-date Hindu observances (same day every year)
