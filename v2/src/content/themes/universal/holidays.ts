@@ -12,7 +12,8 @@ export const universalHolidays: HolidayList = [
   { date: "03-20", name: "First Day of Spring",       tradition: "universal", isMajor: false, sentence: "Today is the first day of spring! Flowers will start to bloom and the days get warmer." },
   { date: "04-22", name: "Earth Day",                 tradition: "universal", isMajor: false, sentence: "Today is Earth Day! Let's take care of our beautiful planet — pick up litter and hug a tree!" },
   { date: "05-10", name: "Mother's Day",              tradition: "universal", isMajor: false, sentence: "Happy Mother's Day! Today we celebrate all the mamas who love us so much." },
-  { date: "05-25", name: "Memorial Day",              tradition: "universal", isMajor: false, sentence: "Today is Memorial Day. We say thank you to the brave people who kept our country safe." },
+  // Memorial Day is a US-only holiday and floats year-to-year (last Monday of May) —
+  // see regions/us/holidays.ts for year-aware entries.
   { date: "06-21", name: "Father's Day",              tradition: "universal", isMajor: false, sentence: "Happy Father's Day! Today we celebrate all the dads and grandpas who love us." },
   { date: "06-19", name: "Juneteenth",                tradition: "universal", isMajor: false, sentence: "Today is Juneteenth! We celebrate freedom and remember that all people deserve to be free." },
   { date: "07-04", name: "Independence Day",          tradition: "universal", isMajor: true,  sentence: "Happy 4th of July! Today is America's birthday — we celebrate with flags, parades, and fireworks!" },
