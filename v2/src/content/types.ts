@@ -17,6 +17,7 @@ export interface Holiday {
   isMajor: boolean;          // true = overrides dominant theme cycling
   sentence: string;          // "Happy Diwali! Today we celebrate the victory of light!"
   theme?: Partial<DayTheme>; // optional theme override for major holidays
+  source?: string;           // set by getDayContent — which file this came from ("universal", tradition id, or region id). Used to pick the icon shown next to the blurb.
 }
 
 // An affirmation/quote entry

@@ -114,22 +114,24 @@ export function getDayContent(
   // Helper: match holiday by date, and by year if the holiday has one
   const matchesDate = (h: Holiday) => h.date === dateKeyMM && (h.year == null || h.year === year);
 
-  // 1. Collect ALL holidays from all selected traditions + ALL selected countries
+  // 1. Collect ALL holidays from all selected traditions + ALL selected countries.
+  //    Each one gets stamped with a `source` so the renderer can show the right
+  //    icon (US flag for US holidays, Om for Hindu, cross for Christian, etc.)
   const rawHolidays: Holiday[] = [];
 
   // Always include universal holidays
-  rawHolidays.push(...universalHolidays.filter(matchesDate));
+  rawHolidays.push(...universalHolidays.filter(matchesDate).map(h => ({ ...h, source: 'universal' })));
 
   // Add tradition-specific holidays
   for (const t of traditions) {
     const traditionHolidays = holidaysByTradition[t] ?? [];
-    rawHolidays.push(...traditionHolidays.filter(matchesDate));
+    rawHolidays.push(...traditionHolidays.filter(matchesDate).map(h => ({ ...h, source: t })));
   }
 
   // Add holidays from every selected country
   for (const r of regionList) {
     const regionHolidays = holidaysByRegion[r] ?? [];
-    rawHolidays.push(...regionHolidays.filter(matchesDate));
+    rawHolidays.push(...regionHolidays.filter(matchesDate).map(h => ({ ...h, source: r })));
   }
 
   // 2. Determine dominant tradition

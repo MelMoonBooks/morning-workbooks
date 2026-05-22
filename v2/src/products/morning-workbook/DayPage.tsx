@@ -66,6 +66,23 @@ function shouldShowSightWords(age: number): boolean {
   return age >= 5;
 }
 
+// ── Holiday icon ──
+// Returns a small emoji shown to the left of a holiday blurb in the date box,
+// so kids can at-a-glance tell what kind of holiday it is.
+function getHolidayIcon(h: Holiday): string {
+  switch (h.source) {
+    case "hindu":                return "🕉️";
+    case "christian-catholic":   return "✝️";
+    case "christian-protestant": return "✝️";
+    case "jewish":               return "✡️";
+    case "muslim":               return "☪️";
+    case "india":                return "🇮🇳";
+    case "us":                   return "🇺🇸";
+    case "uk":                   return "🇬🇧";
+    default:                     return ""; // universal — no flag
+  }
+}
+
 // ── Personalized greeting based on region/tradition ──
 // India region → Namaste. Jewish tradition (when today's image is Jewish-themed)
 // → Shalom. Muslim tradition (when today's image is Muslim-themed) → Salaam.
@@ -345,11 +362,15 @@ export default function DayPage({ day, month, year, childName, traditions, regio
             <div style={{ fontSize: 14, fontWeight: "bold", color: "#1f2937", marginBottom: hasMessages ? 4 : 0 }}>
               {dateDisplay}
             </div>
-            {holidaysForDateBox.map((h, i) => (
-              <div key={i} style={{ fontSize: 11, color: "#374151", fontStyle: "italic", lineHeight: 1.5, marginTop: i > 0 ? 2 : 0 }}>
-                {h.sentence}
-              </div>
-            ))}
+            {holidaysForDateBox.map((h, i) => {
+              const icon = getHolidayIcon(h);
+              return (
+                <div key={i} style={{ fontSize: 11, color: "#374151", fontStyle: "italic", lineHeight: 1.5, marginTop: i > 0 ? 2 : 0 }}>
+                  {icon && <span style={{ marginRight: 4, fontStyle: "normal" }}>{icon}</span>}
+                  {h.sentence}
+                </div>
+              );
+            })}
             {todaysBirthdays.map(b => (
               <div key={b.id} style={{ fontSize: 11, color: "#1f2937", fontWeight: "bold", lineHeight: 1.5, marginTop: 2, display: "flex", alignItems: "center", gap: 4 }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" style={{ display: "inline-block", flexShrink: 0 }}>
