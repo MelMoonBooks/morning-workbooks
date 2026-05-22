@@ -355,21 +355,20 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
     }
   };
 
+  // Single-select: clicking a tradition replaces whatever was selected before.
+  // Always exactly one selected (default "universal" / Non-religious).
   const toggleTradition = (id: string) => {
-    setTraditions(prev => {
-      const action = prev.includes(id) ? "remove" : "add";
-      track("tradition_toggled", { tradition: id, action });
-      if (prev.includes(id)) { if (prev.length <= 1) return prev; return prev.filter(t => t !== id); }
-      if (prev.length >= 3) return prev;
-      return [...prev, id];
-    });
+    track("tradition_toggled", { tradition: id, action: "select" });
+    setTraditions([id]);
   };
 
+  // Multi-select up to 2 (for diaspora families: home country + origin country).
   const toggleRegion = (id: string) => {
     setRegions(prev => {
       const action = prev.includes(id) ? "remove" : "add";
       track("country_toggled", { country: id, action });
       if (prev.includes(id)) { if (prev.length <= 1) return prev; return prev.filter(r => r !== id); }
+      if (prev.length >= 2) return prev;
       return [...prev, id];
     });
   };
@@ -644,7 +643,7 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
               </select>
             </div>
             <div>
-              <div style={{ fontSize: 10, fontWeight: "bold", color: theme.textMuted, marginBottom: 4 }}>COUNTRY <span style={{ fontWeight: "normal", color: theme.textPlaceholder }}>(select all that apply)</span></div>
+              <div style={{ fontSize: 10, fontWeight: "bold", color: theme.textMuted, marginBottom: 4 }}>COUNTRY <span style={{ fontWeight: "normal", color: theme.textPlaceholder }}>(pick up to 2)</span></div>
               <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
                 {REGIONS.map(r => {
                   const selected = regions.includes(r.id);
@@ -657,7 +656,7 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
             </div>
           </div>
           <div style={{ marginTop: 12 }}>
-            <div style={{ fontSize: 10, fontWeight: "bold", color: theme.textMuted, marginBottom: 4 }}>TRADITIONS <span style={{ fontWeight: "normal", color: theme.textPlaceholder }}>(select up to 3 — they alternate daily)</span></div>
+            <div style={{ fontSize: 10, fontWeight: "bold", color: theme.textMuted, marginBottom: 4 }}>TRADITION <span style={{ fontWeight: "normal", color: theme.textPlaceholder }}>(pick one)</span></div>
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
               {TRADITIONS.map(t => {
                 const selected = traditions.includes(t.id);
@@ -1000,13 +999,10 @@ function TestWorkbook({ onSwitch, onDashboard }: { onSwitch: () => void; onDashb
     setProfiles(prev => prev.map(p => p.id === activeId ? { ...p, ...updates } : p));
   };
 
+  // Single-select: clicking a tradition replaces whatever was selected before.
   const toggleTradition = (id: string) => {
     if (!activeChild) return;
-    const has = activeChild.traditions.includes(id);
-    if (has && activeChild.traditions.length <= 1) return;
-    if (!has && activeChild.traditions.length >= 3) return;
-    const next = has ? activeChild.traditions.filter(t => t !== id) : [...activeChild.traditions, id];
-    updateChild({ traditions: next });
+    updateChild({ traditions: [id] });
   };
 
   const addBirthday = () => {
@@ -1437,16 +1433,15 @@ function PaidSuccessPage({ onBackToLanding }: { onBackToLanding: () => void }) {
     }, true);
   };
 
+  // Single-select tradition (match landing page Option B model)
   const toggleEditTradition = (id: string) => {
-    setEditTraditions(prev => {
-      if (prev.includes(id)) { if (prev.length <= 1) return prev; return prev.filter(t => t !== id); }
-      if (prev.length >= 3) return prev;
-      return [...prev, id];
-    });
+    setEditTraditions([id]);
   };
+  // Multi-select regions, capped at 2
   const toggleEditRegion = (id: string) => {
     setEditRegions(prev => {
       if (prev.includes(id)) { if (prev.length <= 1) return prev; return prev.filter(r => r !== id); }
+      if (prev.length >= 2) return prev;
       return [...prev, id];
     });
   };
