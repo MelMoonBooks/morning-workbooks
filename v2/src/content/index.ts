@@ -63,6 +63,17 @@ const affirmationsByTradition: Record<string, AffirmationMap> = {
 
 // holidaysByRegion and activitiesByRegion are imported from ./regions/registry
 
+// Look up the affirmation for a given tradition + date. Used by DayPage's
+// footer cycle when it wants a specific tradition's quote, independent of
+// the day's dominantTradition. Falls back to universal, then empty.
+export function getAffirmationFor(tradition: string, month: number, day: number): Affirmation {
+  const dateKey = `${month}-${day}`;
+  const map = affirmationsByTradition[tradition];
+  return map?.[dateKey]
+    ?? universalAffirmations[dateKey]
+    ?? { quote: '', ref: '', tradition: 'universal' };
+}
+
 function getDominantTradition(
   traditions: string[],
   day: number,

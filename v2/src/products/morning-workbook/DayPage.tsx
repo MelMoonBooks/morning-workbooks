@@ -1,5 +1,5 @@
 import React from 'react';
-import { getDayContent } from '../../content';
+import { getDayContent, getAffirmationFor } from '../../content';
 import { Holiday, Affirmation, DayTheme, Birthday } from '../../content/types';
 import { RuledLine, TraceRow } from '../../shared/DrawingPrimitives';
 import LetterTracing from './LetterTracing';
@@ -228,13 +228,37 @@ export default function DayPage({ day, month, year, childName, traditions, regio
     }
   }
 
-  // The text shown in the "Did you know?" slot:
-  //   - Promoted holiday sentence, OR
-  //   - Generic rotating cultural fact (when no holiday matches the picture)
+  // The footer cultural slot. Three render modes (priority order):
+  //   1. Promoted holiday/region blurb (picture-matching day → no label)
+  //   2. Cultural fact from a cycling source (India, Hindu → "Did you know?")
+  //   3. Affirmation quote (Catholic, Protestant, Jewish, Muslim, universal)
+  //
+  // Cycle: each day picks one "source" from [India if selected] + [each selected
+  // tradition]. So a family with US+India+Hindu+Catholic cycles India → Hindu →
+  // Catholic → India → Hindu → Catholic. Each tradition gets honored on its turn.
+  const footerCycle: string[] = [];
+  if (regionList.includes("india")) footerCycle.push("india");
+  for (const t of traditions) {
+    if (t !== "universal" && !footerCycle.includes(t)) footerCycle.push(t);
+  }
+  if (footerCycle.length === 0) footerCycle.push("universal");
+  const cycleIdx = (month - 1) * 31 + day;
+  const todaysFooterSource = footerCycle[cycleIdx % footerCycle.length];
+  const subIdx = Math.floor(cycleIdx / footerCycle.length);
+
   const culturalFactPlain = pictureMatchedHoliday?.sentence ?? null;
-  const culturalFactRotating = culturalFactPlain
-    ? null
-    : pickCulturalFact(regionList, dominantTradition, month, day);
+  let culturalFactRotating: string | null = null;
+  let footerAffirmation: Affirmation | null = null;
+  if (!culturalFactPlain) {
+    if (todaysFooterSource === "india") {
+      culturalFactRotating = CULTURAL_FACTS.india[subIdx % CULTURAL_FACTS.india.length];
+    } else if (todaysFooterSource === "hindu") {
+      culturalFactRotating = CULTURAL_FACTS.hindu[subIdx % CULTURAL_FACTS.hindu.length];
+    } else {
+      // Tradition source — use that tradition's affirmation quote
+      footerAffirmation = getAffirmationFor(todaysFooterSource, month, day);
+    }
+  }
 
   // Filter the promoted holiday out of the date-box list so it doesn't duplicate
   const holidaysForDateBox = pictureMatchedHoliday
@@ -421,14 +445,19 @@ export default function DayPage({ day, month, year, childName, traditions, regio
             </span>
             {culturalFactRotating}
           </div>
-        ) : (
-          <div style={{ fontSize: 12, color: "#4b5563", fontStyle: "italic", maxWidth: 400 }}>
-            &ldquo;{affirmation.quote}&rdquo;
-            {affirmation.ref && (
-              <span style={{ fontSize: 11, color: "#6b7280", fontStyle: "normal" }}> — {affirmation.ref}</span>
-            )}
-          </div>
-        )}
+        ) : (() => {
+          // Use the cycle-picked tradition's affirmation when available,
+          // otherwise fall back to the dominantTradition's affirmation
+          const a = footerAffirmation ?? affirmation;
+          return (
+            <div style={{ fontSize: 12, color: "#4b5563", fontStyle: "italic", maxWidth: 400 }}>
+              &ldquo;{a.quote}&rdquo;
+              {a.ref && (
+                <span style={{ fontSize: 11, color: "#6b7280", fontStyle: "normal" }}> — {a.ref}</span>
+              )}
+            </div>
+          );
+        })()}
       </div>
     </div>
   );
