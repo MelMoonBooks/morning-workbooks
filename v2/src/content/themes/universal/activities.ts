@@ -166,7 +166,7 @@ export const universalActivities: ActivityMap = {
   '4-30': { word: 'pond',      subject: 'a spring pond',             instruction: 'Color the pond blue and the lily pads green!',      colorWord: 'blue',   tags: [] },
 
   // ── May ───────────────────────────────────────────────────
-  '5-1':  { word: 'mom',       subject: "a Mother's Day card",       instruction: "Color the Mother's Day card pink and gold!",        colorWord: 'pink',   tags: [] },
+  '5-1':  { word: 'May',       subject: 'a May basket of spring flowers', instruction: 'Color the May basket with bright spring colors!',  colorWord: 'pink',   tags: [] },
   '5-2':  { word: 'rose',      subject: 'roses',                     instruction: 'Color the roses red!',                              colorWord: 'red',    tags: [] },
   '5-3':  { word: 'sun',       subject: 'the bright May sun',        instruction: 'Color the sun yellow!',                             colorWord: 'yellow', tags: [] },
   '5-4':  { word: 'bird',      subject: 'a mother bird and nest',    instruction: 'Color the mama bird and her nest!',                 colorWord: 'brown',  tags: [] },
