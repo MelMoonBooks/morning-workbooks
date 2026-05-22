@@ -159,6 +159,10 @@ export const hinduHolidays: HolidayList = [
   { date: "05-07", name: "Krishna with his flute",  tradition: "hindu", isMajor: false, isObservance: true, sentence: "Krishna loved playing his flute by the riverbank — his music brought joy to everyone who listened." },
   { date: "05-14", name: "Ganesha at the doorway",  tradition: "hindu", isMajor: false, isObservance: true, sentence: "Ganesha is the elephant-headed god who removes obstacles and blesses every new beginning." },
   { date: "05-21", name: "Hanuman lifts the mountain", tradition: "hindu", isMajor: false, isObservance: true, sentence: "Hanuman is the strongest of helpers — he once lifted a whole mountain to help his friend Rama." },
+  // Launch-week specials (5-22, 5-23, 5-24)
+  { date: "05-22", name: "Lord Shiva meditates",    tradition: "hindu", isMajor: false, isObservance: true, sentence: "Lord Shiva, the great Hindu god, sits in meditation on Mount Kailash — calm, powerful, and full of love for the whole world." },
+  { date: "05-23", name: "The sacred tulsi plant",  tradition: "hindu", isMajor: false, isObservance: true, sentence: "Tulsi (holy basil) grows in a clay pot by the doorway of Hindu homes — families water it every morning and ask for its blessing." },
+  { date: "05-24", name: "Garuda, the eagle of Vishnu", tradition: "hindu", isMajor: false, isObservance: true, sentence: "Garuda is the giant eagle who carries Lord Vishnu across the sky — a symbol of bravery, speed, and devotion." },
   { date: "05-28", name: "Yoga and stillness",      tradition: "hindu", isMajor: false, isObservance: true, sentence: "Yoga began in India thousands of years ago and helps us feel calm and strong." },
   { date: "06-04", name: "Saraswati and learning",  tradition: "hindu", isMajor: false, isObservance: true, sentence: "Saraswati is the goddess of learning, music, and wisdom — students pray to her before exams." },
   { date: "06-11", name: "The diya lamp",           tradition: "hindu", isMajor: false, isObservance: true, sentence: "A diya is a small clay lamp lit with oil — Hindus light diyas to welcome blessings and peace." },

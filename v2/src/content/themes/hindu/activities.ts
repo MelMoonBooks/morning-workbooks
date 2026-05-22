@@ -27,6 +27,10 @@ export const hinduActivities: ActivityMap = {
   "5-11": { word: "lotus",    subject: "Buddha sitting on a lotus",  instruction: "Color the Buddha and the lotus flower!",              colorWord: "pink",   tags: ["hindu", "buddha-purnima"] },
   "5-14": { word: "Ganesha",  subject: "Ganesha at the doorway with offerings", instruction: "Color Ganesha — the elephant god who removes obstacles!", colorWord: "orange", tags: ["hindu", "ganesha"] },
   "5-21": { word: "Hanuman",  subject: "Hanuman flying with a mountain", instruction: "Color brave Hanuman the monkey god!",             colorWord: "orange", tags: ["hindu", "hanuman"] },
+  // Launch-week specials (5-22, 5-23, 5-24)
+  "5-22": { word: "Shiva",    subject: "Lord Shiva meditating on a mountain", instruction: "Color Lord Shiva and the crescent moon!",     colorWord: "blue",   tags: ["hindu", "shiva"] },
+  "5-23": { word: "tulsi",    subject: "a tulsi plant at a doorway", instruction: "Color the sacred tulsi plant!",                       colorWord: "green",  tags: ["hindu", "tulsi"] },
+  "5-24": { word: "Garuda",   subject: "Garuda the eagle of Lord Vishnu", instruction: "Color Garuda's mighty wings!",                    colorWord: "gold",   tags: ["hindu", "garuda", "vishnu"] },
   "5-28": { word: "yoga",     subject: "a child doing the tree pose", instruction: "Color the calm yoga pose!",                          colorWord: "green",  tags: ["hindu", "yoga"] },
 
   // ── June ──

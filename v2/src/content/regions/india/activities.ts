@@ -35,6 +35,10 @@ export const indiaActivities: ActivityMap = {
   "5-3":  { word: "rangoli",  subject: "a rangoli at a doorway",   instruction: "Color the rangoli with bright welcoming colors!", colorWord: "pink",    tags: ["india", "rangoli", "welcome"] },
   "5-10": { word: "peacock",  subject: "a peacock",                instruction: "Color the peacock blue and green!",               colorWord: "blue",    tags: ["india", "peacock", "bird"] },
   "5-17": { word: "lassi",    subject: "a glass of mango lassi",   instruction: "Color the lassi yellow and the glass cool blue!", colorWord: "yellow",  tags: ["india", "lassi", "mango", "drink"] },
+  // Launch-week specials (5-22, 5-23, 5-24)
+  "5-22": { word: "marigold", subject: "a marigold garland (toran) at a doorway", instruction: "Color the marigold garland bright orange and yellow!", colorWord: "orange", tags: ["india", "marigold", "festival"] },
+  "5-23": { word: "thali",    subject: "an Indian thali platter",  instruction: "Color the thali with all the foods!",             colorWord: "yellow",  tags: ["india", "thali", "food"] },
+  "5-24": { word: "cricket",  subject: "a child playing cricket",  instruction: "Color the cricket player and the bat!",           colorWord: "green",   tags: ["india", "cricket", "sport"] },
   "5-31": { word: "India",    subject: "kids waving the Indian flag", instruction: "Color the flag saffron, white, and green!",    colorWord: "saffron", tags: ["india", "flag", "kids"] },
   "6-7":  { word: "tabla",    subject: "a tabla drum and sitar",   instruction: "Color the tabla and sitar — instruments of India!", colorWord: "brown",  tags: ["india", "tabla", "sitar", "music"] },
   "6-15": { word: "monsoon",  subject: "monsoon rain and umbrella", instruction: "Color the rain blue and the umbrella red!",      colorWord: "blue",    tags: ["india", "monsoon", "rain"] },
