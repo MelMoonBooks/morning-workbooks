@@ -185,10 +185,16 @@ export function getDayContent(
     theme = { ...theme, ...primaryRegionActivities[dateKey] };
   }
 
-  // 5. Apply dominant tradition's theme overlay
-  const traditionActivities = activitiesByTradition[dominantTradition];
-  if (traditionActivities?.[dateKey]) {
-    theme = { ...theme, ...traditionActivities[dateKey] };
+  // 5. Apply dominant tradition's theme overlay.
+  //    Skip if dominantTradition is "universal" — we already used universal as
+  //    the base in step 3, and re-applying it here would clobber the region
+  //    overlay (e.g. on May 3 with India + Non-religious, this used to overwrite
+  //    the India rangoli with the universal sun).
+  if (dominantTradition !== "universal") {
+    const traditionActivities = activitiesByTradition[dominantTradition];
+    if (traditionActivities?.[dateKey]) {
+      theme = { ...theme, ...traditionActivities[dateKey] };
+    }
   }
 
   // 6. If a major holiday has a theme override, apply it
