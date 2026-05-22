@@ -45,10 +45,12 @@ export const indiaActivities: ActivityMap = {
   "6-22": { word: "rickshaw", subject: "an auto-rickshaw (tuk-tuk)", instruction: "Color the rickshaw bright yellow and green!",   colorWord: "yellow",  tags: ["india", "rickshaw", "transport"] },
   "6-28": { word: "chai",     subject: "a cup of steaming chai",   instruction: "Color the chai cup warm browns and steam!",       colorWord: "brown",   tags: ["india", "chai", "tea"] },
 
-  // July — added for cohesion: one themed India day every ~5 days
+  // July — added for cohesion: one themed India day every ~3-4 days (8 per month)
   "7-3":  { word: "samosa",   subject: "a plate of samosas with chutney", instruction: "Color the samosas and chutneys!",        colorWord: "brown",   tags: ["india", "samosa", "food"] },
+  "7-7":  { word: "bangles",  subject: "a stack of colorful Indian bangles", instruction: "Color the bangles in every bright color!", colorWord: "pink", tags: ["india", "bangles"] },
   "7-14": { word: "yoga",     subject: "a child doing yoga at sunrise", instruction: "Color the morning yoga scene!",            colorWord: "orange",  tags: ["india", "yoga", "morning"] },
   "7-18": { word: "henna",    subject: "hands with henna patterns", instruction: "Color the beautiful henna patterns!",          colorWord: "brown",   tags: ["india", "henna", "mehndi"] },
+  "7-22": { word: "kheer",    subject: "a bowl of kheer with nuts and saffron", instruction: "Color the kheer and the warm spices!", colorWord: "yellow", tags: ["india", "kheer", "sweet"] },
   "7-24": { word: "train",    subject: "an Indian train in the countryside", instruction: "Color the train and the green fields!", colorWord: "green",  tags: ["india", "train", "travel"] },
   "7-31": { word: "dance",    subject: "a child in a Bharatanatyam pose", instruction: "Color the classical Indian dance pose!", colorWord: "red",     tags: ["india", "dance", "bharatanatyam"] },
   "7-10": { word: "elephant", subject: "a decorated elephant",     instruction: "Color the elephant with colorful decorations!",   colorWord: "purple",  tags: ["india", "elephant", "festival"] },

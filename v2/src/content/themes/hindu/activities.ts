@@ -39,11 +39,15 @@ export const hinduActivities: ActivityMap = {
   "6-18": { word: "mandir",   subject: "a Hindu temple with a tall tower", instruction: "Color the beautiful mandir!",                   colorWord: "red",    tags: ["hindu", "mandir", "temple"] },
   "6-25": { word: "Om",       subject: "a large Om symbol with leaves", instruction: "Color the Om symbol!",                             colorWord: "gold",   tags: ["hindu", "om"] },
 
-  // ── July ──
+  // ── July ── (8 picture days per month for cohesion)
   "7-3":  { word: "cow",      subject: "a gentle Indian cow with bells", instruction: "Color the kind cow!",                             colorWord: "brown",  tags: ["hindu", "cow"] },
+  "7-8":  { word: "shankh",   subject: "a sacred conch shell",       instruction: "Color the conch shell!",                              colorWord: "white",  tags: ["hindu", "shankh", "conch"] },
+  "7-12": { word: "mala",     subject: "a strand of prayer beads (mala)", instruction: "Color the prayer beads!",                        colorWord: "brown",  tags: ["hindu", "mala", "prayer"] },
   "7-17": { word: "Radha",    subject: "Krishna and Radha together", instruction: "Color Krishna and Radha!",                            colorWord: "pink",   tags: ["hindu", "krishna", "radha"] },
   "7-21": { word: "teacher",  subject: "a guru teaching a student",  instruction: "Color the wise teacher and student!",                 colorWord: "orange", tags: ["hindu", "guru-purnima"] },
+  "7-25": { word: "Nandi",    subject: "Nandi the sacred bull of Shiva", instruction: "Color Nandi the gentle bull!",                    colorWord: "white",  tags: ["hindu", "nandi", "shiva"] },
   "7-28": { word: "aarti",    subject: "a family doing aarti with a lit lamp", instruction: "Color the aarti ceremony!",                 colorWord: "gold",   tags: ["hindu", "aarti"] },
+  "7-29": { word: "banyan",   subject: "a big sacred banyan tree",   instruction: "Color the wide banyan tree!",                         colorWord: "green",  tags: ["hindu", "banyan", "tree"] },
 
   // ── August ──
   "8-9":  { word: "rakhi",    subject: "a sister tying a rakhi on her brother's wrist", instruction: "Color the rakhi celebration!",      colorWord: "red",    tags: ["hindu", "raksha-bandhan"] },

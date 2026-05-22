@@ -464,10 +464,16 @@ function TestLandingPage({ onSwitch }: { onSwitch: () => void }) {
       const paddedDay = String(day).padStart(2, "0");
       const baseKey = `${monthName.toLowerCase()}_${paddedDay}`;
       const primaryRegion = regions[0] ?? "us";
+      // Prefer the region whose id appears in theme.tags (e.g. india for the
+      // rangoli day). Otherwise fall back to primary. Then include other selected
+      // regions before universal so multi-region families still get coverage.
+      const themeTags = (content.theme.tags || []) as string[];
+      const themeRegion = regions.find(r => themeTags.includes(r)) ?? primaryRegion;
       const candidates = [
         ...(content.theme.imageFile ? [content.theme.imageFile.replace(/\.png$/, "")] : []),
         ...(content.dominantTradition !== "universal" ? [`${content.dominantTradition}/${baseKey}`] : []),
-        `${primaryRegion}/${baseKey}`,
+        `${themeRegion}/${baseKey}`,
+        ...regions.filter(r => r !== themeRegion).map(r => `${r}/${baseKey}`),
         baseKey,
       ];
       for (const key of candidates) {
@@ -1357,7 +1363,10 @@ function PaidSuccessPage({ onBackToLanding }: { onBackToLanding: () => void }) {
       const ReactDOM = await import("react-dom/client");
       const React2 = await import("react");
 
-      // Pre-fetch all images for the month (tradition / region / universal fallback)
+      // Pre-fetch all images for the month (tradition / region / universal fallback).
+      // Match DayPage's imageRegion logic: prefer the region whose id is in
+      // theme.tags (e.g. india for rangoli day) so the PDF picture matches the
+      // on-screen preview. Then try other selected regions, then universal.
       setPdfProgress(8);
       const imageCache: Record<string, string> = {};
       const primaryRegion = regions[0] ?? "us";
@@ -1365,10 +1374,13 @@ function PaidSuccessPage({ onBackToLanding }: { onBackToLanding: () => void }) {
         const paddedDay = String(d).padStart(2, "0");
         const baseKey = `${monthName.toLowerCase()}_${paddedDay}`;
         const dayContent = getDayContent(traditions, regions, month, d, year);
+        const themeTags = (dayContent.theme.tags || []) as string[];
+        const themeRegion = regions.find(r => themeTags.includes(r)) ?? primaryRegion;
         const candidates = [
           ...(dayContent.theme.imageFile ? [dayContent.theme.imageFile.replace(/\.png$/, "")] : []),
           ...(dayContent.dominantTradition !== "universal" ? [`${dayContent.dominantTradition}/${baseKey}`] : []),
-          `${primaryRegion}/${baseKey}`,
+          `${themeRegion}/${baseKey}`,
+          ...regions.filter(r => r !== themeRegion).map(r => `${r}/${baseKey}`),
           baseKey,
         ];
         for (const key of candidates) {

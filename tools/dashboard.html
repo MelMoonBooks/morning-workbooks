@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Melmoon Books · Analytics</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    background: #f8f7f3;
+    color: #1f2937;
+    margin: 0;
+    padding: 24px;
+    line-height: 1.5;
+  }
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 16px;
+  }
+  h1 {
+    margin: 0;
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-size: 32px;
+    color: #14746f;
+  }
+  .subtitle { color: #6b7280; font-size: 13px; margin-top: 2px; }
+  .actions { display: flex; gap: 8px; align-items: center; }
+  button {
+    background: #14746f;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  button:hover { background: #0f5854; }
+  button.secondary {
+    background: white;
+    color: #374151;
+    border: 1px solid #d1d5db;
+  }
+  button.secondary:hover { background: #f3f4f6; }
+  input[type="password"], input[type="text"] {
+    padding: 10px 12px;
+    border-radius: 6px;
+    border: 1.5px solid #d1d5db;
+    font-size: 14px;
+    width: 100%;
+    box-sizing: border-box;
+    font-family: inherit;
+  }
+  #setup {
+    max-width: 480px;
+    margin: 80px auto;
+    padding: 32px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  }
+  #setup h2 { font-family: "Cormorant Garamond", Georgia, serif; margin-top: 0; color: #14746f; }
+  #setup p { color: #4b5563; font-size: 14px; }
+  #setup .input-row { margin: 20px 0; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .card {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    border: 1px solid #f3f4f6;
+  }
+  .card h3 {
+    margin: 0 0 8px 0;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #6b7280;
+    font-weight: 600;
+  }
+  .kpi { font-size: 36px; font-weight: 700; color: #1f2937; }
+  .kpi-sub { font-size: 12px; color: #6b7280; margin-top: 4px; }
+  .chart-card { grid-column: span 2; }
+  .chart-wrap { position: relative; height: 240px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid #f3f4f6; }
+  th { color: #6b7280; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .error {
+    background: #fef2f2;
+    color: #991b1b;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border-left: 4px solid #dc2626;
+    margin-bottom: 16px;
+    font-size: 13px;
+  }
+  .loading { color: #9ca3af; font-size: 13px; font-style: italic; }
+  .small-link { font-size: 11px; color: #14746f; cursor: pointer; text-decoration: underline; }
+  @media (max-width: 700px) {
+    .chart-card { grid-column: span 1; }
+  }
+</style>
+</head>
+<body>
+
+<div id="setup" style="display:none">
+  <h2>One-time setup</h2>
+  <p>Paste your PostHog Personal API key (starts with <code>phx_</code>). It's stored only in your browser's localStorage — never sent anywhere except PostHog.</p>
+  <div class="input-row">
+    <input type="password" id="apiKey" placeholder="phx_..." autocomplete="off" />
+  </div>
+  <button id="saveKey">Save &amp; Load Dashboard</button>
+  <p style="font-size: 11px; color: #9ca3af; margin-top: 24px;">
+    Create a key at posthog.com → Settings → Personal API keys → "Read-only access" preset.
+  </p>
+</div>
+
+<div id="main" style="display:none">
+  <header>
+    <div>
+      <h1>Melmoon Books · Analytics</h1>
+      <div class="subtitle">Project 433417 (US Cloud) · last refresh <span id="refreshTime">—</span></div>
+    </div>
+    <div class="actions">
+      <button id="settingsBtn" class="secondary">⚙ Filters</button>
+      <button id="refresh" class="secondary">↻ Refresh</button>
+      <span class="small-link" id="changeKey">change key</span>
+    </div>
+  </header>
+
+  <div id="settingsPanel" style="display:none; background: white; border: 1px solid #e5e7eb; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
+    <h3 style="margin-top:0;font-family:'Cormorant Garamond',Georgia,serif;color:#14746f;font-size:20px;">Filter out internal events</h3>
+    <p style="font-size:13px;color:#4b5563;">Paste one PostHog <strong>distinct_id</strong> per line below. Every metric on the dashboard will exclude users matching these IDs.</p>
+    <textarea id="excludedIds" rows="5" placeholder="01906abc-1234-7890-...&#10;01906def-5678-1234-..." style="width:100%;padding:10px;border:1.5px solid #d1d5db;border-radius:6px;font-family:monospace;font-size:12px;box-sizing:border-box;"></textarea>
+    <div style="display:flex;gap:8px;margin-top:12px;">
+      <button id="saveFilters">Save &amp; Refresh</button>
+      <button id="closeSettings" class="secondary">Close</button>
+    </div>
+    <div style="background:#f9fafb;border-radius:6px;padding:12px;margin-top:16px;font-size:12px;color:#6b7280;">
+      <strong>How to find your distinct_id:</strong><br>
+      1. Open melmoonbooks.com in the browser you use for testing<br>
+      2. Open DevTools (Cmd-Option-I) → Console tab<br>
+      3. Type <code style="background:#fff;padding:2px 6px;border-radius:4px;">posthog.get_distinct_id()</code> and press Enter<br>
+      4. Copy the string it prints, paste into the box above (one per line for each browser/device you use to test)
+    </div>
+  </div>
+
+  <div id="errorBox"></div>
+
+  <!-- KPI row -->
+  <div class="grid">
+    <div class="card">
+      <h3>Visitors today</h3>
+      <div class="kpi" id="kpiVisitorsToday">—</div>
+      <div class="kpi-sub" id="kpiVisitorsTodayDelta"></div>
+    </div>
+    <div class="card">
+      <h3>Visitors last 7d</h3>
+      <div class="kpi" id="kpiVisitors7d">—</div>
+      <div class="kpi-sub">unique users</div>
+    </div>
+    <div class="card">
+      <h3>Unique downloaders (7d)</h3>
+      <div class="kpi" id="kpiDownloads7d">—</div>
+      <div class="kpi-sub">free month PDF</div>
+    </div>
+    <div class="card">
+      <h3>Unique waitlist signups (7d)</h3>
+      <div class="kpi" id="kpiWaitlist7d">—</div>
+      <div class="kpi-sub">printed-books interest</div>
+    </div>
+  </div>
+
+  <!-- Funnel + traffic chart -->
+  <div class="grid">
+    <div class="card chart-card">
+      <h3>Conversion funnel (last 7 days)</h3>
+      <div class="chart-wrap"><canvas id="funnelChart"></canvas></div>
+    </div>
+    <div class="card chart-card">
+      <h3>Daily visitors (last 14 days)</h3>
+      <div class="chart-wrap"><canvas id="trafficChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Selection breakdowns -->
+  <div class="grid">
+    <div class="card">
+      <h3>Top traditions (unique users, 7d)</h3>
+      <div id="traditionTable" class="loading">loading…</div>
+    </div>
+    <div class="card">
+      <h3>Top regions (unique users, 7d)</h3>
+      <div id="regionTable" class="loading">loading…</div>
+    </div>
+    <div class="card">
+      <h3>Top grades (unique users, 7d)</h3>
+      <div id="gradeTable" class="loading">loading…</div>
+    </div>
+  </div>
+
+  <!-- Event firehose -->
+  <div class="grid">
+    <div class="card chart-card">
+      <h3>Event volume by type (last 7 days)</h3>
+      <div id="eventTable" class="loading">loading…</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const PROJECT_ID = '433417';
+const HOST = 'https://us.posthog.com';
+const KEY_STORAGE = 'melmoon_posthog_key';
+const EXCLUDED_IDS_STORAGE = 'melmoon_excluded_distinct_ids';
+
+const $ = (id) => document.getElementById(id);
+
+function getKey() { return localStorage.getItem(KEY_STORAGE); }
+function setKey(k) { localStorage.setItem(KEY_STORAGE, k); }
+function clearKey() { localStorage.removeItem(KEY_STORAGE); }
+
+function getExcludedIds() {
+  const raw = localStorage.getItem(EXCLUDED_IDS_STORAGE) || '';
+  return raw.split('\n').map(s => s.trim()).filter(s => s.length > 0);
+}
+function setExcludedIds(ids) {
+  localStorage.setItem(EXCLUDED_IDS_STORAGE, ids);
+}
+
+// Returns a SQL fragment like " AND distinct_id NOT IN ('a','b')" to splice into queries.
+// Returns "" if no exclusions configured.
+function excludeFilter() {
+  const ids = getExcludedIds();
+  if (!ids.length) return '';
+  // Escape single quotes to be safe even though this is a personal dashboard.
+  const safe = ids.map(id => `'${id.replace(/'/g, "''")}'`).join(',');
+  return ` AND distinct_id NOT IN (${safe})`;
+}
+
+function showError(msg) {
+  $('errorBox').innerHTML = `<div class="error">${msg}</div>`;
+}
+function clearError() { $('errorBox').innerHTML = ''; }
+
+async function runQuery(hogql) {
+  const key = getKey();
+  const res = await fetch(`${HOST}/api/projects/${PROJECT_ID}/query/`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${key}`,
+    },
+    body: JSON.stringify({ query: { kind: 'HogQLQuery', query: hogql } }),
+  });
+  if (!res.ok) {
+    const txt = await res.text();
+    throw new Error(`PostHog API ${res.status}: ${txt.slice(0, 200)}`);
+  }
+  return res.json();
+}
+
+function fmtNumber(n) {
+  if (n == null) return '—';
+  return Number(n).toLocaleString();
+}
+
+let funnelChartInstance = null;
+let trafficChartInstance = null;
+
+async function loadKPIs() {
+  const ex = excludeFilter();
+  // Visitors today vs yesterday
+  const today = await runQuery(`
+    SELECT count(DISTINCT person_id) AS users
+    FROM events
+    WHERE event = '$pageview' AND timestamp >= today()${ex}
+  `);
+  const yesterday = await runQuery(`
+    SELECT count(DISTINCT person_id) AS users
+    FROM events
+    WHERE event = '$pageview'
+      AND timestamp >= today() - INTERVAL 1 DAY
+      AND timestamp < today()${ex}
+  `);
+  const last7 = await runQuery(`
+    SELECT count(DISTINCT person_id) AS users
+    FROM events
+    WHERE event = '$pageview' AND timestamp >= now() - INTERVAL 7 DAY${ex}
+  `);
+  const downloads7 = await runQuery(`
+    SELECT count(DISTINCT person_id) AS uniq_downloads
+    FROM events
+    WHERE event = 'free_month_started' AND timestamp >= now() - INTERVAL 7 DAY${ex}
+  `);
+  const waitlist7 = await runQuery(`
+    SELECT count(DISTINCT person_id) AS uniq_signups
+    FROM events
+    WHERE event = 'waitlist_submitted' AND timestamp >= now() - INTERVAL 7 DAY${ex}
+  `);
+
+  const t = today.results[0]?.[0] ?? 0;
+  const y = yesterday.results[0]?.[0] ?? 0;
+  const delta = t - y;
+  $('kpiVisitorsToday').textContent = fmtNumber(t);
+  if (y > 0 || t > 0) {
+    const arrow = delta >= 0 ? '↑' : '↓';
+    const color = delta >= 0 ? '#059669' : '#dc2626';
+    $('kpiVisitorsTodayDelta').innerHTML = `<span style="color:${color}">${arrow} ${Math.abs(delta)} vs yesterday</span>`;
+  }
+  $('kpiVisitors7d').textContent = fmtNumber(last7.results[0]?.[0] ?? 0);
+  $('kpiDownloads7d').textContent = fmtNumber(downloads7.results[0]?.[0] ?? 0);
+  $('kpiWaitlist7d').textContent = fmtNumber(waitlist7.results[0]?.[0] ?? 0);
+}
+
+async function loadFunnel() {
+  const ex = excludeFilter();
+  const data = await runQuery(`
+    SELECT
+      count(DISTINCT person_id) FILTER (WHERE event = '$pageview') AS pageviews,
+      count(DISTINCT person_id) FILTER (WHERE event IN ('tradition_toggled','country_toggled','birthday_added')) AS customized,
+      count(DISTINCT person_id) FILTER (WHERE event = 'get_full_month_clicked') AS clicked_buy,
+      count(DISTINCT person_id) FILTER (WHERE event = 'free_month_started') AS downloaded
+    FROM events
+    WHERE timestamp >= now() - INTERVAL 7 DAY${ex}
+  `);
+  const [pv, cust, clk, dl] = data.results[0] ?? [0,0,0,0];
+  const labels = ['Visited', 'Customized', 'Clicked Get Free', 'Downloaded'];
+  const values = [pv, cust, clk, dl];
+  const colors = ['#14746f', '#1d8a85', '#2aa19d', '#4cbbb6'];
+
+  if (funnelChartInstance) funnelChartInstance.destroy();
+  funnelChartInstance = new Chart($('funnelChart'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Users',
+        data: values,
+        backgroundColor: colors,
+        borderRadius: 6,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      indexAxis: 'y',
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            afterLabel: (ctx) => {
+              const i = ctx.dataIndex;
+              if (i === 0) return '';
+              const prev = values[i-1];
+              if (!prev) return '';
+              const pct = ((values[i]/prev)*100).toFixed(1);
+              return `${pct}% of previous step`;
+            }
+          }
+        }
+      },
+      scales: { x: { beginAtZero: true } }
+    }
+  });
+}
+
+async function loadTraffic() {
+  const ex = excludeFilter();
+  const data = await runQuery(`
+    SELECT toDate(timestamp) AS day, count(DISTINCT person_id) AS users
+    FROM events
+    WHERE event = '$pageview' AND timestamp >= now() - INTERVAL 14 DAY${ex}
+    GROUP BY day
+    ORDER BY day
+  `);
+  const labels = data.results.map(r => r[0]);
+  const values = data.results.map(r => r[1]);
+
+  if (trafficChartInstance) trafficChartInstance.destroy();
+  trafficChartInstance = new Chart($('trafficChart'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Unique visitors',
+        data: values,
+        borderColor: '#14746f',
+        backgroundColor: 'rgba(20,116,111,0.1)',
+        tension: 0.25,
+        fill: true,
+        pointRadius: 4,
+        pointBackgroundColor: '#14746f',
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true } }
+    }
+  });
+}
+
+function renderTable(targetId, rows, columns) {
+  if (!rows.length) {
+    $(targetId).innerHTML = '<div class="loading">no data yet</div>';
+    return;
+  }
+  let html = '<table><thead><tr>';
+  columns.forEach(c => html += `<th>${c.label}</th>`);
+  html += '</tr></thead><tbody>';
+  rows.forEach(row => {
+    html += '<tr>';
+    columns.forEach((c, i) => html += `<td>${row[i] ?? ''}</td>`);
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  $(targetId).innerHTML = html;
+}
+
+async function loadBreakdowns() {
+  const ex = excludeFilter();
+  // Traditions — unique users per tradition
+  const trad = await runQuery(`
+    SELECT properties.tradition AS tradition, count(DISTINCT person_id) AS users
+    FROM events
+    WHERE event = 'tradition_toggled' AND timestamp >= now() - INTERVAL 7 DAY${ex}
+    GROUP BY tradition ORDER BY users DESC LIMIT 10
+  `);
+  renderTable('traditionTable', trad.results, [{label:'Tradition'}, {label:'Users'}]);
+
+  // Regions — unique users per region
+  const reg = await runQuery(`
+    SELECT properties.country AS country, count(DISTINCT person_id) AS users
+    FROM events
+    WHERE event = 'country_toggled'
+      AND properties.action = 'add'
+      AND timestamp >= now() - INTERVAL 7 DAY${ex}
+    GROUP BY country ORDER BY users DESC LIMIT 10
+  `);
+  renderTable('regionTable', reg.results, [{label:'Region'}, {label:'Users'}]);
+
+  // Grades — unique users per grade (from get_full_month_clicked)
+  const grade = await runQuery(`
+    SELECT properties.age AS age, count(DISTINCT person_id) AS users
+    FROM events
+    WHERE event = 'get_full_month_clicked' AND timestamp >= now() - INTERVAL 7 DAY${ex}
+    GROUP BY age ORDER BY users DESC LIMIT 10
+  `);
+  renderTable('gradeTable', grade.results.map(r => {
+    const ageMap = { 3:'Preschool', 4:'TK', 5:'Kindergarten', 6:'1st' };
+    return [ageMap[r[0]] || `age ${r[0]}`, r[1]];
+  }), [{label:'Grade'}, {label:'Users'}]);
+
+  // Event volume — raw event counts (this is the one place where total events matter)
+  const ev = await runQuery(`
+    SELECT event, count() AS n, count(DISTINCT person_id) AS users
+    FROM events
+    WHERE timestamp >= now() - INTERVAL 7 DAY${ex}
+    GROUP BY event ORDER BY n DESC LIMIT 25
+  `);
+  renderTable('eventTable', ev.results, [{label:'Event'}, {label:'Events (7d)'}, {label:'Unique users'}]);
+}
+
+async function loadAll() {
+  clearError();
+  try {
+    await Promise.all([
+      loadKPIs(),
+      loadFunnel(),
+      loadTraffic(),
+      loadBreakdowns(),
+    ]);
+    $('refreshTime').textContent = new Date().toLocaleTimeString();
+  } catch (err) {
+    if (String(err).includes('401') || String(err).includes('403')) {
+      showError('Your API key was rejected by PostHog. Click "change key" to paste a new one.');
+    } else if (String(err).includes('CORS') || String(err).includes('Failed to fetch')) {
+      showError(`PostHog blocked the request from this page (CORS). Your file:// or localhost origin may not be allowed. <br><br>Fix: open this dashboard via a local server instead — in Terminal: <code>cd ${"~/Documents/morning-workbooks/tools"} && python3 -m http.server 8765</code>, then visit <a href="http://localhost:8765/dashboard.html">http://localhost:8765/dashboard.html</a>`);
+    } else {
+      showError(`Couldn't load data: ${err.message}`);
+    }
+  }
+}
+
+function showSetup() {
+  $('setup').style.display = 'block';
+  $('main').style.display = 'none';
+}
+function showMain() {
+  $('setup').style.display = 'none';
+  $('main').style.display = 'block';
+}
+
+$('saveKey').onclick = () => {
+  const k = $('apiKey').value.trim();
+  if (!k.startsWith('phx_')) {
+    alert('PostHog Personal API keys start with "phx_". Please double-check.');
+    return;
+  }
+  setKey(k);
+  showMain();
+  loadAll();
+};
+
+$('refresh').onclick = () => loadAll();
+$('changeKey').onclick = () => {
+  if (confirm('Forget the saved API key on this device?')) {
+    clearKey();
+    showSetup();
+  }
+};
+
+// Settings panel
+$('settingsBtn').onclick = () => {
+  $('excludedIds').value = localStorage.getItem(EXCLUDED_IDS_STORAGE) || '';
+  $('settingsPanel').style.display = 'block';
+};
+$('closeSettings').onclick = () => {
+  $('settingsPanel').style.display = 'none';
+};
+$('saveFilters').onclick = () => {
+  setExcludedIds($('excludedIds').value);
+  $('settingsPanel').style.display = 'none';
+  loadAll();
+};
+
+// Init
+if (getKey()) {
+  showMain();
+  loadAll();
+} else {
+  showSetup();
+}
+</script>
+
+</body>
+</html>

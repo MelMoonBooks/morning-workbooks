@@ -169,8 +169,13 @@ export const hinduHolidays: HolidayList = [
   { date: "06-18", name: "The mandir",              tradition: "hindu", isMajor: false, isObservance: true, sentence: "A mandir is a Hindu temple — families gather there to sing, pray, and ring the temple bells." },
   { date: "06-25", name: "The sound of Om",         tradition: "hindu", isMajor: false, isObservance: true, sentence: "Om is the sacred sound of the universe — saying it together helps families feel peaceful." },
   { date: "07-03", name: "The sacred cow",          tradition: "hindu", isMajor: false, isObservance: true, sentence: "In India, the cow is honored as a gentle giver — providing milk and reminding us to be kind to animals." },
+  { date: "07-08", name: "The sacred shankh",       tradition: "hindu", isMajor: false, isObservance: true, sentence: "The shankh is a conch shell that Hindus blow during prayer — its deep sound is believed to clear the air and bring blessings." },
+  { date: "07-12", name: "The mala prayer beads",   tradition: "hindu", isMajor: false, isObservance: true, sentence: "A mala has 108 prayer beads — Hindus hold them while praying, counting one bead for each prayer or breath." },
   { date: "07-17", name: "Krishna and Radha",       tradition: "hindu", isMajor: false, isObservance: true, sentence: "Krishna and Radha share the deepest love story — they remind us that joy and devotion go together." },
+  { date: "07-21", name: "Guru Purnima",            tradition: "hindu", isMajor: false, isObservance: true, sentence: "On Guru Purnima, Hindus thank their teachers — the gurus who help us see the world more clearly." },
+  { date: "07-25", name: "Nandi the bull",          tradition: "hindu", isMajor: false, isObservance: true, sentence: "Nandi is Lord Shiva's bull and best friend — he sits at the door of Shiva's temple, waiting patiently." },
   { date: "07-28", name: "Aarti — the lamp ceremony", tradition: "hindu", isMajor: false, isObservance: true, sentence: "In aarti, families wave a lit lamp before a deity while singing — the light carries their love and prayers." },
+  { date: "07-29", name: "The sacred banyan tree",  tradition: "hindu", isMajor: false, isObservance: true, sentence: "The banyan tree's branches grow so wide they make a forest of one tree — Hindus see it as a symbol of long life and shelter." },
 
   // ── 2026 ──
   { date: "01-14", year: 2026, ...pongal },
