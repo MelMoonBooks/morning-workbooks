@@ -202,22 +202,30 @@ export default function DayPage({ day, month, year, childName, traditions, regio
   // Personalized greeting (Rita-feedback fix)
   const greetingWord = getGreetingWord(regionList, dominantTradition);
 
+  // Pick the region used for image lookup. When today's activity overlay came
+  // from a non-primary selected region (theme.tags contains its id), use that
+  // region so DayImage finds e.g. `india/may_03.png` instead of falling back
+  // to universal. Otherwise default to the primary region.
+  const imageRegion: string =
+    regionList.find(r => (theme.tags || []).includes(r)) ?? primaryRegion;
+
   // ── Cultural slot ("Did you know?") ──
   // Goal: avoid clutter. If today's picture is tied to a holiday/region blurb,
   // promote that blurb up to the "Did you know?" slot and remove it from the
   // date box (so the same sentence doesn't appear twice). If no matching blurb,
   // fall back to the rotating fact pool. On days with no eligible content,
   // the slot is hidden entirely.
+  // Try tradition match first; if dominantTradition has no holiday today,
+  // fall through to region match (so a Hindu+India family on May 3 still
+  // promotes the India rangoli blurb even though dominantTradition is hindu).
   let pictureMatchedHoliday: Holiday | null = null;
   if (dominantTradition !== "universal") {
-    // Tradition-themed picture → grab the matching tradition holiday today
     pictureMatchedHoliday = holidays.find(h => h.tradition === dominantTradition) ?? null;
-  } else {
-    // Region-themed picture? Check if any selected region tag matches the theme.
+  }
+  if (!pictureMatchedHoliday) {
     const themeTags = (theme.tags || []) as string[];
     const regionTag = regionList.find(r => themeTags.includes(r));
     if (regionTag) {
-      // Find a universal holiday whose sentence references the picture's word/subject
       const themeWord    = (theme.word || "").toLowerCase();
       const subjectWords = (theme.subject || "").toLowerCase().split(/\s+/).filter(w => w.length > 3);
       pictureMatchedHoliday = holidays.find(h => {
@@ -416,7 +424,7 @@ export default function DayPage({ day, month, year, childName, traditions, regio
             subject={theme.subject}
             colorWord={theme.colorWord}
             tradition={dominantTradition}
-            region={primaryRegion}
+            region={imageRegion}
             imageFile={theme.imageFile}
           />
         </div>
