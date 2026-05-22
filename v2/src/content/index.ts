@@ -152,11 +152,24 @@ export function getDayContent(
     tags: [],
   };
 
-  // 4. Apply primary country's activity overlay if available
-  // (Multi-country families: activities come from the first selected country to avoid daily whiplash)
-  const regionActivities = activitiesByRegion[primaryRegion];
-  if (regionActivities?.[dateKey]) {
-    theme = { ...theme, ...regionActivities[dateKey] };
+  // 4. Apply region activity overlays.
+  //
+  //    Behavior: any selected region's activity override applies (so a US+India
+  //    family on May 3 still gets the India rangoli image, not the universal
+  //    sun). The PRIMARY region wins ties — we apply secondary regions first,
+  //    then primary last so it overrides. This keeps the original "primary
+  //    sets the daily flavor" intent while not erasing rich content from
+  //    secondary regions on culturally-significant days.
+  for (const r of regionList) {
+    if (r === primaryRegion) continue;
+    const ra = activitiesByRegion[r];
+    if (ra?.[dateKey]) {
+      theme = { ...theme, ...ra[dateKey] };
+    }
+  }
+  const primaryRegionActivities = activitiesByRegion[primaryRegion];
+  if (primaryRegionActivities?.[dateKey]) {
+    theme = { ...theme, ...primaryRegionActivities[dateKey] };
   }
 
   // 5. Apply dominant tradition's theme overlay
