@@ -100,22 +100,24 @@ function getGreetingWord(regions: string[], dominantTradition: string): string {
 // (no flicker on PDF regeneration). Returns null when no region/tradition fact
 // applies — caller hides the box entirely in that case.
 const CULTURAL_FACTS: Record<string, string[]> = {
+  // NOTE: keep these distinct from the picture-day observances in
+  // src/content/regions/india/holidays.ts (peacock, lotus, mango, chai, rangoli,
+  // monsoon, elephant, yoga, henna, etc.). The rotation should COMPLEMENT the
+  // observance blurbs, not duplicate them — otherwise users see the same topic
+  // twice within a few days.
   india: [
-    "The lotus is India's national flower — it grows in muddy water but blooms beautifully.",
-    "Mango is called the king of fruits in India — there are over 1,000 varieties!",
-    "The peacock is India's national bird. Its feathers shine like jewels.",
-    "Chai means tea — Indian chai is brewed with spices like cardamom and ginger.",
-    "Rangoli is a colorful pattern drawn at doorways to welcome guests and good luck.",
     "India invented the number zero — without zero, math would look very different!",
-    "The Bengal tiger is India's national animal.",
-    "Indian elephants are honored in festivals and often painted with bright colors.",
-    "Diwali, the festival of lights, lights up homes across India every fall.",
-    "India is home to the Himalayas — the tallest mountains in the world.",
-    "Yoga began in India thousands of years ago.",
+    "The Bengal tiger is India's national animal — fierce and beautiful.",
+    "The Himalayas in northern India are the tallest mountains in the world.",
     "More than 1,600 languages are spoken across India.",
-    "Holi, the festival of colors, paints the streets in pink, yellow, and green.",
     "Indian sweets like jalebi and gulab jamun are loved at every celebration.",
-    "Cricket is the most popular sport in India.",
+    "Cricket is the most popular sport in India — millions watch every match.",
+    "The Taj Mahal in India is one of the seven wonders of the world.",
+    "Bollywood is the world's largest film industry — thousands of films a year!",
+    "The Ganges is a sacred river that flows through northern India.",
+    "In India, kids often touch their elders' feet as a sign of respect.",
+    "India is the world's largest democracy, with over a billion citizens.",
+    "Indian families often share meals together with food served on banana leaves.",
   ],
   uk: [
     "The robin is the UK's most beloved bird, especially around winter.",
@@ -128,13 +130,17 @@ const CULTURAL_FACTS: Record<string, string[]> = {
     "Wales has more sheep than people!",
     "British weather is famous for changing many times in one day.",
   ],
+  // Same rule as India — don't duplicate Hindu picture-day observances
+  // (Krishna, Ganesha, Hanuman, Saraswati, diya, mandir, Om, cow, aarti).
   hindu: [
-    "Diyas are small clay lamps lit during Diwali to welcome the goddess Lakshmi.",
-    "Ganesha, the elephant-headed god, is loved for removing obstacles.",
-    "Hindus believe the cow is sacred and a symbol of gentleness.",
-    "Sanskrit is one of the world's oldest languages — many prayers are spoken in it.",
-    "Saraswati is the goddess of learning and music — students pray to her before exams.",
-    "Krishna loved playing his flute and is often pictured with peacock feathers.",
+    "Sanskrit is one of the world's oldest languages — many Hindu prayers are written in it.",
+    "The Bhagavad Gita is a holy book of the Hindus, full of wisdom from Lord Krishna.",
+    "Lord Shiva is one of the great Hindu gods — the destroyer and renewer of the world.",
+    "Lord Vishnu protects the world — Krishna and Rama are two of his forms.",
+    "The bindi is a small dot worn on the forehead — a sign of devotion and beauty.",
+    "Many Hindus pray together as a family at home or at the mandir.",
+    "Hindus light incense, ring bells, and offer flowers when they pray.",
+    "Hindus celebrate festivals with colorful clothes, music, and sweets shared with friends.",
   ],
   "christian-catholic": [
     "Catholics make the sign of the cross to start and end their prayers.",
