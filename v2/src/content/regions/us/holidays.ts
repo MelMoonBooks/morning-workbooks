@@ -20,7 +20,7 @@ export const usHolidays: HolidayList = [
   { date: "10-12", name: "Indigenous Peoples' Day",     tradition: "universal", isMajor: false, sentence: "Today we honor the Indigenous peoples who have lived on this land since long ago." },
   { date: "10-31", name: "Halloween",                   tradition: "universal", isMajor: false, sentence: "Tonight is Halloween! Have fun dressing up and being kind to your neighbors." },
   { date: "11-11", name: "Veterans Day",                tradition: "universal", isMajor: false, sentence: "Today is Veterans Day! We say thank you to all who served our country." },
-  { date: "11-27", name: "Thanksgiving",     year: 2026, tradition: "universal", isMajor: true,  sentence: "Happy Thanksgiving! Today we think about everything we are grateful for." },
+  { date: "11-26", name: "Thanksgiving",     year: 2026, tradition: "universal", isMajor: true,  sentence: "Happy Thanksgiving! Today we think about everything we are grateful for." },
   { date: "11-25", name: "Thanksgiving",     year: 2027, tradition: "universal", isMajor: true,  sentence: "Happy Thanksgiving! Today we think about everything we are grateful for." },
   { date: "12-31", name: "New Year's Eve",              tradition: "universal", isMajor: false, sentence: "Tonight is New Year's Eve! Say thank you for this year and get ready for tomorrow." },
 ];

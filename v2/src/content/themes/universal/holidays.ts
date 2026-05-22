@@ -21,7 +21,8 @@ export const universalHolidays: HolidayList = [
   { date: "10-12", name: "Columbus Day",              tradition: "universal", isMajor: false, sentence: "Today is Columbus Day. We remember the explorers who crossed the ocean long ago." },
   { date: "10-31", name: "Halloween",                 tradition: "universal", isMajor: false, sentence: "Tonight is Halloween! Have fun dressing up and being kind to your neighbors." },
   { date: "11-11", name: "Veterans Day",              tradition: "universal", isMajor: false, sentence: "Today is Veterans Day! We say thank you to the brave people who kept our country safe." },
-  { date: "11-26", name: "Thanksgiving",              tradition: "universal", isMajor: true,  sentence: "Happy Thanksgiving! Today we think about everything we are grateful for." },
+  // Thanksgiving is a US-only holiday and floats year-to-year (last Thursday of November) —
+  // see regions/us/holidays.ts for year-aware entries.
   { date: "12-25", name: "Christmas Day",             tradition: "universal", isMajor: false, sentence: "Merry Christmas! Today families celebrate and share gifts with the people they love." },
   { date: "12-31", name: "New Year's Eve",            tradition: "universal", isMajor: false, sentence: "Tonight is New Year's Eve! Say thank you for this year and get ready for tomorrow." },
 ];
