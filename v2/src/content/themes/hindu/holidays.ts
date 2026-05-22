@@ -153,6 +153,21 @@ const dussehraEve = {
 };
 
 export const hinduHolidays: HolidayList = [
+  // ── Everyday Hindu observances (recurring every year, paired with picture days) ──
+  // These give the bottom-box blurb its content on non-festival days so the
+  // picture and text always match.
+  { date: "05-07", name: "Krishna with his flute",  tradition: "hindu", isMajor: false, sentence: "Krishna loved playing his flute by the riverbank — his music brought joy to everyone who listened." },
+  { date: "05-14", name: "Ganesha at the doorway",  tradition: "hindu", isMajor: false, sentence: "Ganesha is the elephant-headed god who removes obstacles and blesses every new beginning." },
+  { date: "05-21", name: "Hanuman lifts the mountain", tradition: "hindu", isMajor: false, sentence: "Hanuman is the strongest of helpers — he once lifted a whole mountain to help his friend Rama." },
+  { date: "05-28", name: "Yoga and stillness",      tradition: "hindu", isMajor: false, sentence: "Yoga began in India thousands of years ago and helps us feel calm and strong." },
+  { date: "06-04", name: "Saraswati and learning",  tradition: "hindu", isMajor: false, sentence: "Saraswati is the goddess of learning, music, and wisdom — students pray to her before exams." },
+  { date: "06-11", name: "The diya lamp",           tradition: "hindu", isMajor: false, sentence: "A diya is a small clay lamp lit with oil — Hindus light diyas to welcome blessings and peace." },
+  { date: "06-18", name: "The mandir",              tradition: "hindu", isMajor: false, sentence: "A mandir is a Hindu temple — families gather there to sing, pray, and ring the temple bells." },
+  { date: "06-25", name: "The sound of Om",         tradition: "hindu", isMajor: false, sentence: "Om is the sacred sound of the universe — saying it together helps families feel peaceful." },
+  { date: "07-03", name: "The sacred cow",          tradition: "hindu", isMajor: false, sentence: "In India, the cow is honored as a gentle giver — providing milk and reminding us to be kind to animals." },
+  { date: "07-17", name: "Krishna and Radha",       tradition: "hindu", isMajor: false, sentence: "Krishna and Radha share the deepest love story — they remind us that joy and devotion go together." },
+  { date: "07-28", name: "Aarti — the lamp ceremony", tradition: "hindu", isMajor: false, sentence: "In aarti, families wave a lit lamp before a deity while singing — the light carries their love and prayers." },
+
   // ── 2026 ──
   { date: "01-14", year: 2026, ...pongal },
   { date: "01-15", year: 2026, ...makarSankranti },

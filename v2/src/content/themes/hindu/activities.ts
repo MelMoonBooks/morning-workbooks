@@ -23,10 +23,23 @@ export const hinduActivities: ActivityMap = {
   "4-13": { word: "Hanuman",  subject: "Hanuman the monkey god",     instruction: "Color Hanuman, the brave helper of Rama!",            colorWord: "orange", tags: ["hindu", "hanuman-jayanti"] },
 
   // ── May ──
+  "5-7":  { word: "Krishna",  subject: "Krishna playing his flute under a tree", instruction: "Color Krishna and his peacock feather!", colorWord: "blue", tags: ["hindu", "krishna"] },
   "5-11": { word: "lotus",    subject: "Buddha sitting on a lotus",  instruction: "Color the Buddha and the lotus flower!",              colorWord: "pink",   tags: ["hindu", "buddha-purnima"] },
+  "5-14": { word: "Ganesha",  subject: "Ganesha at the doorway with offerings", instruction: "Color Ganesha — the elephant god who removes obstacles!", colorWord: "orange", tags: ["hindu", "ganesha"] },
+  "5-21": { word: "Hanuman",  subject: "Hanuman flying with a mountain", instruction: "Color brave Hanuman the monkey god!",             colorWord: "orange", tags: ["hindu", "hanuman"] },
+  "5-28": { word: "yoga",     subject: "a child doing the tree pose", instruction: "Color the calm yoga pose!",                          colorWord: "green",  tags: ["hindu", "yoga"] },
+
+  // ── June ──
+  "6-4":  { word: "Saraswati", subject: "Saraswati with her veena and books", instruction: "Color Saraswati and her swan!",              colorWord: "white",  tags: ["hindu", "saraswati"] },
+  "6-11": { word: "diya",     subject: "a glowing diya lamp",        instruction: "Color the diya with warm light!",                     colorWord: "yellow", tags: ["hindu", "diya"] },
+  "6-18": { word: "mandir",   subject: "a Hindu temple with a tall tower", instruction: "Color the beautiful mandir!",                   colorWord: "red",    tags: ["hindu", "mandir", "temple"] },
+  "6-25": { word: "Om",       subject: "a large Om symbol with leaves", instruction: "Color the Om symbol!",                             colorWord: "gold",   tags: ["hindu", "om"] },
 
   // ── July ──
+  "7-3":  { word: "cow",      subject: "a gentle Indian cow with bells", instruction: "Color the kind cow!",                             colorWord: "brown",  tags: ["hindu", "cow"] },
+  "7-17": { word: "Radha",    subject: "Krishna and Radha together", instruction: "Color Krishna and Radha!",                            colorWord: "pink",   tags: ["hindu", "krishna", "radha"] },
   "7-21": { word: "teacher",  subject: "a guru teaching a student",  instruction: "Color the wise teacher and student!",                 colorWord: "orange", tags: ["hindu", "guru-purnima"] },
+  "7-28": { word: "aarti",    subject: "a family doing aarti with a lit lamp", instruction: "Color the aarti ceremony!",                 colorWord: "gold",   tags: ["hindu", "aarti"] },
 
   // ── August ──
   "8-9":  { word: "rakhi",    subject: "a sister tying a rakhi on her brother's wrist", instruction: "Color the rakhi celebration!",      colorWord: "red",    tags: ["hindu", "raksha-bandhan"] },
